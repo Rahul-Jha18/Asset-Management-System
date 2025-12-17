@@ -1,0 +1,135 @@
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { Menu, X } from 'lucide-react';
+
+export default function Nav() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleSignIn = () => {
+    setMenuOpen(false);
+    navigate('/login');
+  };
+
+  const handleSignUp = () => {
+    setMenuOpen(false);
+    navigate('/register');
+  };
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+    navigate('/login');
+  };
+
+  const hideNavMenu = ['/login', '/register'].includes(location.pathname);
+  const showNewsBar = location.pathname === '/';
+
+  return (
+    <>
+      <header className="global-nav" role="navigation" aria-label="Main navigation">
+        <div className="nav-inner">
+          {/* Logo */}
+          <div className="brand">
+            <Link to="/" onClick={() => setMenuOpen(false)}>
+              <img
+                src="https://play-lh.googleusercontent.com/zW5KMgLpmTvg0TA4xYIztb5HedXa6mqbAflXHBnNWix5kKetiqtR1ZOqNghuBtleiJkN"
+                className="logo"
+                alt="NLI Logo"
+              />
+            </Link>
+          </div>
+
+          {/* Hamburger for mobile */}
+          {!hideNavMenu && (
+            <div className="hamburger-menu" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X size={28} /> : <Menu size={28} />}
+            </div>
+          )}
+
+          {/* MAIN NAV MENU */}
+          {!hideNavMenu && (
+            <nav className={`nav-menu ${menuOpen ? 'open' : ''}`} aria-label="Main menu">
+              <Link to="/branches" onClick={() => setMenuOpen(false)}>
+                Branch
+              </Link>
+
+              <Link to="/assets" onClick={() => setMenuOpen(false)}>
+                Asset List Table
+              </Link>
+
+              <Link to="/requests" onClick={() => setMenuOpen(false)}>
+                Requests
+              </Link>
+
+
+
+              <div className="mobile-nav-actions">
+                {user ? (
+                  <>
+                    <span className="user">Hi, {user.name || user.email || 'User'}</span>
+                    <button className="sign" onClick={handleLogout}>
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {location.pathname !== '/login' && (
+                      <button className="sign" onClick={handleSignIn}>
+                        Sign in
+                      </button>
+                    )}
+                    {location.pathname !== '/register' && (
+                      <button className="sign" onClick={handleSignUp}>
+                        Sign up
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </nav>
+          )}
+
+          {/* Desktop auth buttons */}
+          <div className="nav-right">
+            {user ? (
+              <>
+                <span className="user">Hi, {user.name || user.email || 'User'}</span>
+                <button className="sign" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                {location.pathname !== '/login' && (
+                  <button className="sign" onClick={handleSignIn}>
+                    Sign in
+                  </button>
+                )}
+                {location.pathname !== '/register' && (
+                  <button className="sign" onClick={handleSignUp}>
+                    Sign up
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {showNewsBar && (
+        <div className="news-bar">
+          <div className="news-ticker">
+            <span>
+              <strong>News & Updates:</strong>{' '}
+              <b>Wake up to Reality.</b> Nothing ever goes as planned in this accursed world...
+            </span>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

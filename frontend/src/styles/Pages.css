@@ -1,0 +1,789 @@
+
+
+/* ---------- Reset / Theme ---------- */
+* { box-sizing: border-box; }
+html, body { overflow-x: hidden; }
+
+:root{
+  --bg1: #050b14;
+  --bg2: #070a12;
+  --glass: rgba(255,255,255,0.10);
+  --glass2: rgba(255,255,255,0.14);
+  --stroke: rgba(255,255,255,0.18);
+  --shadow: 0 18px 55px rgba(0,0,0,0.35);
+
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.75);
+
+  --primary: #2563eb;
+  --primary2:#00c6ff;
+
+  --success:#16a34a;
+  --danger:#dc2626;
+  --secondary:#334155;
+
+  --tableBorder:rgb(229, 231, 235);
+  --tableHead:rgb(15, 23, 42);
+  --tableEven:#f8fafc;
+  --tableHover:#eef2ff;
+}
+
+body{
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  /* animated glowing background */
+  background:
+    radial-gradient(900px 500px at 15% 20%, rgba(0,198,255,0.30), transparent 60%),
+    radial-gradient(700px 450px at 85% 30%, rgba(37,99,235,0.28), transparent 60%),
+    radial-gradient(650px 500px at 50% 85%, rgba(34,197,94,0.18), transparent 60%),
+    linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 45%, #05060a 100%);
+  background-attachment: fixed;
+  color: var(--text);
+}
+
+/* floating glow overlay */
+body::before{
+  content:"";
+  position: fixed;
+  inset: -30%;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(0,198,255,0.22), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(37,99,235,0.20), transparent 45%),
+    radial-gradient(circle at 55% 80%, rgba(34,197,94,0.14), transparent 42%);
+  filter: blur(38px);
+  animation: floatGlow 12s ease-in-out infinite alternate;
+  z-index: -1;
+}
+
+@keyframes floatGlow{
+  from { transform: translate3d(-2%, -1%, 0) scale(1.05); }
+  to   { transform: translate3d(2%,  1%, 0) scale(1.12); }
+}
+
+img{ max-width: 100%; height: auto; display:block; }
+
+/* ---------- Shared Containers ---------- */
+.page-container{
+  width:0 auto;
+  padding: 22px;
+  background: rgba(153, 153, 153, 0.253);
+  border: 1px solid rgba(255, 255, 255, 0.192);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+/* ---------- Headings ---------- */
+.device-header{
+  text-align: center;
+  margin: 0 0 14px;
+}
+
+.device-header h2{
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: rgba(44, 153, 80, 0.863);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  text-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.7),
+    0 0 25px rgba(9, 126, 243, 0.6);
+  animation: slideDown 1s ease forwards;
+}
+
+/* ---------- Controls row (search + add button) ---------- */
+.device-controls{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.089);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+/* Search input */
+.device-search{
+  width: min(520px, 100%);
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.28);
+  color: var(--text);
+  outline: none;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+.device-search::placeholder{
+  color: rgba(255,255,255,0.55);
+}
+
+.device-search:focus{
+  border-color: rgba(0,198,255,0.55);
+  box-shadow: 0 0 0 4px rgba(0,198,255,0.12);
+}
+
+/* ---------- Button base (works with your <Button /> component) ---------- */
+.btn{
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  user-select: none;
+}
+ .btn-primary{
+  padding: 0.6rem 1.3rem;
+  background: linear-gradient(135deg, #00ff15b4, #00ff0db0);
+  color: #000;
+  font-weight: 700;
+  border: none;
+  box-shadow: 0 0 15px #00ff2ab2, 0 0 18px #20c035;
+  cursor: pointer;
+  transition: all 0.5s ease-in-out;
+  transform: sccale(1.05);
+}
+
+.btn-primary:hover {
+  transition: all 0.1s ease-in-out;
+  box-shadow:  0 0 35px rgba(23, 46, 30, 0.843), 0 0 15px rgb(7, 15, 7);
+  color: #fff;
+  border: 0.5px solid rgba(17, 224, 79, 0.288);
+  
+  }
+.btn:hover{ transform: translateY(-1px); }
+.btn:active{ transform: translateY(0); }
+
+.btn-secondary{
+  background: rgba(23, 191, 241, 0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: var(--text);
+}
+.btn-secondary:hover{ 
+  background: rgba(255,255,255,0.14);
+ }
+
+.btn-danger{
+  background: linear-gradient(135deg, var(--danger), rgb(255, 17, 0));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(220,38,38,0.18);
+}
+.btn-danger:hover{ filter: brightness(1.05); 
+  box-shadow: 0 16px 30px rgba(220,38,38,0.24); }
+
+/* Table small buttons */
+.btn-small{
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  min-width: 78px;
+  height: 32px;
+}
+
+/* Override: Primary inside tables should be GREEN for Edit */
+.device-table .btn-primary{
+  background: linear-gradient(135deg, var(--success), rgb(10, 250, 98));
+  color: #fff;
+  margin-right: 2px;
+  box-shadow: 0 10px 15px rgba(22, 221, 95, 0.473);
+}
+.device-table .btn-primary:hover{
+  box-shadow: 0 14px 22px rgba(22,163,74,0.24);
+}
+
+/* Danger already red, keep */
+.device-table .btn-danger{
+  background: linear-gradient(135deg, var(--danger), #f10e30);
+}
+
+/* Secondary inside tables = light gray (formal) */
+.device-table .btn-secondary{
+  background: linear-gradient(45deg,rgb(47, 207, 41),rgb(31, 122, 31));
+  border: 1px solid #20a5da;
+  margin-right: 2px;
+  color: #ffffff;
+}
+.device-table .btn-secondary:hover{
+  background: #e2e8f0; 
+   background: linear-gradient(-45deg,rgb(47, 207, 41),rgb(31, 122, 31)); 
+}
+
+/* ---------- Formal Table (Branch / Device) ---------- */
+.table-wrapper{
+  margin-top: 14px;
+  background: rgba(255,255,255,0.96);
+  border: 1px solid var(--tableBorder);
+  border-radius: 10px;
+  overflow: auto;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+}
+
+.device-table{
+  width: 100%;
+  min-width: 980px;              /* branch table wide */
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.device-table th,
+.device-table td{
+  border: 1px solid var(--tableBorder);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #0f172a;
+  vertical-align: middle;
+}
+
+.device-table th{
+  background: var(--tableHead);
+  color: #fff;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.device-table tbody tr:nth-child(even){
+  background: var(--tableEven);
+}
+
+.device-table tbody tr:hover{
+  background: var(--tableHover);
+}
+
+/* action columns */
+.device-table td.action-cell,
+.device-table td.details-cell{
+  white-space: nowrap;
+  min-width: 160px;
+}
+
+/* empty state */
+.empty-state{
+  padding: 24px;
+  text-align: center;
+  color: #0f172a;
+}
+
+/* ---------- Form inputs (Modal + Add/Edit forms) ---------- */
+.form-group{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.form-label{
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* FormInput component uses .form-input */
+.form-input,
+textarea.form-input,
+select.form-input{
+  padding: 12px 14px;
+  border: 1px solid #e6edf3;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  background: #ffffff;
+  color: #0f172a;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.form-input:focus,
+textarea.form-input:focus,
+select.form-input:focus{
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 8px 22px rgba(37,99,235,0.10);
+}
+
+/* Branch modal grid */
+.branch-form{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 2px;
+}
+
+@media (min-width: 720px){
+  .branch-form{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 14px;
+  }
+}
+
+/* modal actions (your Branch.jsx uses .modal-actions) */
+.modal-actions{
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  width: 100%;
+  padding-top: 10px;
+}
+
+/* errors */
+.error-message{
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* ---------- Pagination (works with your Pagination component) ---------- */
+.pagination{
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-info{
+  color: rgba(255,255,255,0.78);
+  font-weight: 800;
+}
+
+.pagination-controls{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.page-size-select{
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: var(--text);
+}
+
+/* if your Pagination uses .pagination-btn */
+.pagination-btn{
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: var(--text);
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease;
+}
+.pagination-btn:hover:not(:disabled){
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.14);
+}
+.pagination-btn:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+}
+.pagination-btn.active{
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  border-color: rgba(255,255,255,0.22);
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 900px){
+  .page-container{ padding: 16px; }
+  .device-header h2{ font-size: 1.6rem; }
+  .device-controls{ flex-direction: column; align-items: stretch; }
+  .device-search{ width: 100%; }
+}
+
+@media (max-width: 600px){
+  .btn{ width: 100%; }
+  .btn-small{ width: auto; }
+  .device-table{ min-width: 900px; } /* keep scroll */
+  .pagination{ flex-direction: column; align-items: stretch; }
+  .pagination-controls{ justify-content: center; width: 100%; }
+}
+/* =========================
+   REQUEST PAGE
+========================= */
+
+.request-form {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.request-form label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.request-form select,
+.request-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.request-form select:focus,
+.request-form textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.request-form textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* Grid spacing fix on small screens */
+@media (max-width: 900px) {
+  .request-form > div {
+    grid-template-columns: 1fr !important;
+  }
+}
+  
+/* ================================
+   LOGIN (TWO JOINED CARDS)
+================================ */
+.login-page{
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+
+  /* Background image */
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.932),
+      rgba(0, 0, 0, 0.904)
+    ),
+    url('https://play-lh.googleusercontent.com/zW5KMgLpmTvg0TA4xYIztb5HedXa6mqbAflXHBnNWix5kKetiqtR1ZOqNghuBtleiJkN');
+  
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+ .login-shell{
+  width: min(900px, 100%);
+  min-height: 520px;
+  display: flex;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(48, 49, 49, 0.712);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background-repeat: no-repeat;
+  box-shadow:
+    0 10px 25px rgba(229, 231, 238, 0.404),
+    0 4px 12px rgba(218, 221, 231, 0.473);
+}
+
+.login-form{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Base card */
+.login-card{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* LEFT card with background image */
+.login-card--image{
+  width: 52%;
+  min-height: 520px;
+  background-size: cover;
+  background-position: center;
+}
+
+.login-card-overlay{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(17, 17, 17, 0.17),
+    rgba(10, 10, 10, 0.25)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.login-card--form{
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-card-inner{
+  width: min(420px, 100%);
+  background: rgba(5, 5, 5, 0.788);
+  backdrop-filter: blur(3px);
+  border-radius: 16px;
+  padding: 18px;
+  border: 1px solid rgba(15,23,42,0.10);
+}
+
+/* Right info card */
+.login-card--info{
+  width: 48%;
+  padding: 22px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(243, 241, 241, 0.918), rgb(170, 170, 173));
+}
+
+.login-title{
+  margin: 0 0 10px 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-shadow: 
+  0 8px 15px rgba(26, 210, 235, 0.986);
+  color: #dbdbdb;
+  text-align: center;
+}
+
+.login-form{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-input{
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,0.15);
+  outline: none;
+  font-size: 0.95rem;
+  background: #dbd8d8d2;
+}
+
+.login-input:focus{
+  border-color: rgba(37, 99, 235, 0.7);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.login-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.login-check{
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 700;
+  color: #dfe1e6;
+}
+
+.login-check input{
+  width: 16px;
+  height: 16px;
+}
+
+/* Button (modern branch-like glow) */
+.login-btn{
+  padding: 12px 14px;
+  border: none;
+  border-radius: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  background: linear-gradient(135deg, #00f0ff, #00fff7);
+  color: #06121f;
+  box-shadow: 0 10px 22px rgba(0, 238, 255, 0.28), 0 0 16px rgba(0,255,247,0.35);
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+.login-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow: 0 14px 28px rgba(0, 238, 255, 0.35), 0 0 20px rgba(0,255,247,0.45);
+}
+
+.login-foot{
+  margin: 4px 0 0;
+  font-weight: 600;
+  color: #d3dae2;
+}
+
+.login-foot a{
+  font-weight: 900;
+  color: #2563eb;
+  text-decoration: none;
+}
+.login-foot a:hover{
+  text-decoration: underline;
+}
+
+.login-error{
+  margin: 6px 0 0;
+  color: #dc2626;
+  font-weight: 800;
+}
+
+/* Right info styles */
+.login-info-title{
+  margin: 0 0 12px 0;
+  font-size: 1.4rem;
+  font-weight: 950;
+  color: #0f172a;
+}
+
+.login-info{
+  display: flex;
+  background: transparent;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-info-block{
+  padding: 12px;
+  border: 1px solid rgba(15,23,42,0.08);
+  border-radius: 14px;
+  background: rgba(43, 181, 190, 0.623);
+  box-shadow: 0 10px 22px rgba(236, 238, 241, 0.06);
+}
+
+.login-info-block h4{
+  margin: 0 0 6px 0;
+  font-size: 1rem;
+  font-weight: 950;
+  color: #0f172a;
+}
+
+.login-info-block p{
+  margin: 0;
+  color: #262729;
+  font-size: 0.85rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+/* ================================
+   MOBILE RESPONSIVE
+================================ */
+@media (max-width: 900px){
+  .login-page,
+  .register-page{
+    padding: 12px;
+  }
+
+  .login-shell,
+  .register-shell{
+    margin-top: 2rem;
+    flex-direction: column;
+    border-radius: 16px;
+    min-height: auto;
+  }
+
+  .login-card--image,
+  .login-card--info{
+    width: 100%;
+  }
+
+  .login-card--image{
+    min-height: 300px; /* smaller but still visible */
+  }
+
+  .login-card-overlay{
+    padding: 12px;
+  }
+
+  .login-card-inner{
+    width: min(520px, 100%);
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .login-title{
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+  }
+
+  .login-input{
+    font-size: 0.9rem;
+    padding: 10px 10px;
+    border-radius: 10px;
+  }
+
+  .login-btn{
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+  }
+
+  .login-card--info{
+    padding: 14px;
+  }
+
+  .login-info-title{
+    font-size: 1.15rem;
+  }
+
+  .login-info-block{
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .login-info-block h4{
+    font-size: 0.95rem;
+  }
+
+  .login-info-block p{
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+}
+
+/* EXTRA SMALL PHONES */
+@media (max-width: 420px){
+  .login-card--image{
+    min-height: 240px;
+  }
+
+  .login-title{
+    font-size: 1.1rem;
+  }
+
+  .login-card-inner{
+    padding: 12px;
+  }
+
+  .login-foot{
+    font-size: 0.85rem;
+  }
+}

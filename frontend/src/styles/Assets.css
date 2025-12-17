@@ -1,0 +1,431 @@
+/* CLEAN + RESPONSIVE CSS (FORMAL TABLE + BRANCH STYLE + YOUR BUTTON GLOW) */
+
+/* ---------------------------------
+   GLOBAL RESET
+---------------------------------- */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+/* ---------------------------------
+   ROOT VARIABLES
+---------------------------------- */
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-soft: #dbeafe;
+
+  --bg: #f3f4f6;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+
+  --text-main: #111827;
+  --text-muted: #6b7280;
+
+  --success: #16a34a;
+  --danger: #dc2626;
+
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+
+  --warn-bg: #fef9c3;
+  --warn-text: #854d0e;
+
+  --gray-bg: #e5e7eb;
+  --gray-text: #4b5563;
+}
+
+/* ---------------------------------
+   PAGE LAYOUT (UNCHANGED)
+---------------------------------- */
+.assets-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ---------------------------------
+   HEADER
+---------------------------------- */
+.assets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.assets-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--text-main);
+}
+
+.assets-header p {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.assets-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* MOBILE HEADER */
+@media (max-width: 600px) {
+  .assets-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .assets-header h1 {
+    font-size: 1.3rem;
+  }
+}
+
+/* ---------------------------------
+   FILTERS
+---------------------------------- */
+.filters-card {
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 16px;
+  margin: 0;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .filters-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 550px) {
+  .filters-grid { grid-template-columns: 1fr; }
+}
+
+.filters-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+/* ---------------------------------
+   TABLE (FORMAL LIKE BRANCH)
+---------------------------------- */
+.assets-table-section {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* Main table */
+.assets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 1000px; /* mobile scroll */
+  background: #ffffff;
+}
+
+.assets-table th,
+.assets-table td {
+  padding: 12px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  color: var(--text-main);
+}
+
+/* Dark sticky header */
+.assets-table thead th {
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Zebra rows */
+.assets-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.assets-table tbody tr:hover {
+  background: #eef2ff;
+  cursor: pointer;
+}
+
+/* MOBILE TABLE */
+@media (max-width: 600px) {
+  .assets-table th,
+  .assets-table td {
+    padding: 8px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ---------------------------------
+   STATUS PILLS
+---------------------------------- */
+.status-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.status-active {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.status-repair,
+.status-in-repair {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+}
+
+.status-disposed {
+  background: var(--gray-bg);
+  color: var(--gray-text);
+}
+
+/* ---------------------------------
+   BUTTONS (YOUR GLOW STYLE, CLEANED)
+   Works with your <Button />: .btn-primary/.btn-secondary/.btn-danger/.btn-small
+---------------------------------- */
+
+/* base */
+.btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  user-select: none;
+  background: transparent;
+  color: var(--text-main);
+}
+
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* PRIMARY (green glow like you wrote) */
+.btn-primary{
+  padding: 0.6rem 1.3rem;
+  background: linear-gradient(135deg, #00ff15b4, #00ff0db0);
+  color: #000;
+  font-weight: 800;
+  border: none;
+  box-shadow: 0 0 15px #00ff2ab2, 0 0 18px #20c035;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 35px #00ff40d7, 0 0 15px #25d42e;
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+/* SECONDARY (your gradient but readable) */
+.btn-secondary{
+  padding: 0.6rem 1.1rem;
+  background: linear-gradient(45deg, rgb(47, 207, 41), rgb(31, 122, 31));
+  border: 1px solid #20a5da;
+  color: #ffffff;
+  font-weight: 800;
+  transition: all 0.25s ease-in-out;
+}
+.btn-secondary:hover{
+  background: linear-gradient(-45deg, rgb(47, 207, 41), rgb(31, 122, 31));
+  filter: brightness(1.04);
+}
+
+/* DANGER (red) */
+.btn-danger{
+  padding: 0.6rem 1.1rem;
+  background: linear-gradient(135deg, var(--danger), #ff1100);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 12px 24px rgba(220,38,38,0.18);
+  transition: all 0.25s ease-in-out;
+}
+.btn-danger:hover{
+  filter: brightness(1.05);
+  box-shadow: 0 16px 30px rgba(220,38,38,0.24);
+}
+
+/* Small buttons (table) */
+.btn-small{
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  min-width: 78px;
+  height: 32px;
+}
+
+/* Make table action column buttons align nicely */
+.assets-table td .btn{
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  height: 32px;
+  min-width: 78px;
+}
+
+/* ---------------------------------
+   DETAILS LAYOUT
+---------------------------------- */
+.details-wrapper {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.asset-detail-container {
+  background: var(--card-bg);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.asset-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.asset-detail-layout {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .asset-detail-layout {
+    flex-direction: column;
+  }
+}
+
+/* ---------------------------------
+   SIDEBAR
+---------------------------------- */
+.asset-detail-sidebar {
+  min-width: 220px;
+  max-width: 260px;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+@media (max-width: 900px) {
+  .asset-detail-sidebar {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .asset-detail-sidebar ul {
+    display: flex;
+    gap: 6px;
+  }
+  .asset-detail-sidebar li {
+    flex: 0 0 auto;
+  }
+}
+
+.sidebar-item {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.sidebar-item.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* ---------------------------------
+   DETAIL CONTENT TABLE (FORMAL)
+---------------------------------- */
+.detail-section {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.asset-horizontal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.asset-horizontal-table th,
+.asset-horizontal-table td {
+  padding: 10px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  color: var(--text-main);
+}
+
+.asset-horizontal-table th {
+  background: #111827;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+/* MOBILE DETAIL TABLE */
+@media (max-width: 600px) {
+  .asset-horizontal-table th,
+  .asset-horizontal-table td {
+    padding: 6px;
+    font-size: 0.75rem;
+  }
+}
+
+/* EXTRA MOBILE POLISH (like branch responsiveness) */
+@media (max-width: 768px) {
+  .table-scroll { border-radius: 10px; }
+  .assets-table { min-width: 980px; } /* keeps scroll like branch */
+}
