@@ -417,7 +417,7 @@ export default function Assets() {
                   style={{ listStyle: "none", padding: 0 }}
                 >
                   {/* Branded Option */}
-                  <div className="field">
+                  <div className="field-left">
                     <label>Branded Option</label>
                     <select
                       value={filters.brandedOption}
@@ -434,7 +434,7 @@ export default function Assets() {
                   </div>
 
                   {/* Department */}
-                  <div className="field">
+                  <div className="field-left">
                     <label>Department</label>
                     <select
                       value={filters.department}
@@ -451,7 +451,7 @@ export default function Assets() {
                   </div>
 
                   {/* Group */}
-                  <div className="field">
+                  <div className="field-left">
                     <label>Asset Category</label>
                     <select
                       value={filters.group}
@@ -466,7 +466,7 @@ export default function Assets() {
                   </div>
 
                   {/* Sub-Category */}
-                  <div className="field">
+                  <div className="field-left">
                     <label>Sub-Category</label>
                     <select
                       value={filters.subCategory}
@@ -484,7 +484,7 @@ export default function Assets() {
                   </div>
 
                   {/* Status */}
-                  <div className="field">
+                  <div className="field-left">
                     <label>Status</label>
                     <select
                       value={filters.status}
@@ -499,7 +499,7 @@ export default function Assets() {
                   </div>
 
                   {/* Condition */}
-                  <div className="field">
+                  <div className="field-left">
                     <label>Condition</label>
                     <select
                       value={filters.condition}
@@ -554,7 +554,7 @@ export default function Assets() {
               >
                 <div className="top-field">
                   <input
-                    style={{ border: "1px solid grey", borderRadius:"4px" }}
+                    style={{ border: "1px solid grey", borderRadius:"10px" }}
                     type="text"
                     value={filters.search}
                     onChange={(e) => updateFilter("search", e.target.value)}

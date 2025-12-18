@@ -468,6 +468,7 @@ html, body, #root {
   padding: 7px 20px;
   background: linear-gradient(135deg, #00f0ff, #00fff7);
   color: #000;
+  margin: 10px;
   font-weight: 600;
   width: fit-content;
   border: none;
@@ -573,10 +574,18 @@ html, body, #root {
   overflow-y: auto;
 }
 
-.field { display:flex; flex-direction:column; gap:6px; }
-.field label { font-size:1.1rem; font-weight:900; text-align:center; color: #ffffff; }
+.field, .field-left { display:flex; flex-direction:column; gap:6px; }
+.field-left { margin-bottom:12px; color: rgb(255, 255, 255);  text-align:center;
+  text-shadow: 0 0 3px rgba(11, 156, 182, 0.5); font-weight:900; font-size:1.1rem; }
+.field label { 
+   font-size:1.1rem;
+   font-weight:900;
+   text-align:center;
+   color: rgb(20, 65, 129);
+   text-shadow: 0 0 3px rgba(20, 65, 129, 0.5);
+  }
 
-.field select, .field input {
+.field select, .field input, .field-left select, .field-left input {
   background: rgba(238,244,244,0.95);
   border: 1px solid rgba(0,0,0,0.25);
   border-radius: 12px;
@@ -584,11 +593,21 @@ html, body, #root {
 }
 
 /* Top search input */
+.top-field {
+  display: flex;
+  background: rgba(0, 0, 0, 0.323);
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
+  gap: 6px;
+  margin-bottom: 12px;
+}
 .top-field input {
   background: rgba(238,244,244,0.95);
   border: 1px solid rgba(0,0,0,0.25);
-  border-radius: 10px;
-  padding: 10px 12px;
+  border-radius: 20px;
+  width: 40%;
+  padding: 8px 10px;
 }
 
 /* Edit form box */

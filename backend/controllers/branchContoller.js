@@ -1,12 +1,14 @@
 // backend/controllers/branchContoller.js
-const asyncHandler = require('express-async-handler');
-const path = require('path');
-const { validate } = require('../utils/validators');
-const { sendSuccess, sendError, sendPaginated } = require('../utils/response');
+const asyncHandler = require("express-async-handler");
+const { validate } = require("../utils/validators");
+const { sendSuccess, sendError, sendPaginated } = require("../utils/response");
 
-const Branch = require('../models/Branch');
+const Branch = require("../models/Branch");
 
-const infraModels = require(path.join(__dirname, '..', 'models', 'branchInfra'));
+// ✅ FIXED IMPORT (matches your file name)
+const infraModels = require("../models/BranchInfra");
+
+
 const {
   BranchInfra,
   BranchScanner,
@@ -28,54 +30,47 @@ exports.getBranches = asyncHandler(async (req, res) => {
   const { count, rows } = await Branch.findAndCountAll({
     limit,
     offset,
-    order: [['id', 'ASC']],
+    order: [["id", "ASC"]],
   });
 
-  return sendPaginated(res, rows, page, limit, count, 'Branches fetched successfully');
+  return sendPaginated(res, rows, page, limit, count, "Branches fetched successfully");
 });
 
-// GET ONE BRANCH + ALL INFRA
+// GET ONE BRANCH + ALL INFRA/DEVICES (multi)
 exports.getBranchById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const branch = await Branch.findByPk(id, {
     include: [
-      { model: BranchInfra, as: 'infra' },
-      { model: BranchScanner, as: 'scanner' },
-      { model: BranchProjector, as: 'projector' },
-      { model: BranchPrinter, as: 'printer' },
-      { model: BranchDesktop, as: 'desktop' },
-      { model: BranchLaptop, as: 'laptop' },
-      { model: BranchCctv, as: 'cctv' },
-      { model: BranchPanel, as: 'panel' },
-      { model: BranchIpPhone, as: 'ipphone' },
+      { model: BranchInfra, as: "infra" },
+
+      { model: BranchScanner, as: "scanners" },
+      { model: BranchProjector, as: "projectors" },
+      { model: BranchPrinter, as: "printers" },
+      { model: BranchDesktop, as: "desktops" },
+      { model: BranchLaptop, as: "laptops" },
+      { model: BranchCctv, as: "cctvs" },
+      { model: BranchPanel, as: "panels" },
+      { model: BranchIpPhone, as: "ipphones" },
     ],
   });
 
-  if (!branch) {
-    return sendError(res, 'Branch not found', 404);
-  }
-
-  return sendSuccess(res, branch, 'Branch fetched successfully');
+  if (!branch) return sendError(res, "Branch not found", 404);
+  return sendSuccess(res, branch, "Branch fetched successfully");
 });
 
 // CREATE BRANCH
 exports.createBranch = asyncHandler(async (req, res) => {
   const { name, manager_name, address, contact } = req.body;
 
-  // Validate input
   const { isValid, errors } = validate.branchInput(name, manager_name, address, contact);
-  if (!isValid) {
-    return sendError(res, 'Validation failed', 400, errors);
-  }
+  if (!isValid) return sendError(res, "Validation failed", 400, errors);
 
   const exists = await Branch.findOne({ where: { name } });
-  if (exists) {
-    return sendError(res, 'Branch already exists', 409);
-  }
+  if (exists) return sendError(res, "Branch already exists", 409);
 
   const branch = await Branch.create(req.body);
-  return sendSuccess(res, branch, 'Branch created successfully', 201);
+  return sendSuccess(res, branch, "Branch created successfully", 201);
 });
 
 // UPDATE BRANCH
@@ -84,94 +79,77 @@ exports.updateBranch = asyncHandler(async (req, res) => {
   const { name, manager_name, address, contact } = req.body;
 
   const branch = await Branch.findByPk(id);
-  if (!branch) {
-    return sendError(res, 'Branch not found', 404);
-  }
+  if (!branch) return sendError(res, "Branch not found", 404);
 
-  // Validate input
   const { isValid, errors } = validate.branchInput(name, manager_name, address, contact);
-  if (!isValid) {
-    return sendError(res, 'Validation failed', 400, errors);
-  }
+  if (!isValid) return sendError(res, "Validation failed", 400, errors);
 
   await branch.update(req.body);
-  return sendSuccess(res, branch, 'Branch updated successfully');
+  return sendSuccess(res, branch, "Branch updated successfully");
 });
 
 // DELETE BRANCH
 exports.deleteBranch = asyncHandler(async (req, res) => {
   const { id } = req.params;
-
   const branch = await Branch.findByPk(id);
-  if (!branch) {
-    return sendError(res, 'Branch not found', 404);
-  }
+  if (!branch) return sendError(res, "Branch not found", 404);
 
   await branch.destroy();
-  return sendSuccess(res, {}, 'Branch deleted successfully');
+  return sendSuccess(res, {}, "Branch deleted successfully");
 });
 
-// ================= HELP: UPDATE OR CREATE =================
+// ================= INFRA (single record per branch) =================
 async function updateOrCreate(model, branchId, data) {
   let record = await model.findOne({ where: { branchId } });
-  if (!record) {
-    record = await model.create({ branchId });
-  }
+  if (!record) record = await model.create({ branchId });
   await record.update(data);
   return record;
 }
 
-// ================= UPDATE EACH INFRA SECTION =================
 exports.updateInfra = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const infra = await updateOrCreate(BranchInfra, id, req.body);
   res.json(infra);
 });
 
-exports.updateScanner = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const scanner = await updateOrCreate(BranchScanner, id, req.body);
-  res.json(scanner);
-});
+// ================= DEVICE CRUD (multi rows per branch) =================
+function deviceCrud(model) {
+  return {
+    list: asyncHandler(async (req, res) => {
+      const { id: branchId } = req.params;
+      const rows = await model.findAll({ where: { branchId }, order: [["id", "ASC"]] });
+      res.json(rows);
+    }),
 
-exports.updateProjector = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const projector = await updateOrCreate(BranchProjector, id, req.body);
-  res.json(projector);
-});
+    create: asyncHandler(async (req, res) => {
+      const { id: branchId } = req.params;
+      const row = await model.create({ branchId, ...req.body });
+      res.status(201).json(row);
+    }),
 
-exports.updatePrinter = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const printer = await updateOrCreate(BranchPrinter, id, req.body);
-  res.json(printer);
-});
+    update: asyncHandler(async (req, res) => {
+      const { id: branchId, rowId } = req.params;
+      const row = await model.findOne({ where: { id: rowId, branchId } });
+      if (!row) return sendError(res, "Record not found", 404);
+      await row.update(req.body);
+      res.json(row);
+    }),
 
-exports.updateDesktop = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const desktop = await updateOrCreate(BranchDesktop, id, req.body);
-  res.json(desktop);
-});
+    remove: asyncHandler(async (req, res) => {
+      const { id: branchId, rowId } = req.params;
+      const row = await model.findOne({ where: { id: rowId, branchId } });
+      if (!row) return sendError(res, "Record not found", 404);
+      await row.destroy();
+      res.json({ ok: true });
+    }),
+  };
+}
 
-exports.updateLaptop = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const laptop = await updateOrCreate(BranchLaptop, id, req.body);
-  res.json(laptop);
-});
-
-exports.updateCctv = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const cctv = await updateOrCreate(BranchCctv, id, req.body);
-  res.json(cctv);
-});
-
-exports.updatePanel = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const panel = await updateOrCreate(BranchPanel, id, req.body);
-  res.json(panel);
-});
-
-exports.updateIpPhone = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const ipphone = await updateOrCreate(BranchIpPhone, id, req.body);
-  res.json(ipphone);
-});
+exports.scanners = deviceCrud(BranchScanner);
+exports.projectors = deviceCrud(BranchProjector);
+exports.printers = deviceCrud(BranchPrinter);
+exports.desktops = deviceCrud(BranchDesktop);
+exports.laptops = deviceCrud(BranchLaptop);
+exports.cctvs = deviceCrud(BranchCctv);
+exports.panels = deviceCrud(BranchPanel);
+exports.ipphones = deviceCrud(BranchIpPhone);
