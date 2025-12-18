@@ -1,3 +1,9 @@
+Lookup or UI
+<img width="1320" height="653" alt="image" src="https://github.com/user-attachments/assets/f86704dc-d8ed-4ba4-b519-6d295c7886e6" />
+<img width="1352" height="653" alt="image" src="https://github.com/user-attachments/assets/05289a2f-948f-4200-988e-de87166610d0" />
+<img width="1351" height="652" alt="image" src="https://github.com/user-attachments/assets/aa8fcfd8-6cea-47cc-88ec-c3b0fea0c11d" />
+<img width="1356" height="656" alt="image" src="https://github.com/user-attachments/assets/fb16b146-dec5-4217-b97e-a0a4c850e334" />
+
 # Project IMS - Inventory Management System
 
 A modern, full-stack inventory management system built with React, Node.js, and MySQL. Features role-based access control, branch management, asset tracking, and more.
