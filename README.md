@@ -3,7 +3,6 @@ Lookup or UI
 <img width="1352" height="653" alt="image" src="https://github.com/user-attachments/assets/05289a2f-948f-4200-988e-de87166610d0" />
 <img width="1351" height="652" alt="image" src="https://github.com/user-attachments/assets/aa8fcfd8-6cea-47cc-88ec-c3b0fea0c11d" />
 <img width="1356" height="656" alt="image" src="https://github.com/user-attachments/assets/fb16b146-dec5-4217-b97e-a0a4c850e334" />
-![Uploading image.png…]()
 
 # Project IMS - Inventory Management System
 
