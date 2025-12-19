@@ -16,6 +16,7 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
     cctv: [],
     panel: [],
     ipphone: [],
+    ups: [],
   });
 
   const [activeSection, setActiveSection] = useState("totalStaff");
@@ -24,7 +25,10 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
 
   const isStaffCanEdit = isAdmin || isSubAdmin;
 
-  const sections = ["infra", "scanner", "projector", "printer", "desktop", "laptop", "cctv", "panel", "ipphone", "ups"];
+  const sections = [
+    "infra", "scanner", "projector", "printer", "desktop", 
+    "laptop", "cctv", "panel", "ipphone", "ups"
+  ];
 
   const sectionConfig = {
     infra: {
@@ -32,97 +36,67 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
       nameKey: "branch_name",
       summary: ["total_staff", "connectivity_status", "connectivity_lan_ip", "connectivity_wifi"],
       details: [
-        "total_staff",
-        "connectivity_status",
-        "connectivity_wlink",
-        "connectivity_lan_ip",
-        "connectivity_lan_switch",
-        "connectivity_network",
-        "connectivity_wifi",
-        "biometrics_ip",
+        "total_staff", "connectivity_status", "connectivity_wlink",
+        "connectivity_lan_ip", "connectivity_lan_switch",
+        "connectivity_network", "connectivity_wifi", "biometrics_ip",
       ],
     },
-
-    // UPS is inside infra table
     ups: {
       title: "UPS",
       nameKey: "ups_model",
       summary: ["ups_total_no", "ups_model", "ups_backup_time", "ups_installer"],
       details: ["ups_total_no", "ups_model", "ups_backup_time", "ups_installer", "ups_rating", "battery_rating", "ups_purchase_year"],
     },
-
     scanner: {
       title: "Scanner",
       nameKey: "scanner_name",
       summary: ["scanner_name", "scanner_number", "scanner_model"],
       details: ["scanner_name", "scanner_number", "scanner_model", "remarks"],
     },
-
     projector: {
       title: "Projector",
       nameKey: "projector_name",
       summary: ["projector_name", "projector_model", "projector_status", "projector_purchase_date"],
       details: ["projector_name", "projector_model", "projector_status", "projector_purchase_date", "location", "remarks"],
     },
-
     printer: {
       title: "Printer",
       nameKey: "printer_name",
       summary: ["printer_name", "printer_model", "printer_type", "printer_status"],
       details: ["printer_name", "printer_model", "printer_type", "printer_status", "remarks"],
     },
-
     desktop: {
       title: "Desktop",
       nameKey: "desktop_brand",
       summary: ["desktop_brand", "desktop_processor", "desktop_ram", "desktop_domain"],
       details: [
-        "desktop_total_no",
-        "desktop_ids",
-        "desktop_brand",
-        "desktop_ram",
-        "desktop_ssd",
-        "desktop_processor",
-        "desktop_domain",
-        "desktop_purchase_date",
-        "desktop_fiscal_year",
-        "remarks",
+        "desktop_total_no", "desktop_ids", "desktop_brand", "desktop_ram",
+        "desktop_ssd", "desktop_processor", "desktop_domain", "desktop_purchase_date",
+        "desktop_fiscal_year", "remarks",
       ],
     },
-
     laptop: {
       title: "Laptop",
       nameKey: "laptop_brand",
       summary: ["laptop_brand", "laptop_processor", "laptop_ram", "laptop_user"],
       details: [
-        "laptop_total_no",
-        "laptop_ids",
-        "laptop_brand",
-        "laptop_ram",
-        "laptop_ssd",
-        "laptop_processor",
-        "laptop_domain",
-        "laptop_user",
-        "laptop_purchase_date",
-        "laptop_fiscal_year",
-        "remarks",
+        "laptop_total_no", "laptop_ids", "laptop_brand", "laptop_ram",
+        "laptop_ssd", "laptop_processor", "laptop_domain", "laptop_user",
+        "laptop_purchase_date", "laptop_fiscal_year", "remarks",
       ],
     },
-
     cctv: {
       title: "CCTV",
       nameKey: "cctv_nvr_ip",
       summary: ["cctv_total_no", "cctv_nvr_ip", "cctv_installed_year", "cctv_record_days"],
       details: ["cctv_total_no", "cctv_nvr_ip", "cctv_camera_ip", "cctv_installed_year", "cctv_record_days", "cctv_nvr_details"],
     },
-
     panel: {
       title: "Panel",
       nameKey: "panel_name",
       summary: ["panel_name", "panel_brand", "panel_ip", "panel_status"],
       details: ["panel_name", "panel_brand", "panel_ip", "panel_user", "panel_status", "location", "panel_purchase_year", "remarks"],
     },
-
     ipphone: {
       title: "IP Phone",
       nameKey: "ip_telephone_ip",
@@ -131,17 +105,11 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
     },
   };
 
-  const normalizeList = (val) => {
-    if (!val) return [];
-    if (Array.isArray(val)) return val;
-    return [val];
-  };
+  const normalizeList = (val) => (!val ? [] : Array.isArray(val) ? val : [val]);
 
   useEffect(() => {
-    // ✅ after backend update, branch.* will be plural arrays
     setData({
       infra: branch?.infra || {},
-
       scanner: normalizeList(branch?.scanners),
       projector: normalizeList(branch?.projectors),
       printer: normalizeList(branch?.printers),
@@ -150,6 +118,7 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
       cctv: normalizeList(branch?.cctvs),
       panel: normalizeList(branch?.panels),
       ipphone: normalizeList(branch?.ipphones),
+      ups: normalizeList(branch?.ups),
     });
 
     const init = {};
@@ -157,23 +126,34 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
     setExpanded(init);
   }, [branch]);
 
-  const getVal = (row, key) =>
+  const getVal = (row, key) => 
     row?.[key] === null || row?.[key] === undefined || row?.[key] === "" ? "—" : row[key];
 
+  const parseNum = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const getSectionCount = (sec) => {
+    if (sec === "totalStaff") return parseNum(data?.infra?.total_staff);
+    if (sec === "connectivity") return null;
+    if (sec === "infra" || sec === "ups") return 1;
+    return (data?.[sec] || []).length;
+  };
+
   const handleToggle = (sec, rowId) => {
-    setExpanded((prev) => ({
+    setExpanded(prev => ({
       ...prev,
       [sec]: { ...(prev[sec] || {}), [rowId]: !(prev?.[sec]?.[rowId]) },
     }));
   };
 
-  // Infra edit (single)
   const [infraForm, setInfraForm] = useState({});
   useEffect(() => setInfraForm(data.infra || {}), [data.infra]);
 
   const handleInfraChange = (e) => {
     const { name, value } = e.target;
-    setInfraForm((p) => ({ ...p, [name]: value }));
+    setInfraForm(p => ({ ...p, [name]: value }));
   };
 
   const handleUpdateInfra = async () => {
@@ -195,20 +175,21 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
     const nameValue = nameKey ? getVal(row, nameKey) : "—";
 
     return (
-      <div style={{ marginTop: 12, padding: 12, border: "1px solid #ddd", borderRadius: 8, background: "#fff" }}>
-        <div style={{ marginBottom: 10 }}>
-          <strong>
-            Name: <span style={{ fontWeight: 600 }}>{nameValue}</span>
-          </strong>
+      <div className="details-panel-card">
+        <div className="details-panel-header">
+          <strong>Name: <span>{nameValue}</span></strong>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
-          {keys.map((k) => (
-            <div key={k} style={{ padding: 10, border: "1px solid #eee", borderRadius: 8, background: "#fafafa" }}>
-              <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>{k}</div>
-              <div style={{ fontWeight: 600 }}>{getVal(row, k)}</div>
-            </div>
-          ))}
+        <div className="details-panel-grid">
+          {keys.map((k) => {
+            if (k.toLowerCase() === "comments") return null;
+            return (
+              <div key={k} className="field-box">
+                <div className="field-label">{k}</div>
+                <div className="field-value">{getVal(row, k)}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -218,28 +199,22 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
     const conf = sectionConfig[sec];
     if (!conf) return <p>No config available</p>;
 
-    // single sections: infra + ups (ups fields inside infra)
-    if (sec === "infra" || sec === "ups") {
-      const summaryFields = conf.summary || [];
-      const detailsFields = conf.details || [];
-      const source = data.infra || {};
+    const summaryFields = conf.summary || [];
+    const detailsFields = conf.details || summaryFields;
 
+    if (sec === "infra" || sec === "ups") {
+      const source = data.infra || {};
       return (
         <div>
           <table className="asset-horizontal-table">
             <thead>
-              <tr>
-                {summaryFields.map((f) => (
-                  <th key={f}>{f}</th>
-                ))}
-                <th>Details</th>
+              <tr>{summaryFields.map(f => <th key={f}>{f}</th>)}
+              <th>Details</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                {summaryFields.map((f) => (
-                  <td key={f}>{getVal(source, f)}</td>
-                ))}
+                {summaryFields.map(f => <td key={f}>{getVal(source, f)}</td>)}
                 <td>
                   <button type="button" className="back-btn" onClick={() => handleToggle(sec, "single")}>
                     {expanded?.[sec]?.single ? "Hide Details" : "Show Details"}
@@ -248,49 +223,34 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
               </tr>
             </tbody>
           </table>
-
           {expanded?.[sec]?.single && renderDetailsPanel(sec, source, detailsFields)}
         </div>
       );
     }
 
-    // multi-device tables
     const rows = data?.[sec] || [];
     if (!rows.length) return <p>No data available</p>;
-
-    const summaryFields = conf.summary || [];
-    const detailsFields = conf.details || summaryFields;
 
     return (
       <div>
         <table className="asset-horizontal-table">
           <thead>
-            <tr>
-              {summaryFields.map((f) => (
-                <th key={f}>{f}</th>
-              ))}
-              <th>Details</th>
-            </tr>
+            <tr>{summaryFields.map(f => <th key={f}>{f}</th>)}<th>Details</th></tr>
           </thead>
-
           <tbody>
             {rows.map((row) => {
               const rowId = row.id;
               const isOpen = !!expanded?.[sec]?.[rowId];
-
               return (
                 <React.Fragment key={rowId}>
                   <tr>
-                    {summaryFields.map((f) => (
-                      <td key={f}>{getVal(row, f)}</td>
-                    ))}
+                    {summaryFields.map(f => <td key={f}>{getVal(row, f)}</td>)}
                     <td>
                       <button type="button" className="back-btn" onClick={() => handleToggle(sec, rowId)}>
                         {isOpen ? "Hide Details" : "Show Details"}
                       </button>
                     </td>
                   </tr>
-
                   {isOpen && (
                     <tr>
                       <td colSpan={summaryFields.length + 1}>{renderDetailsPanel(sec, row, detailsFields)}</td>
@@ -320,39 +280,37 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
     { id: "ipphone", label: "IP Phone" },
   ];
 
-  const currentSection = sectionMeta.find((s) => s.id === activeSection) || sectionMeta[0];
+  const currentSection = sectionMeta.find(s => s.id === activeSection) || sectionMeta[0];
+  const currentCount = getSectionCount(activeSection);
 
   return (
     <div className="split-page">
       {showLeft && (
         <div className="split-left">
           <div className="details-header">
-            <button type="button" className="back-btn" onClick={onClose}>
-              ← Back
-            </button>
+            <button type="button" className="back-btn" onClick={onClose}>← Back</button>
             <h1>Branch Details</h1>
           </div>
-
           <div className="left-inner">
             <h2 className="asset-title">{branch.name}</h2>
             <p className="asset-subtitle">Manager: {branch.manager_name || "—"}</p>
 
             {isStaffCanEdit && (
-              <button type="button" className="back-btn" onClick={() => setEditMode((p) => !p)}>
+              <button type="button" className="back-btn" onClick={() => setEditMode(p => !p)}>
                 {editMode ? "Close Edit" : "Edit Infra"}
               </button>
             )}
 
             <h4 className="sidebar-title">Sections</h4>
             <ul className="sidebar-list">
-              {sectionMeta.map((section) => (
-                <li key={section.id}>
+              {sectionMeta.map(s => (
+                <li key={s.id}>
                   <button
                     type="button"
-                    className={section.id === activeSection ? "sidebar-btn active" : "sidebar-btn"}
-                    onClick={() => setActiveSection(section.id)}
+                    className={s.id === activeSection ? "sidebar-btn active" : "sidebar-btn"}
+                    onClick={() => setActiveSection(s.id)}
                   >
-                    {section.label}
+                    {s.label}
                   </button>
                 </li>
               ))}
@@ -363,16 +321,15 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
 
       <div className="split-right" style={showLeft ? {} : { width: "100%" }}>
         <div className="details-header" style={{ justifyContent: "space-between" }}>
-          <h3 className="section-title">{currentSection.label}</h3>
-
-          <div style={{ display: "flex", gap: "8px" }}>
-            {!showLeft && (
-              <button type="button" className="back-btn" onClick={onClose}>
-                ← Back
-              </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <h3 className="section-title">{currentSection.label}</h3>
+            {currentCount !== null && (
+              <span className="total-badge">Total: {currentCount}</span>
             )}
-
-            <button type="button" className="back-btn" onClick={() => setShowLeft((p) => !p)}>
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            {!showLeft && <button type="button" className="back-btn" onClick={onClose}>← Back</button>}
+            <button type="button" className="back-btn" onClick={() => setShowLeft(p => !p)}>
               {showLeft ? "Hide Panel" : "Show Panel"}
             </button>
           </div>
@@ -382,43 +339,27 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
           {editMode ? (
             <section>
               <h2>Edit Infra</h2>
-              {Object.keys(infraForm || {}).map((f) => (
+              {Object.keys(infraForm || {}).map(f => (
                 <div key={f} className="form-group">
                   <label>{f}</label>
                   <input name={f} value={infraForm[f] ?? ""} onChange={handleInfraChange} />
                 </div>
               ))}
-              <button type="button" className="back-btn" onClick={handleUpdateInfra}>
-                Save
-              </button>
+              <button type="button" className="back-btn" onClick={handleUpdateInfra}>Save</button>
             </section>
           ) : (
             <>
               {activeSection === "totalStaff" && (
                 <table className="asset-horizontal-table">
-                  <thead>
-                    <tr>
-                      <th>Total Staff</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>{getVal(data.infra, "total_staff")}</td>
-                    </tr>
-                  </tbody>
+                  <thead><tr><th>Total Staff</th></tr></thead>
+                  <tbody><tr><td>{getVal(data.infra, "total_staff")}</td></tr></tbody>
                 </table>
               )}
-
               {activeSection === "connectivity" && (
                 <table className="asset-horizontal-table">
                   <thead>
                     <tr>
-                      <th>Status</th>
-                      <th>Wlink</th>
-                      <th>LAN IP</th>
-                      <th>LAN Switch</th>
-                      <th>Network</th>
-                      <th>WiFi</th>
+                      <th>Status</th><th>Wlink</th><th>LAN IP</th><th>LAN Switch</th><th>Network</th><th>WiFi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -433,8 +374,7 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
                   </tbody>
                 </table>
               )}
-
-              {sections.map((sec) => activeSection === sec && renderSectionTable(sec))}
+              {sections.map(sec => activeSection === sec && renderSectionTable(sec))}
             </>
           )}
         </div>
