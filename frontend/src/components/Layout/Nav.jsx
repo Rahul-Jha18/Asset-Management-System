@@ -32,7 +32,8 @@ export default function Nav() {
     <>
       <header className="global-nav" role="navigation" aria-label="Main navigation">
         <div className="nav-inner">
-          {/* Logo */}
+
+          {/* LOGO – LEFT */}
           <div className="brand">
             <Link to="/" onClick={() => setMenuOpen(false)}>
               <img
@@ -43,80 +44,52 @@ export default function Nav() {
             </Link>
           </div>
 
-          {/* Hamburger for mobile */}
+          {/* HAMBURGER (MOBILE) */}
           {!hideNavMenu && (
             <div className="hamburger-menu" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X size={28} /> : <Menu size={28} />}
             </div>
           )}
 
-          {/* MAIN NAV MENU */}
+          {/* NAV LINKS */}
           {!hideNavMenu && (
-            <nav className={`nav-menu ${menuOpen ? 'open' : ''}`} aria-label="Main menu">
-              <Link to="/branches" onClick={() => setMenuOpen(false)}>
-                Branch
-              </Link>
+            <nav className={`nav-menu ${menuOpen ? 'open' : ''}`}>
+              <Link to="/branches" onClick={() => setMenuOpen(false)}>Branch</Link>
+              <Link to="/assets" onClick={() => setMenuOpen(false)}>Asset List</Link>
+              <Link to="/requests" onClick={() => setMenuOpen(false)}>Requests</Link>
 
-              <Link to="/assets" onClick={() => setMenuOpen(false)}>
-                Asset List Table
-              </Link>
-
-              <Link to="/requests" onClick={() => setMenuOpen(false)}>
-                Requests
-              </Link>
-
-
-
+              {/* MOBILE AUTH */}
               <div className="mobile-nav-actions">
                 {user ? (
                   <>
-                    <span className="user">Hi, {user.name || user.email || 'User'}</span>
-                    <button className="sign" onClick={handleLogout}>
-                      Logout
-                    </button>
+                    <span className="user">Hi, {user.name || user.email}</span>
+                    <button className="sign" onClick={handleLogout}>Logout</button>
                   </>
                 ) : (
                   <>
-                    {location.pathname !== '/login' && (
-                      <button className="sign" onClick={handleSignIn}>
-                        Sign in
-                      </button>
-                    )}
-                    {location.pathname !== '/register' && (
-                      <button className="sign" onClick={handleSignUp}>
-                        Sign up
-                      </button>
-                    )}
+                    <button className="sign" onClick={handleSignIn}>Sign in</button>
+                    <button className="sign" onClick={handleSignUp}>Sign up</button>
                   </>
                 )}
               </div>
             </nav>
           )}
 
-          {/* Desktop auth buttons */}
+          {/* DESKTOP AUTH – RIGHT */}
           <div className="nav-right">
             {user ? (
               <>
-                <span className="user">Hi, {user.name || user.email || 'User'}</span>
-                <button className="sign" onClick={handleLogout}>
-                  Logout
-                </button>
+                <span className="user">Hi, {user.name || user.email}</span>
+                <button className="sign" onClick={handleLogout}>Logout</button>
               </>
             ) : (
               <>
-                {location.pathname !== '/login' && (
-                  <button className="sign" onClick={handleSignIn}>
-                    Sign in
-                  </button>
-                )}
-                {location.pathname !== '/register' && (
-                  <button className="sign" onClick={handleSignUp}>
-                    Sign up
-                  </button>
-                )}
+                <button className="sign" onClick={handleSignIn}>Sign in</button>
+                <button className="sign" onClick={handleSignUp}>Sign up</button>
               </>
             )}
           </div>
+
         </div>
       </header>
 

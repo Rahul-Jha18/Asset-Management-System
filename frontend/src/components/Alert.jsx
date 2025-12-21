@@ -51,3 +51,7 @@ export const InfoAlert = ({ message, onClose }) => (
 );
 
 export default Alert;
+//git config --global user.name "Rahul Jha"
+//git config --global user.email "157490613+Rahul-Jha18@users.noreply.github.com"
+//git commit --amend --reset-author --no-edit
+//git push origin main --force

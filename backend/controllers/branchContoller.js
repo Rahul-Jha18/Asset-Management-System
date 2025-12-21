@@ -4,10 +4,10 @@ const { validate } = require("../utils/validators");
 const { sendSuccess, sendError, sendPaginated } = require("../utils/response");
 
 const Branch = require("../models/Branch");
+const ServiceStation = require("../models/ServiceStation");
 
 // ✅ FIXED IMPORT (matches your file name)
 const infraModels = require("../models/BranchInfra");
-
 
 const {
   BranchInfra,
@@ -21,7 +21,25 @@ const {
   BranchIpPhone,
 } = infraModels;
 
-// GET ALL BRANCHES (with pagination)
+// Helper: sanitize payload (avoid service_station old field, keep FK)
+function sanitizeBranchBody(body) {
+  return {
+    name: body.name,
+    manager_name: body.manager_name,
+    address: body.address,
+    contact: body.contact,
+    ext_no: body.ext_no,
+    region: body.region,
+    service_station_id:
+      body.service_station_id === "" || body.service_station_id === undefined
+        ? null
+        : body.service_station_id === null
+        ? null
+        : Number(body.service_station_id),
+  };
+}
+
+// GET ALL BRANCHES (with pagination) + service station join
 exports.getBranches = asyncHandler(async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
@@ -31,17 +49,32 @@ exports.getBranches = asyncHandler(async (req, res) => {
     limit,
     offset,
     order: [["id", "ASC"]],
+    include: [
+      {
+        model: ServiceStation,
+        as: "serviceStation",
+        attributes: ["id", "name"],
+        required: false,
+      },
+    ],
   });
 
   return sendPaginated(res, rows, page, limit, count, "Branches fetched successfully");
 });
 
-// GET ONE BRANCH + ALL INFRA/DEVICES (multi)
+// GET ONE BRANCH + ALL INFRA/DEVICES (multi) + service station join
 exports.getBranchById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const branch = await Branch.findByPk(id, {
     include: [
+      {
+        model: ServiceStation,
+        as: "serviceStation",
+        attributes: ["id", "name", "manager_name", "manager_email", "contact"],
+        required: false,
+      },
+
       { model: BranchInfra, as: "infra" },
 
       { model: BranchScanner, as: "scanners" },
@@ -69,7 +102,9 @@ exports.createBranch = asyncHandler(async (req, res) => {
   const exists = await Branch.findOne({ where: { name } });
   if (exists) return sendError(res, "Branch already exists", 409);
 
-  const branch = await Branch.create(req.body);
+  const payload = sanitizeBranchBody(req.body);
+
+  const branch = await Branch.create(payload);
   return sendSuccess(res, branch, "Branch created successfully", 201);
 });
 
@@ -84,13 +119,16 @@ exports.updateBranch = asyncHandler(async (req, res) => {
   const { isValid, errors } = validate.branchInput(name, manager_name, address, contact);
   if (!isValid) return sendError(res, "Validation failed", 400, errors);
 
-  await branch.update(req.body);
+  const payload = sanitizeBranchBody(req.body);
+
+  await branch.update(payload);
   return sendSuccess(res, branch, "Branch updated successfully");
 });
 
 // DELETE BRANCH
 exports.deleteBranch = asyncHandler(async (req, res) => {
   const { id } = req.params;
+
   const branch = await Branch.findByPk(id);
   if (!branch) return sendError(res, "Branch not found", 404);
 

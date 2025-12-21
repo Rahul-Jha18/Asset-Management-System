@@ -13,12 +13,29 @@ const softwareRoutes = require("./routes/softwareRoutes");
 const assetRoutes = require("./routes/assetRoutes");
 const requestRoutes = require("./routes/requestRoutes");
 
+// ✅ NEW: service stations route
+const serviceStationRoutes = require("./routes/serviceStationRoutes");
+
 const { errorHandler } = require("./middleware/errorMiddleware");
 
 dotenv.config();
 connectDB();
 
 const app = express();
+
+// ✅ IMPORTANT: load models + associations ONCE (before routes)
+const Branch = require("./models/Branch");
+const ServiceStation = require("./models/ServiceStation");
+
+// ✅ Associations (must match "as" used in controller include)
+Branch.belongsTo(ServiceStation, {
+  foreignKey: "service_station_id",
+  as: "serviceStation",
+});
+ServiceStation.hasMany(Branch, {
+  foreignKey: "service_station_id",
+  as: "branches",
+});
 
 // Middleware
 app.use(helmet());
@@ -27,7 +44,6 @@ app.use(express.json());
 if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
 // ✅ Rate limiting ONLY for auth routes (login/register)
-//    (increase in dev to avoid 429 during testing)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "production" ? 100 : 5000,
@@ -36,8 +52,12 @@ const authLimiter = rateLimit({
 });
 
 // Routes
-app.use("/api/auth", authLimiter, authRoutes); // ✅ limiter here only
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/branches", branchRoutes);
+
+// ✅ NEW: for Branch.jsx dropdown (OG table)
+app.use("/api/service-stations", serviceStationRoutes);
+
 app.use("/api/software", softwareRoutes);
 app.use("/api/assets", assetRoutes);
 app.use("/api/requests", requestRoutes);

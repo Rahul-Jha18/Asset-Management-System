@@ -1,9 +1,9 @@
 // backend/models/Branch.js
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+const { DataTypes } = require("sequelize");
+const { sequelize } = require("../config/db");
 
 const Branch = sequelize.define(
-  'Branch',
+  "Branch",
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
 
@@ -17,22 +17,14 @@ const Branch = sequelize.define(
 
     ext_no: { type: DataTypes.STRING, allowNull: true },
 
-    // 🔹 NEW FIELDS
-    service_station: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      // field: 'service_station', // only needed if DB column name is different
-    },
+    // ✅ FK to service_stations(id)
+    service_station_id: { type: DataTypes.INTEGER, allowNull: true },
 
-    region: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      // field: 'region',
-    },
+    region: { type: DataTypes.STRING, allowNull: true },
   },
   {
     timestamps: true,
-    tableName: 'branches',
+    tableName: "branches",
   }
 );
 
