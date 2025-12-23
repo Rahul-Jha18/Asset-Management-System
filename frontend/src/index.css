@@ -273,6 +273,129 @@ img {
     width: 22px;
   }
 }
+/* =========================
+   ALERT TOAST POSITIONING
+   ========================= */
+.alert {
+  position: fixed;              /* FLOATING */
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  min-width: 320px;
+  max-width: 520px;
+  width: calc(100% - 32px);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 16px;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: alert-slide-down 0.25s ease-out;
+}
+
+/* =========================
+   ALERT CONTENT
+   ========================= */
+.alert-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.alert-icon {
+  font-size: 20px;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.alert-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.alert-message {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* =========================
+   CLOSE BUTTON
+   ========================= */
+.alert-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 6px;
+  opacity: 0.7;
+}
+
+.alert-close:hover {
+  opacity: 1;
+}
+
+/* =========================
+   ALERT TYPES
+   ========================= */
+.alert-success {
+  background-color: #e6f6ec;
+  color: #146c43;
+  border-left: 5px solid #198754;
+}
+
+.alert-error {
+  background-color: #fdecea;
+  color: #842029;
+  border-left: 5px solid #dc3545;
+}
+
+.alert-warning {
+  background-color: #fff4e5;
+  color: #664d03;
+  border-left: 5px solid #ffc107;
+}
+
+.alert-info {
+  background-color: #e7f1ff;
+  color: #084298;
+  border-left: 5px solid #0d6efd;
+}
+
+/* =========================
+   ANIMATION
+   ========================= */
+@keyframes alert-slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* =========================
+   MOBILE RESPONSIVE
+   ========================= */
+@media (max-width: 480px) {
+  .alert {
+    min-width: auto;
+    font-size: 13px;
+  }
+}
 
 /* =========================
    LANDING PAGE (Landing.jsx)

@@ -1,5 +1,5 @@
 // backend/routes/requestRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const {
@@ -9,21 +9,32 @@ const {
   updateRequestStatus,
   editRequest,
   deleteRequest,
-} = require('../controllers/requestController');
+} = require("../controllers/requestController");
 
-const { protect } = require('../middleware/authMiddleware');
-const { adminOrSubadmin, adminOnlyDelete } = require('../middleware/adminMiddleware');
+const { protect } = require("../middleware/authMiddleware");
+const { adminOrSubadmin, adminOnlyDelete, allowRoles } = require("../middleware/adminMiddleware");
 
-// User routes
-router.post('/', protect, createRequest);
-router.get('/', protect, getUserRequests);
+// ✅ ONLY normal user can create request
+router.post("/", protect, allowRoles("user"), createRequest);
 
-// Admin + Subadmin routes
-router.get('/all', protect, adminOrSubadmin, getAllRequests);
-router.put('/:id', protect, adminOrSubadmin, updateRequestStatus);
-router.put('/:id/edit', protect, adminOrSubadmin, editRequest);
+// user view own
+router.get("/", protect, getUserRequests);
 
-// Only Admin can delete request
-router.delete('/:id', protect, adminOnlyDelete, deleteRequest);
+// admin/subadmin view all
+router.get("/all", protect, adminOrsubadminSafe, getAllRequests);
+
+// status-only update
+router.put("/:id", protect, adminOrsubadminSafe, updateRequestStatus);
+
+// full edit
+router.put("/:id/edit", protect, adminOrsubadminSafe, editRequest);
+
+// admin delete
+router.delete("/:id", protect, adminOnlyDelete, deleteRequest);
 
 module.exports = router;
+
+// small wrapper so spelling mistake never breaks routes
+function adminOrsubadminSafe(req, res, next) {
+  return adminOrSubadmin(req, res, next);
+}

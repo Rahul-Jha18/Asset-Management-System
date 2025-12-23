@@ -4,6 +4,11 @@ const Request = require("../models/Request");
 const User = require("../models/User");
 const Branch = require("../models/Branch");
 
+// helper: allow empty -> null
+const toNull = (v) => (v === "" || v === undefined ? null : v);
+
+const allowedStatuses = ["Pending", "In Progress", "Approved", "Rejected", "Completed", "Done"];
+
 // @desc Create a new request (User)
 exports.createRequest = asyncHandler(async (req, res) => {
   const {
@@ -16,32 +21,63 @@ exports.createRequest = asyncHandler(async (req, res) => {
     sub_category,
     asset,
     priority,
+
+    // ✅ new fields
+    requestedByName,
+    requestedByContact,
+    purchaseDate,
+    warrantyExpiry,
+    invoiceNo,
+    vendorName,
+    province,
+    district,
+    localLevel,
+    fiscalYear,
+    agreeAccuracy,
   } = req.body;
 
-  // ✅ branchId required
   if (!type || !description || !branchId) {
     res.status(400);
     throw new Error("Type, description and branch are required");
   }
 
-  const payload = {
-    userId: req.user.id,
-    type,
-    title: title || null,
-    category: category || null,
-    sub_category: sub_category || null,
-    asset: asset || null,
-    priority: priority || "Medium",
-    description,
-    status: "Pending",
-    branchId: Number(branchId),
-    deviceId: deviceId ? Number(deviceId) : null,
-  };
+  // ✅ agreement must be true
+  if (!agreeAccuracy) {
+    res.status(400);
+    throw new Error("Agreement is required");
+  }
 
-  if (!payload.branchId || Number.isNaN(payload.branchId)) {
+  const bId = Number(branchId);
+  if (!bId || Number.isNaN(bId)) {
     res.status(400);
     throw new Error("branchId must be a valid number");
   }
+
+  const payload = {
+    userId: req.user.id,
+    type,
+    title: toNull(title),
+    category: toNull(category),
+    sub_category: toNull(sub_category),
+    asset: toNull(asset),
+    priority: priority || "Medium",
+    description,
+    status: "Pending",
+    branchId: bId,
+    deviceId: deviceId ? Number(deviceId) : null,
+
+    requestedByName: toNull(requestedByName),
+    requestedByContact: toNull(requestedByContact),
+    purchaseDate: toNull(purchaseDate),
+    warrantyExpiry: toNull(warrantyExpiry),
+    invoiceNo: toNull(invoiceNo),
+    vendorName: toNull(vendorName),
+    province: toNull(province),
+    district: toNull(district),
+    localLevel: toNull(localLevel),
+    fiscalYear: toNull(fiscalYear),
+    agreeAccuracy: true,
+  };
 
   const newRequest = await Request.create(payload);
   res.status(201).json(newRequest);
@@ -69,14 +105,12 @@ exports.getAllRequests = asyncHandler(async (req, res) => {
   res.json(requests);
 });
 
-// @desc Update request status (Admin/Subadmin)
+// @desc Update request status (Admin/Subadmin) - STATUS ONLY
 exports.updateRequestStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  // ✅ keep your existing rule OR expand if your DB supports more
-  const validStatuses = ["Pending", "Done", "In Progress", "Approved", "Rejected", "Completed"];
-  if (!validStatuses.includes(status)) {
+  if (!allowedStatuses.includes(status)) {
     res.status(400);
     throw new Error("Invalid status value");
   }
@@ -93,9 +127,10 @@ exports.updateRequestStatus = asyncHandler(async (req, res) => {
   res.json({ message: "Status updated", request });
 });
 
-// @desc Edit request (Admin/Subadmin)
+// @desc Edit request (Admin/Subadmin) - FULL EDIT
 exports.editRequest = asyncHandler(async (req, res) => {
   const { id } = req.params;
+
   const {
     type,
     description,
@@ -106,6 +141,20 @@ exports.editRequest = asyncHandler(async (req, res) => {
     sub_category,
     asset,
     priority,
+    status,
+
+    // ✅ new fields
+    requestedByName,
+    requestedByContact,
+    purchaseDate,
+    warrantyExpiry,
+    invoiceNo,
+    vendorName,
+    province,
+    district,
+    localLevel,
+    fiscalYear,
+    agreeAccuracy,
   } = req.body;
 
   const request = await Request.findByPk(id);
@@ -115,12 +164,21 @@ exports.editRequest = asyncHandler(async (req, res) => {
   }
 
   if (type !== undefined) request.type = type;
-  if (title !== undefined) request.title = title || null;
-  if (category !== undefined) request.category = category || null;
-  if (sub_category !== undefined) request.sub_category = sub_category || null;
-  if (asset !== undefined) request.asset = asset || null;
+  if (title !== undefined) request.title = toNull(title);
+  if (category !== undefined) request.category = toNull(category);
+  if (sub_category !== undefined) request.sub_category = toNull(sub_category);
+  if (asset !== undefined) request.asset = toNull(asset);
   if (priority !== undefined) request.priority = priority || "Medium";
   if (description !== undefined) request.description = description;
+
+  // ✅ allow admins to update status here too (optional)
+  if (status !== undefined) {
+    if (!allowedStatuses.includes(status)) {
+      res.status(400);
+      throw new Error("Invalid status value");
+    }
+    request.status = status;
+  }
 
   // ✅ branchId must not become null
   if (branchId !== undefined) {
@@ -128,10 +186,30 @@ exports.editRequest = asyncHandler(async (req, res) => {
       res.status(400);
       throw new Error("branchId cannot be empty");
     }
-    request.branchId = Number(branchId);
+    const bId = Number(branchId);
+    if (!bId || Number.isNaN(bId)) {
+      res.status(400);
+      throw new Error("branchId must be a valid number");
+    }
+    request.branchId = bId;
   }
 
   if (deviceId !== undefined) request.deviceId = deviceId ? Number(deviceId) : null;
+
+  // ✅ update new fields
+  if (requestedByName !== undefined) request.requestedByName = toNull(requestedByName);
+  if (requestedByContact !== undefined) request.requestedByContact = toNull(requestedByContact);
+  if (purchaseDate !== undefined) request.purchaseDate = toNull(purchaseDate);
+  if (warrantyExpiry !== undefined) request.warrantyExpiry = toNull(warrantyExpiry);
+  if (invoiceNo !== undefined) request.invoiceNo = toNull(invoiceNo);
+  if (vendorName !== undefined) request.vendorName = toNull(vendorName);
+  if (province !== undefined) request.province = toNull(province);
+  if (district !== undefined) request.district = toNull(district);
+  if (localLevel !== undefined) request.localLevel = toNull(localLevel);
+  if (fiscalYear !== undefined) request.fiscalYear = toNull(fiscalYear);
+
+  // ✅ admin edit: keep agreeAccuracy true once already submitted
+  if (agreeAccuracy !== undefined) request.agreeAccuracy = !!agreeAccuracy;
 
   await request.save();
   res.json({ message: "Request updated", request });

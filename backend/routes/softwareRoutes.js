@@ -1,14 +1,16 @@
 // backend/routes/softwareRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const { protect, adminOrSubAdmin } = require('../middleware/authMiddleware');
+const { protect } = require("../middleware/authMiddleware");
+const { adminOrSubadmin } = require("../middleware/adminMiddleware");
+
 const {
   getSoftwareByBranch,
   upsertSoftwareByBranch,
-} = require('../controllers/softwareController');
+} = require("../controllers/softwareController");
 
-router.get('/:branchId', protect, getSoftwareByBranch);
-router.put('/:branchId', protect, adminOrSubAdmin, upsertSoftwareByBranch);
+router.get("/:branchId", protect, getSoftwareByBranch);
+router.put("/:branchId", protect, adminOrSubadmin, upsertSoftwareByBranch);
 
 module.exports = router;

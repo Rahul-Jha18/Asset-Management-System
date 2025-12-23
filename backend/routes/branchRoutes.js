@@ -10,6 +10,7 @@ const { adminOrSubadmin, adminOnlyDelete } = require("../middleware/adminMiddlew
 // main branch routes
 router.get("/", protect, branchController.getBranches);
 router.get("/:id", protect, branchController.getBranchById);
+
 router.post("/", protect, adminOrSubadmin, branchController.createBranch);
 router.put("/:id", protect, adminOrSubadmin, branchController.updateBranch);
 router.delete("/:id", protect, adminOnlyDelete, branchController.deleteBranch);

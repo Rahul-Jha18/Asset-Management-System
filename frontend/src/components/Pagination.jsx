@@ -53,9 +53,9 @@ export const Pagination = ({
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
             className="page-size-select"
           >
-            <option value={10}>10 per page</option>
-            <option value={25}>25 per page</option>
-            <option value={50}>50 per page</option>
+            <option value={8}>8 per page</option>
+            <option value={20}>20 per page</option>
+            <option value={40}>40 per page</option>
             <option value={100}>100 per page</option>
           </select>
         )}

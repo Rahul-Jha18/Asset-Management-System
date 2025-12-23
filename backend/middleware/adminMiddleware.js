@@ -1,31 +1,51 @@
 // backend/middleware/adminMiddleware.js
 
-// Admin OR Subadmin: can create/update/etc. (no deletes)
+// Normalize role so "Admin", "sub-admin", "SUBADMIN" all work
+const normRole = (role) => (role || "").toLowerCase().replace(/-/g, "").trim();
+
 exports.adminOrSubadmin = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ message: 'Not authorized' });
+    return res.status(401).json({ message: "Not authorized" });
   }
 
-  if (req.user.role === 'admin' || req.user.role === 'subadmin') { // <-- no dash
+  const role = normRole(req.user.role);
+
+  if (role === "admin" || role === "subadmin") {
     return next();
   }
 
-  return res.status(403).json({ message: 'Access denied' });
+  return res.status(403).json({ message: "Access denied (Admin/SubAdmin only)" });
 };
 
-// ONLY Admin: allowed to delete
 exports.adminOnlyDelete = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authorized" });
+  }
+
+  const role = normRole(req.user.role);
+
+  if (role === "admin") {
     return next();
   }
-  return res.status(403).json({ message: 'Only admin can delete' });
+
+  return res.status(403).json({ message: "Only admin can delete" });
 };
 
 exports.allowRoles = (...roles) => {
+  // roles passed should be normalized already like: 'admin', 'subadmin'
+  const allowed = roles.map(normRole);
+
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Access denied' });
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authorized" });
     }
+
+    const role = normRole(req.user.role);
+
+    if (!allowed.includes(role)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
     next();
   };
 };

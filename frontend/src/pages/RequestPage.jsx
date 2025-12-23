@@ -1,5 +1,5 @@
 // src/pages/RequestPage.jsx
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useForm, useDebounce } from "../hooks";
@@ -14,15 +14,46 @@ import Modal from "../components/Modal";
 import Pagination from "../components/Pagination";
 import "../styles/Pages.css";
 
+const initialValues = {
+  // request core
+  type: "",
+  title: "",
+  category: "",
+  sub_category: "",
+  asset: "",
+  priority: "Medium",
+  description: "",
+  status: "Pending",
+  branchId: "",
+  deviceId: "",
+
+  // professional fields (optional columns)
+  requestedByName: "",
+  requestedByContact: "",
+  purchaseDate: "",
+  warrantyExpiry: "",
+  invoiceNo: "",
+  vendorName: "",
+  province: "",
+  district: "",
+  localLevel: "",
+  fiscalYear: "",
+
+  // mandatory agreement
+  agreeAccuracy: false,
+};
+
 export default function RequestPage() {
   const { token, user, isAdmin, isSubAdmin } = useAuth();
   const navigate = useNavigate();
 
   const canManage = isAdmin || isSubAdmin;
+  const isUser = user?.role === "user";
 
   const [requests, setRequests] = useState([]);
   const [branches, setBranches] = useState([]);
   const [devices, setDevices] = useState([]);
+
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
@@ -35,13 +66,12 @@ export default function RequestPage() {
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
 
-  // Pagination
+  // Pagination (works even if API not paginated)
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
-  // ✅ Form state: use camelCase keys expected by backend
   const {
     values,
     errors,
@@ -51,55 +81,52 @@ export default function RequestPage() {
     handleBlur,
     handleSubmit,
     resetForm,
-  } = useForm(
-    {
-      type: "",
-      title: "",
-      category: "",
-      sub_category: "",
-      asset: "",
-      priority: "Medium",
-      description: "",
-      status: "Pending",
-      branchId: "",     // ✅ was branch_id
-      deviceId: "",     // ✅ was device_id
-    },
-    onSubmitForm
-  );
+  } = useForm(initialValues, onSubmitForm);
+
+  const bindInput = (name) => ({
+    name,
+    value: values[name] ?? "",
+    onChange: handleChange,
+    onBlur: handleBlur,
+    error: errors[name],
+    touched: touched[name],
+  });
+
+  // Helpers to read request values no matter backend format
+  const getReqBranchId = (r) => r?.branchId ?? r?.branch_id ?? null;
+  const getReqDeviceId = (r) => r?.deviceId ?? r?.device_id ?? null;
+  const getReqUserId = (r) => r?.userId ?? r?.user_id ?? null;
 
   // ----------- Fetching ----------
   const fetchRequests = useCallback(async () => {
+    if (!token) return;
     setLoading(true);
     try {
-      // NOTE:
-      // Your backend currently has getUserRequests/getAllRequests (not paginated).
-      // If /api/requests returns an array, this code still works.
-      const res = await api.get("/api/requests", {
+      // ✅ Admin/SubAdmin sees ALL
+      const url = canManage ? "/api/requests/all" : "/api/requests";
+
+      const res = await api.get(url, {
+        // If backend not paginated, these params will be ignored safely
         params: { page: currentPage, limit: pageSize },
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = res?.data;
-
-      // Support both: paginated {data, pagination} or plain array
-      const payload = Array.isArray(data) ? data : (data?.data ?? []);
+      const payload = Array.isArray(data) ? data : data?.data ?? [];
       const pagination = data?.pagination ?? {};
 
       setRequests(Array.isArray(payload) ? payload : []);
       setTotalPages(pagination.pages || 1);
       setTotalItems(pagination.total || (Array.isArray(payload) ? payload.length : 0));
     } catch (err) {
-      setAlert({
-        type: "error",
-        title: "Error",
-        message: "Failed to fetch requests",
-      });
+      setAlert({ type: "error", title: "Error", message: "Failed to fetch requests" });
     } finally {
       setLoading(false);
     }
-  }, [token, currentPage, pageSize]);
+  }, [token, canManage, currentPage, pageSize]);
 
   const fetchBranches = useCallback(async () => {
+    if (!token) return;
     try {
       const res = await api.get("/api/branches", {
         params: { page: 1, limit: 5000 },
@@ -107,21 +134,21 @@ export default function RequestPage() {
       });
       const payload = res?.data?.data ?? res?.data ?? [];
       setBranches(Array.isArray(payload) ? payload : []);
-    } catch (e) {
+    } catch {
       setBranches([]);
     }
   }, [token]);
 
   const fetchDevices = useCallback(async () => {
+    if (!token) return;
     try {
-      // If your backend doesn't have /api/devices, this will fail silently
       const res = await api.get("/api/devices", {
         params: { page: 1, limit: 5000 },
         headers: { Authorization: `Bearer ${token}` },
       });
       const payload = res?.data?.data ?? res?.data ?? [];
       setDevices(Array.isArray(payload) ? payload : []);
-    } catch (e) {
+    } catch {
       setDevices([]);
     }
   }, [token]);
@@ -133,45 +160,62 @@ export default function RequestPage() {
     fetchDevices();
   }, [token, fetchRequests, fetchBranches, fetchDevices]);
 
-  // Helpers to read request values no matter backend format
-  const getReqBranchId = (r) => r?.branchId ?? r?.branch_id ?? null;
-  const getReqDeviceId = (r) => r?.deviceId ?? r?.device_id ?? null;
-  const getReqUserId = (r) => r?.userId ?? r?.user_id ?? null;
-
   // Client-side search
-  const filteredRequests = requests.filter((r) => {
-    const q = debouncedSearch.toLowerCase();
-    const s = [
-      r?.type,
-      r?.title,
-      r?.category,
-      r?.sub_category,
-      r?.asset,
-      r?.status,
-      r?.description,
-      String(getReqBranchId(r) ?? ""),
-      String(getReqDeviceId(r) ?? ""),
-      String(getReqUserId(r) ?? ""),
-      String(r?.id ?? ""),
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+  const filteredRequests = useMemo(() => {
+    const q = (debouncedSearch || "").toLowerCase();
+    if (!q) return requests;
 
-    return s.includes(q);
-  });
+    return requests.filter((r) => {
+      const s = [
+        r?.type,
+        r?.title,
+        r?.category,
+        r?.sub_category,
+        r?.asset,
+        r?.status,
+        r?.description,
+        String(getReqBranchId(r) ?? ""),
+        String(getReqDeviceId(r) ?? ""),
+        String(getReqUserId(r) ?? ""),
+        String(r?.id ?? ""),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return s.includes(q);
+    });
+  }, [requests, debouncedSearch]);
 
   // ----------- Submit (Add/Edit) ----------
   async function onSubmitForm(formValues) {
     if (!token) return;
 
-    const canCreate = !!user;
-    if (!canCreate) {
+    if (!user) {
       setAlert({ type: "error", title: "Error", message: "You do not have permission" });
       return;
     }
 
-    // ✅ Backend expects branchId/deviceId (camelCase)
+    // ✅ only USER can create new requests (UI + backend should enforce)
+    if (!editingId && !isUser) {
+      setAlert({
+        type: "error",
+        title: "Not allowed",
+        message: "Admin/SubAdmin cannot create requests. Please respond to existing requests.",
+      });
+      return;
+    }
+
+    // ✅ mandatory agreement for user create (and for edit too if you want)
+    if (!formValues.agreeAccuracy) {
+      setAlert({
+        type: "error",
+        title: "Agreement required",
+        message: "Please confirm the agreement checkbox before submitting.",
+      });
+      return;
+    }
+
     const payload = {
       type: formValues.type,
       title: formValues.title || null,
@@ -180,11 +224,25 @@ export default function RequestPage() {
       asset: formValues.asset || null,
       priority: formValues.priority || "Medium",
       description: formValues.description,
-      // status on create can be ignored by backend; keep for admins edit
+
+      // For edit, status can be changed. For create, backend sets Pending anyway.
       status: formValues.status || "Pending",
 
-      branchId: formValues.branchId ? Number(formValues.branchId) : null,   // ✅ required
+      branchId: formValues.branchId ? Number(formValues.branchId) : null,
       deviceId: formValues.deviceId ? Number(formValues.deviceId) : null,
+
+      requestedByName: formValues.requestedByName || null,
+      requestedByContact: formValues.requestedByContact || null,
+      purchaseDate: formValues.purchaseDate || null,
+      warrantyExpiry: formValues.warrantyExpiry || null,
+      invoiceNo: formValues.invoiceNo || null,
+      vendorName: formValues.vendorName || null,
+      province: formValues.province || null,
+      district: formValues.district || null,
+      localLevel: formValues.localLevel || null,
+      fiscalYear: formValues.fiscalYear || null,
+
+      agreeAccuracy: true,
     };
 
     try {
@@ -193,14 +251,18 @@ export default function RequestPage() {
           setAlert({ type: "error", title: "Error", message: "You do not have permission" });
           return;
         }
-        await api.put(`/api/requests/${editingId}`, payload, {
+
+        // ✅ IMPORTANT: full edit endpoint is /:id/edit
+        await api.put(`/api/requests/${editingId}/edit`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setAlert({ type: "success", title: "Success", message: "Request updated successfully!" });
       } else {
         await api.post("/api/requests", payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setAlert({ type: "success", title: "Success", message: "Request submitted successfully!" });
       }
 
@@ -217,6 +279,25 @@ export default function RequestPage() {
       });
     }
   }
+
+  // ----------- Admin quick status update (table dropdown) ----------
+  const updateStatusQuick = useCallback(
+    async (id, status) => {
+      if (!canManage) return;
+      try {
+        await api.put(
+          `/api/requests/${id}`,
+          { status },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setAlert({ type: "success", title: "Success", message: "Status updated!" });
+        fetchRequests();
+      } catch (err) {
+        setAlert({ type: "error", title: "Error", message: "Failed to update status" });
+      }
+    },
+    [canManage, token, fetchRequests]
+  );
 
   // ----------- Actions ----------
   const handleOpenForm = useCallback(() => {
@@ -238,6 +319,7 @@ export default function RequestPage() {
       setEditingId(req.id);
 
       resetForm({
+        ...initialValues,
         type: req.type || "",
         title: req.title || "",
         category: req.category || "",
@@ -246,10 +328,22 @@ export default function RequestPage() {
         priority: req.priority || "Medium",
         description: req.description || "",
         status: req.status || "Pending",
-
-        // ✅ read from either field style
         branchId: getReqBranchId(req) ? String(getReqBranchId(req)) : "",
         deviceId: getReqDeviceId(req) ? String(getReqDeviceId(req)) : "",
+
+        requestedByName: req.requestedByName || req.requested_by_name || "",
+        requestedByContact: req.requestedByContact || req.requested_by_contact || "",
+        purchaseDate: req.purchaseDate || req.purchase_date || "",
+        warrantyExpiry: req.warrantyExpiry || req.warranty_expiry || "",
+        invoiceNo: req.invoiceNo || req.invoice_no || "",
+        vendorName: req.vendorName || req.vendor_name || "",
+        province: req.province || "",
+        district: req.district || "",
+        localLevel: req.localLevel || req.local_level || "",
+        fiscalYear: req.fiscalYear || req.fiscal_year || "",
+
+        // ✅ require agreement again on edit
+        agreeAccuracy: false,
       });
 
       setShowModal(true);
@@ -342,9 +436,12 @@ export default function RequestPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
 
-          <Button variant="primary" onClick={handleOpenForm}>
-            + New Request
-          </Button>
+          {/* ✅ Only normal USER can create request */}
+          {isUser && (
+            <Button variant="primary" onClick={handleOpenForm}>
+              + New Request
+            </Button>
+          )}
         </div>
 
         {/* ---------- Add/Edit Modal ---------- */}
@@ -357,124 +454,102 @@ export default function RequestPage() {
               <Button variant="secondary" onClick={closeModal}>
                 Cancel
               </Button>
+
               <Button
                 variant="primary"
                 type="submit"
+                form="request-form"
                 loading={isSubmitting}
-                onClick={() =>
-                  document
-                    .querySelector(".request-form")
-                    .dispatchEvent(new Event("submit", { bubbles: true }))
-                }
+                disabled={!values.agreeAccuracy}
+                title={!values.agreeAccuracy ? "Please accept the agreement to submit" : ""}
               >
                 {editingId ? "Update Request" : "Submit Request"}
               </Button>
             </div>
           }
         >
-          <form className="request-form" onSubmit={handleSubmit}>
-            <FormInput
-              label="Type"
-              name="type"
-              placeholder="e.g. add_asset, repair, etc."
-              value={values.type}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.type}
-              touched={touched.type}
-              required
-            />
+          <form id="request-form" className="request-form" onSubmit={handleSubmit}>
+            <h4 className="form-section-title">Request Information</h4>
 
-            <FormInput
-              label="Title"
-              name="title"
-              placeholder="Enter title"
-              value={values.title}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.title}
-              touched={touched.title}
-            />
-
-            <FormInput
-              label="Category"
-              name="category"
-              placeholder="Enter category"
-              value={values.category}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.category}
-              touched={touched.category}
-            />
-
-            <FormInput
-              label="Sub Category"
-              name="sub_category"
-              placeholder="Enter sub category"
-              value={values.sub_category}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.sub_category}
-              touched={touched.sub_category}
-            />
-
-            <FormInput
-              label="Asset"
-              name="asset"
-              placeholder="Enter asset info"
-              value={values.asset}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.asset}
-              touched={touched.asset}
-            />
-
-            {/* Priority */}
-            <div className="form-group">
-              <label className="form-label">Priority</label>
-              <select
-                className="form-control"
-                name="priority"
-                value={values.priority}
-                onChange={handleChange}
-                onBlur={handleBlur}
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Critical">Critical</option>
-              </select>
+            <div className="form-grid">
+              <FormInput label="Request Type" required placeholder="Hardware/Software/Support" {...bindInput("type")} />
+              <FormInput label="Title" placeholder="Short title" {...bindInput("title")} />
             </div>
 
-            {/* Status (admins can edit; create always Pending on backend) */}
-            <div className="form-group">
-              <label className="form-label">Status</label>
-              <select
-                className="form-control"
-                name="status"
-                value={values.status}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={!canManage && !!editingId}
-                title={!canManage && !!editingId ? "Only admin/subadmin can change status" : ""}
-              >
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Completed">Completed</option>
-                <option value="Done">Done</option>
-              </select>
+            <div className="form-grid">
+              <FormInput label="Category" placeholder="Network, CCTV, Printer..." {...bindInput("category")} />
+              <FormInput label="Sub Category" placeholder="Router, NVR, Toner..." {...bindInput("sub_category")} />
             </div>
 
-            {/* Branch */}
-            {branches.length > 0 ? (
+            <FormInput label="Asset / Item" placeholder="Device name / asset tag" {...bindInput("asset")} />
+
+            <div className="form-grid">
               <div className="form-group">
-                <label className="form-label">Branch</label>
+                <label>Priority</label>
+                <select name="priority" value={values.priority} onChange={handleChange} onBlur={handleBlur}>
+                  <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                  <option>Critical</option>
+                </select>
+              </div>
+
+              {/* ✅ Only admin/subadmin should change status */}
+              <div className="form-group">
+                <label>Status</label>
                 <select
-                  className="form-control"
-                  name="branchId"                 // ✅ changed
-                  value={values.branchId}         // ✅ changed
+                  name="status"
+                  value={values.status}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  disabled={!canManage}
+                  title={!canManage ? "Only Admin/SubAdmin can change status" : ""}
+                >
+                  <option>Pending</option>
+                  <option>In Progress</option>
+                  <option>Approved</option>
+                  <option>Rejected</option>
+                  <option>Completed</option>
+                  <option>Done</option>
+                </select>
+              </div>
+            </div>
+
+            <h4 className="form-section-title">Requester</h4>
+            <div className="form-grid">
+              <FormInput label="Requested By" placeholder="Employee name" {...bindInput("requestedByName")} />
+              <FormInput label="Contact" placeholder="Phone/Extension" {...bindInput("requestedByContact")} />
+            </div>
+
+            <h4 className="form-section-title">Asset Details</h4>
+            <div className="form-grid">
+              <FormInput label="Purchase Date (AD)" type="date" {...bindInput("purchaseDate")} />
+              <FormInput label="Warranty Expiry (AD)" type="date" {...bindInput("warrantyExpiry")} />
+            </div>
+
+            <div className="form-grid">
+              <FormInput label="Invoice No." placeholder="Invoice / Bill no." {...bindInput("invoiceNo")} />
+              <FormInput label="Vendor Name" placeholder="Supplier / vendor" {...bindInput("vendorName")} />
+            </div>
+
+            <h4 className="form-section-title">Location (Nepal)</h4>
+            <div className="form-grid">
+              <FormInput label="Province" placeholder="Bagmati" {...bindInput("province")} />
+              <FormInput label="District" placeholder="Kathmandu" {...bindInput("district")} />
+            </div>
+
+            <div className="form-grid">
+              <FormInput label="Local Level" placeholder="KMC / Municipality" {...bindInput("localLevel")} />
+              <FormInput label="Fiscal Year (BS)" placeholder="2082/83" {...bindInput("fiscalYear")} />
+            </div>
+
+            <h4 className="form-section-title">Office / Asset Mapping</h4>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Branch</label>
+                <select
+                  name="branchId"
+                  value={values.branchId}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   required
@@ -487,69 +562,49 @@ export default function RequestPage() {
                   ))}
                 </select>
               </div>
-            ) : (
-              <FormInput
-                label="Branch ID"
-                name="branchId"                 // ✅ changed
-                placeholder="Enter branch id"
-                value={values.branchId}         // ✅ changed
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={errors.branchId}
-                touched={touched.branchId}
-                required
-                type="number"
-              />
-            )}
 
-            {/* Device */}
-            {devices.length > 0 ? (
               <div className="form-group">
-                <label className="form-label">Device</label>
-                <select
-                  className="form-control"
-                  name="deviceId"                // ✅ changed
-                  value={values.deviceId}        // ✅ changed
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                >
-                  <option value="">-- Select Device (optional) --</option>
+                <label>Device (optional)</label>
+                <select name="deviceId" value={values.deviceId} onChange={handleChange} onBlur={handleBlur}>
+                  <option value="">-- Optional Device --</option>
                   {devices.map((d) => (
                     <option key={d.id} value={d.id}>
-                      {d.name || d.asset_tag || d.serial_no || `Device #${d.id}`}
+                      {d.name || d.asset_tag || d.serial_no}
                     </option>
                   ))}
                 </select>
               </div>
-            ) : (
-              <FormInput
-                label="Device ID"
-                name="deviceId"                 // ✅ changed
-                placeholder="Enter device id (optional)"
-                value={values.deviceId}         // ✅ changed
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={errors.deviceId}
-                touched={touched.deviceId}
-                type="number"
-              />
-            )}
+            </div>
 
+            <h4 className="form-section-title">Description</h4>
             <FormInput
               label="Description"
-              name="description"
-              placeholder="Enter request description"
-              value={values.description}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.description}
-              touched={touched.description}
+              textarea
               required
+              placeholder="Write details of the issue / request..."
+              {...bindInput("description")}
             />
+
+            <div className="form-group agreement-box">
+              <label className="agreement-label">
+                <input
+                  type="checkbox"
+                  name="agreeAccuracy"
+                  checked={!!values.agreeAccuracy}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  required
+                />
+                <span>
+                  I confirm that all the information provided above is correct. If any mistake is found, I will be
+                  responsible.
+                </span>
+              </label>
+            </div>
           </form>
         </Modal>
 
-        {/* ---------- Full Details Modal ---------- */}
+        {/* ---------- Details Modal ---------- */}
         <Modal
           isOpen={detailOpen}
           title="Request Full Details"
@@ -564,27 +619,82 @@ export default function RequestPage() {
         >
           {selectedRequest ? (
             <div style={{ lineHeight: 1.8 }}>
-              <div><strong>ID:</strong> {selectedRequest.id}</div>
-              <div><strong>User ID:</strong> {getReqUserId(selectedRequest) ?? "—"}</div>
-              <div><strong>Type:</strong> {selectedRequest.type}</div>
-              <div><strong>Title:</strong> {selectedRequest.title || "—"}</div>
-              <div><strong>Category:</strong> {selectedRequest.category || "—"}</div>
-              <div><strong>Sub Category:</strong> {selectedRequest.sub_category || "—"}</div>
-              <div><strong>Asset:</strong> {selectedRequest.asset || "—"}</div>
-              <div><strong>Priority:</strong> {selectedRequest.priority || "—"}</div>
-              <div><strong>Status:</strong> {selectedRequest.status}</div>
-              <div><strong>Branch:</strong> {getBranchName(getReqBranchId(selectedRequest))}</div>
-              <div><strong>Device:</strong> {getDeviceLabel(getReqDeviceId(selectedRequest))}</div>
-              <div><strong>Description:</strong> {selectedRequest.description || "—"}</div>
-              <div><strong>Created:</strong> {selectedRequest.created_at || selectedRequest.createdAt || "—"}</div>
-              <div><strong>Updated:</strong> {selectedRequest.updated_at || selectedRequest.updatedAt || "—"}</div>
+              {(() => {
+                const r = selectedRequest;
+
+                // helper to read camelCase OR snake_case OR null
+                const pick = (...keys) => {
+                  for (const k of keys) {
+                    if (r?.[k] !== undefined && r?.[k] !== null && r?.[k] !== "") return r[k];
+                  }
+                  return "—";
+                };
+
+                const branchId = getReqBranchId(r);
+                const deviceId = getReqDeviceId(r);
+
+                const created = pick("created_at", "createdAt");
+                const updated = pick("updated_at", "updatedAt");
+
+                return (
+                  <>
+                    <div><strong>ID:</strong> {pick("id")}</div>
+                    <div><strong>User:</strong> {pick("userId", "user_id", "user")?.name || pick("userId", "user_id")}</div>
+
+                    <hr />
+
+                    <div><strong>Type:</strong> {pick("type")}</div>
+                    <div><strong>Title:</strong> {pick("title")}</div>
+                    <div><strong>Category:</strong> {pick("category")}</div>
+                    <div><strong>Sub Category:</strong> {pick("sub_category", "subCategory")}</div>
+                    <div><strong>Asset:</strong> {pick("asset")}</div>
+                    <div><strong>Priority:</strong> {pick("priority")}</div>
+                    <div><strong>Status:</strong> {pick("status")}</div>
+
+                    <hr />
+
+                    <div><strong>Branch:</strong> {getBranchName(branchId)}</div>
+                    <div><strong>Device:</strong> {getDeviceLabel(deviceId)}</div>
+
+                    <hr />
+
+                    <div><strong>Requested By:</strong> {pick("requestedByName", "requested_by_name")}</div>
+                    <div><strong>Requester Contact:</strong> {pick("requestedByContact", "requested_by_contact")}</div>
+
+                    <hr />
+
+                    <div><strong>Purchase Date (AD):</strong> {pick("purchaseDate", "purchase_date")}</div>
+                    <div><strong>Warranty Expiry (AD):</strong> {pick("warrantyExpiry", "warranty_expiry")}</div>
+                    <div><strong>Invoice No:</strong> {pick("invoiceNo", "invoice_no")}</div>
+                    <div><strong>Vendor Name:</strong> {pick("vendorName", "vendor_name")}</div>
+
+                    <hr />
+
+                    <div><strong>Province:</strong> {pick("province")}</div>
+                    <div><strong>District:</strong> {pick("district")}</div>
+                    <div><strong>Local Level:</strong> {pick("localLevel", "local_level")}</div>
+                    <div><strong>Fiscal Year (BS):</strong> {pick("fiscalYear", "fiscal_year")}</div>
+
+                    <hr />
+
+                    <div><strong>Description:</strong> {pick("description")}</div>
+
+                    <hr />
+
+                    <div><strong>Agreement Accepted:</strong> {String(pick("agreeAccuracy", "agree_accuracy") === true || pick("agreeAccuracy", "agree_accuracy") === 1 ? "Yes" : "No")}</div>
+                    <div><strong>Created:</strong> {created}</div>
+                    <div><strong>Updated:</strong> {updated}</div>
+                  </>
+                );
+              })()}
             </div>
           ) : (
             <p>No request selected.</p>
           )}
+
         </Modal>
 
-        {/* ---------- Table (unchanged style) ---------- */}
+        {/* ---------- Table ---------- */}
         <div className="table-wrapper">
           {filteredRequests.length ? (
             <table className="device-table">
@@ -592,7 +702,6 @@ export default function RequestPage() {
                 <tr>
                   <th>ID</th>
                   <th>User</th>
-                  <th>Type</th>
                   <th>Title</th>
                   <th>Category</th>
                   <th>Sub Category</th>
@@ -600,8 +709,6 @@ export default function RequestPage() {
                   <th>Priority</th>
                   <th>Status</th>
                   <th>Branch</th>
-                  <th>Device</th>
-                  <th>Description</th>
                   <th>Details</th>
                   {canManage && <th>Actions</th>}
                 </tr>
@@ -616,21 +723,33 @@ export default function RequestPage() {
                   return (
                     <tr key={r.id}>
                       <td>{r.id}</td>
-                      <td>{uId ?? "—"}</td>
-                      <td>{r.type}</td>
+                      <td>{uId ?? r?.user?.name ?? "—"}</td>
                       <td>{r.title || "—"}</td>
                       <td>{r.category || "—"}</td>
                       <td>{r.sub_category || "—"}</td>
                       <td>{r.asset || "—"}</td>
                       <td>{r.priority || "—"}</td>
-                      <td>{r.status}</td>
-                      <td>{getBranchName(bId)}</td>
-                      <td>{getDeviceLabel(dId)}</td>
-                      <td title={r.description}>
-                        {(r.description || "—").slice(0, 40)}
-                        {(r.description || "").length > 40 ? "..." : ""}
+
+                      {/* ✅ Admin/SubAdmin can change status quickly here */}
+                      <td>
+                        {canManage ? (
+                          <select
+                            value={r.status}
+                            onChange={(e) => updateStatusQuick(r.id, e.target.value)}
+                          >
+                            <option>Pending</option>
+                            <option>In Progress</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                            <option>Completed</option>
+                            <option>Done</option>
+                          </select>
+                        ) : (
+                          r.status
+                        )}
                       </td>
 
+                      <td>{getBranchName(bId)}</td>
                       <td className="action-cell">
                         <Button size="small" variant="secondary" onClick={() => openDetail(r)}>
                           Full Details
@@ -661,7 +780,6 @@ export default function RequestPage() {
           )}
         </div>
 
-        {/* Pagination */}
         {filteredRequests.length > 0 && (
           <Pagination
             currentPage={currentPage}

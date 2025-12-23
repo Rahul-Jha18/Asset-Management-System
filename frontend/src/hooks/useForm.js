@@ -1,31 +1,43 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from "react";
 
 /**
  * Custom hook for managing form state
- * @param {Object} initialValues - Initial form values
- * @param {Function} onSubmit - Callback function on form submission
- * @returns {Object} Form state and handlers
+ * - Supports resetForm() and resetForm(nextValues)
+ * - Exposes setValues for edit prefilling
  */
 export const useForm = (initialValues, onSubmit) => {
+  const initialRef = useRef(initialValues);
+
+  // If initialValues changes between renders, update ref
+  useEffect(() => {
+    initialRef.current = initialValues;
+  }, [initialValues]);
+
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = useCallback((e) => {
-    const { name, value, type, checked } = e.target;
-    setValues((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  }, [errors]);
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value, type, checked } = e.target;
+
+      setValues((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+
+      // clear field error on change
+      if (errors[name]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
 
   const handleBlur = useCallback((e) => {
     const { name } = e.target;
@@ -36,14 +48,16 @@ export const useForm = (initialValues, onSubmit) => {
     async (e) => {
       e.preventDefault();
       setIsSubmitting(true);
+
       try {
         await onSubmit(values);
       } catch (err) {
         if (err.response?.data?.errors) {
           setErrors(err.response.data.errors);
         } else {
-          setErrors({ general: err.message || 'Something went wrong' });
+          setErrors({ general: err.message || "Something went wrong" });
         }
+        throw err; // optional: allows callers to handle too
       } finally {
         setIsSubmitting(false);
       }
@@ -51,11 +65,12 @@ export const useForm = (initialValues, onSubmit) => {
     [values, onSubmit]
   );
 
-  const resetForm = useCallback(() => {
-    setValues(initialValues);
+  // ✅ IMPORTANT: allow resetForm(nextValues)
+  const resetForm = useCallback((nextValues) => {
+    setValues(nextValues ?? initialRef.current);
     setErrors({});
     setTouched({});
-  }, [initialValues]);
+  }, []);
 
   const setFieldValue = useCallback((name, value) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -67,13 +82,14 @@ export const useForm = (initialValues, onSubmit) => {
 
   return {
     values,
+    setValues, // ✅ expose this for edit
     errors,
     touched,
     isSubmitting,
     handleChange,
     handleBlur,
     handleSubmit,
-    resetForm,
+    resetForm, // ✅ now accepts optional values
     setFieldValue,
     setFieldError,
   };

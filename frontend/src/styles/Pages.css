@@ -293,6 +293,16 @@ img{ max-width: 100%; height: auto; display:block; }
   font-weight: 800;
   color: #0f172a;
 }
+.form-control{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgb(181, 174, 174);
+  background: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  gap: 4px;
+}
 
 /* FormInput component uses .form-input */
 .form-input,
@@ -421,51 +431,73 @@ select.form-input:focus{
 /* =========================
    REQUEST PAGE
 ========================= */
-
+/* REAL FORM LAYOUT */
 .request-form {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+.request-form .form-section-title {
+  margin: 14px 0 8px;
+  font-size: 15px;
+  font-weight: 700;
 }
 
-.request-form label {
+.request-form .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.request-form .form-group label {
   display: block;
+  margin-bottom: 6px;
   font-weight: 600;
-  font-size: 0.85rem;
-  color: #374151;
-  margin-bottom: 4px;
 }
 
-.request-form select,
-.request-form textarea {
+.request-form select {
   width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #d1d5db;
+  padding: 10px;
   border-radius: 6px;
-  font-size: 0.9rem;
-  background-color: #fff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #ddd;
 }
 
-.request-form select:focus,
-.request-form textarea:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-
-.request-form textarea {
-  resize: vertical;
-  min-height: 90px;
-}
-
-/* Grid spacing fix on small screens */
-@media (max-width: 900px) {
-  .request-form > div {
-    grid-template-columns: 1fr !important;
+@media (max-width: 768px) {
+  .request-form .form-grid {
+    grid-template-columns: 1fr;
   }
 }
+
+
+.form-section-title {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #1e293b;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 6px;
+  margin-top: 10px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.form-group select {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
   
 /* ================================
    LOGIN (TWO JOINED CARDS)

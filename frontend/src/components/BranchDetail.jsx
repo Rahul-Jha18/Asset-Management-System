@@ -289,7 +289,7 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
         <div className="split-left">
           <div className="details-header">
             <button type="button" className="back-btn" onClick={onClose}>← Back</button>
-            <h1>Branch Details</h1>
+            <h1 style={{color:'White'}}>Branch Details</h1>
           </div>
           <div className="left-inner">
             <h2 className="asset-title">{branch.name}</h2>
@@ -330,7 +330,7 @@ export default function BranchDetail({ branch, token, onClose, isAdmin, isSubAdm
           <div style={{ display: "flex", gap: "8px" }}>
             {!showLeft && <button type="button" className="back-btn" onClick={onClose}>← Back</button>}
             <button type="button" className="back-btn" onClick={() => setShowLeft(p => !p)}>
-              {showLeft ? "Hide Panel" : "Show Panel"}
+              {showLeft ? "☰" : "☰"}
             </button>
           </div>
         </div>

@@ -8,34 +8,14 @@ const Branch = require("./Branch");
 const Request = sequelize.define(
   "Request",
   {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
 
-    // maps to user_id
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      field: "user_id",
-    },
+    userId: { type: DataTypes.INTEGER, allowNull: false, field: "user_id" },
 
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    type: { type: DataTypes.STRING, allowNull: false },
 
-    // ✅ NEW columns (as per your DB)
-    title: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    category: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    title: { type: DataTypes.STRING, allowNull: true },
+    category: { type: DataTypes.STRING, allowNull: true },
 
     sub_category: {
       type: DataTypes.STRING,
@@ -43,10 +23,7 @@ const Request = sequelize.define(
       field: "sub_category",
     },
 
-    asset: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    asset: { type: DataTypes.STRING, allowNull: true },
 
     priority: {
       type: DataTypes.ENUM("Low", "Medium", "High", "Critical"),
@@ -54,29 +31,37 @@ const Request = sequelize.define(
       defaultValue: "Medium",
     },
 
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
+    description: { type: DataTypes.TEXT, allowNull: false },
 
-    // ✅ allow more statuses if you want (recommended)
     status: {
       type: DataTypes.ENUM("Pending", "In Progress", "Approved", "Rejected", "Completed", "Done"),
       allowNull: false,
       defaultValue: "Pending",
     },
 
-    // ✅ MUST NOT be null (matches DB constraint)
-    branchId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      field: "branch_id",
-    },
+    branchId: { type: DataTypes.INTEGER, allowNull: false, field: "branch_id" },
+    deviceId: { type: DataTypes.INTEGER, allowNull: true, field: "device_id" },
 
-    deviceId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      field: "device_id",
+    // ✅ NEW PROFESSIONAL FIELDS (mapped to DB columns)
+    requestedByName: { type: DataTypes.STRING, allowNull: true, field: "requested_by_name" },
+    requestedByContact: { type: DataTypes.STRING, allowNull: true, field: "requested_by_contact" },
+
+    purchaseDate: { type: DataTypes.DATEONLY, allowNull: true, field: "purchase_date" },
+    warrantyExpiry: { type: DataTypes.DATEONLY, allowNull: true, field: "warranty_expiry" },
+
+    invoiceNo: { type: DataTypes.STRING, allowNull: true, field: "invoice_no" },
+    vendorName: { type: DataTypes.STRING, allowNull: true, field: "vendor_name" },
+
+    province: { type: DataTypes.STRING, allowNull: true },
+    district: { type: DataTypes.STRING, allowNull: true },
+    localLevel: { type: DataTypes.STRING, allowNull: true, field: "local_level" },
+    fiscalYear: { type: DataTypes.STRING, allowNull: true, field: "fiscal_year" },
+
+    agreeAccuracy: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: "agree_accuracy",
     },
   },
   {

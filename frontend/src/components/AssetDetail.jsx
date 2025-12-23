@@ -137,12 +137,10 @@ function AssetDetail({ asset, onClose, user, onDelete }) {
           vendorName: form.vendorName,
           amount: form.amount,
           amcVendor: form.amcProvider,
-          // you can add poNo, invoiceNo, amcExp, remarks later if you store them
         },
         license: {
           noOfLicenses: form.noOfLicenses,
-          licenseExp: form.licenseExpDate,
-          // licenseKey is not edited here (we mask it)
+          licenseExp: form.licenseExpDate,  
         },
         updateRemark: updateRemark,
       };
@@ -152,7 +150,6 @@ function AssetDetail({ asset, onClose, user, onDelete }) {
       });
 
       alert("Asset updated successfully.");
-      // simplest: reload or you can refetch in parent later
       window.location.reload();
     } catch (err) {
       console.error("Error updating asset:", err);
@@ -172,7 +169,7 @@ function AssetDetail({ asset, onClose, user, onDelete }) {
             <button className="back-btn" onClick={onClose}>
               ← Back
             </button>
-            <h1>Asset Details</h1>
+          <h1 style={{color:'white'}}>Asset Details</h1>
           </div>
 
           <div className="left-inner">
@@ -225,7 +222,7 @@ function AssetDetail({ asset, onClose, user, onDelete }) {
                 className="back-btn"
                 onClick={() => setShowLeft((x) => !x)}
               >
-                {showLeft ? "Hide Panel" : "Show Panel"}
+                {showLeft ? "☰" : "☰"}
               </button>
             </div>
 

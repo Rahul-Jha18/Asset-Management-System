@@ -565,7 +565,7 @@ export default function Assets() {
                     className="back-btn"
                     onClick={() => setShowLeft((s) => !s)}
                   >
-                    {showLeft ? "Hide Panel" : "Show Panel"}
+                    {showLeft ? "☰" : "☰"}
                   </button>
                 </div>
               </div>

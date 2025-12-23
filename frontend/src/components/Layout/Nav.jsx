@@ -18,13 +18,11 @@ export default function Nav() {
     setMenuOpen(false);
     navigate('/register');
   };
-
   const handleLogout = () => {
     logout();
     setMenuOpen(false);
     navigate('/login');
   };
-
   const hideNavMenu = ['/login', '/register'].includes(location.pathname);
   const showNewsBar = location.pathname === '/';
 
@@ -43,7 +41,6 @@ export default function Nav() {
               />
             </Link>
           </div>
-
           {/* HAMBURGER (MOBILE) */}
           {!hideNavMenu && (
             <div className="hamburger-menu" onClick={() => setMenuOpen(!menuOpen)}>
@@ -98,7 +95,8 @@ export default function Nav() {
           <div className="news-ticker">
             <span>
               <strong>News & Updates:</strong>{' '}
-              <b>Wake up to Reality.</b> Nothing ever goes as planned in this accursed world...
+              <b>Latest Update is about our system new features that is now the user or sub-admin can Request their assets issue and change status if need any.
+              </b>
             </span>
           </div>
         </div>

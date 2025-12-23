@@ -1,72 +1,112 @@
 // src/pages/Branch.jsx
-import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useForm, useDebounce } from '../hooks';
-import api from '../services/api';
-import Footer from '../components/Layout/Footer';
-import Button from '../components/Button';
-import FormInput from '../components/FormInput';
-import Alert from '../components/Alert';
-import { SkeletonTable } from '../components/Loading';
-import Modal from '../components/Modal';
-import Pagination from '../components/Pagination';
-import '../styles/Pages.css';
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useForm, useDebounce } from "../hooks";
+import api from "../services/api";
+
+import Footer from "../components/Layout/Footer";
+import Button from "../components/Button";
+import FormInput from "../components/FormInput";
+import Alert from "../components/Alert";
+import { SkeletonTable } from "../components/Loading";
+import Modal from "../components/Modal";
+import Pagination from "../components/Pagination";
+import "../styles/Pages.css";
+
+const initialBranchValues = {
+  name: "",
+  manager_name: "",
+  address: "",
+  contact: "",
+  ext_no: "",
+  service_station_id: "",
+  region: "",
+};
 
 export default function Branch() {
   const { token, isAdmin, isSubAdmin } = useAuth();
   const navigate = useNavigate();
 
+  const canManage = isAdmin || isSubAdmin;
+
   const [branches, setBranches] = useState([]);
   const [serviceStations, setServiceStations] = useState([]);
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
+
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
 
-  // Pagination state
+  // pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(7);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
-  const canManage = isAdmin || isSubAdmin;
+  // NOTE: We will NOT rely on resetForm(values) because some hooks don't support it.
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    resetForm,
+    // OPTIONAL: If your useForm exposes setValues, we'll use it.
+    setValues,
+  } = useForm(initialBranchValues, onSubmitForm);
 
-  // Form state (✅ changed: service_station_id)
-  const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, resetForm } = useForm(
-    {
-      name: '',
-      manager_name: '',
-      address: '',
-      contact: '',
-      ext_no: '',
-      service_station_id: '',
-      region: '',
+  // Helper: safely set form values even if your useForm doesn't have setValues
+  const safeSetFormValues = useCallback(
+    (nextValues) => {
+      if (typeof setValues === "function") {
+        setValues(nextValues);
+        return;
+      }
+
+      // Fallback: resetForm() then manually trigger change events (works with most hooks)
+      resetForm();
+
+      // Delay one tick so inputs render, then set by synthetic events
+      setTimeout(() => {
+        Object.entries(nextValues).forEach(([name, value]) => {
+          const el = document.querySelector(`[name="${name}"]`);
+          if (!el) return;
+          el.value = value ?? "";
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      }, 0);
     },
-    onSubmitForm
+    [resetForm, setValues]
   );
 
-  // Fetch service stations (OG table)
   const fetchServiceStations = useCallback(async () => {
+    if (!token) return;
     try {
-      const res = await api.get('/api/service-stations', {
+      const res = await api.get("/api/service-stations", {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const payload = res?.data?.data ?? res?.data ?? [];
       setServiceStations(Array.isArray(payload) ? payload : []);
     } catch (e) {
-      // optional alert
+      // optional
     }
   }, [token]);
 
-  // Fetch branches with pagination
   const fetchBranches = useCallback(async () => {
+    if (!token) return;
+
     setLoading(true);
     try {
-      const res = await api.get('/api/branches', {
+      const res = await api.get("/api/branches", {
         params: { page: currentPage, limit: pageSize },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -79,20 +119,14 @@ export default function Branch() {
       setTotalItems(pagination.total || 0);
     } catch (err) {
       setAlert({
-        type: 'error',
-        title: 'Error',
-        message: 'Failed to fetch branches',
+        type: "error",
+        title: "Error",
+        message: err.response?.data?.message || "Failed to fetch branches",
       });
     } finally {
       setLoading(false);
     }
   }, [token, currentPage, pageSize]);
-
-  // Filter branches based on search
-  const filteredBranches = branches.filter((b) =>
-    (b.name || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-    (b.address || '').toLowerCase().includes(debouncedSearch.toLowerCase())
-  );
 
   useEffect(() => {
     if (!token) return;
@@ -100,16 +134,39 @@ export default function Branch() {
     fetchServiceStations();
   }, [token, fetchBranches, fetchServiceStations]);
 
+  const filteredBranches = useMemo(() => {
+    const q = (debouncedSearch || "").toLowerCase();
+    if (!q) return branches;
+
+    return branches.filter((b) => {
+      const name = (b.name || "").toLowerCase();
+      const addr = (b.address || "").toLowerCase();
+      return name.includes(q) || addr.includes(q);
+    });
+  }, [branches, debouncedSearch]);
+
+  const getStationName = useCallback(
+    (b) => {
+      if (b?.service_station_name) return b.service_station_name;
+      if (b?.serviceStation?.name) return b.serviceStation.name;
+
+      const found = serviceStations.find((s) => s.id === b.service_station_id);
+      return found?.name || "—";
+    },
+    [serviceStations]
+  );
+
   async function onSubmitForm(formValues) {
     if (!canManage) {
-      setAlert({ type: 'error', title: 'Error', message: 'You do not have permission' });
+      setAlert({ type: "error", title: "Error", message: "You do not have permission" });
       return;
     }
 
-    // ✅ ensure int/null
     const payload = {
       ...formValues,
-      service_station_id: formValues.service_station_id ? Number(formValues.service_station_id) : null,
+      service_station_id: formValues.service_station_id
+        ? Number(formValues.service_station_id)
+        : null,
     };
 
     try {
@@ -117,12 +174,12 @@ export default function Branch() {
         await api.put(`/api/branches/${editingId}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setAlert({ type: 'success', title: 'Success', message: 'Branch updated successfully!' });
+        setAlert({ type: "success", title: "Success", message: "Branch updated successfully!" });
       } else {
-        await api.post('/api/branches', payload, {
+        await api.post("/api/branches", payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setAlert({ type: 'success', title: 'Success', message: 'Branch added successfully!' });
+        setAlert({ type: "success", title: "Success", message: "Branch added successfully!" });
       }
 
       resetForm();
@@ -132,60 +189,73 @@ export default function Branch() {
       fetchBranches();
     } catch (err) {
       setAlert({
-        type: 'error',
-        title: 'Error',
-        message: err.response?.data?.message || 'Failed to save branch',
+        type: "error",
+        title: "Error",
+        message:
+          err.response?.data?.message ||
+          `Failed to save branch (${err.response?.status || "unknown"})`,
       });
     }
   }
 
-  const handleEdit = useCallback((branch) => {
+  const handleOpenForm = useCallback(() => {
     if (!canManage) return;
-
-    setEditingId(branch.id);
-
-    // ✅ set form values safely
-    resetForm({
-      name: branch.name || '',
-      manager_name: branch.manager_name || '',
-      address: branch.address || '',
-      contact: branch.contact || '',
-      ext_no: branch.ext_no || '',
-      service_station_id: branch.service_station_id ? String(branch.service_station_id) : '',
-      region: branch.region || '',
-    });
-
+    setEditingId(null);
+    resetForm();
     setShowModal(true);
   }, [canManage, resetForm]);
 
-  const handleDelete = useCallback(async (id) => {
-    if (!isAdmin) return;
-    if (!window.confirm('Are you sure you want to delete this branch?')) return;
+  const handleEdit = useCallback(
+    (branch) => {
+      if (!canManage) return;
 
-    try {
-      await api.delete(`/api/branches/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      setEditingId(branch.id);
+
+      safeSetFormValues({
+        name: branch.name || "",
+        manager_name: branch.manager_name || "",
+        address: branch.address || "",
+        contact: branch.contact || "",
+        ext_no: branch.ext_no || "",
+        service_station_id: branch.service_station_id ? String(branch.service_station_id) : "",
+        region: branch.region || "",
       });
-      setAlert({ type: 'success', title: 'Success', message: 'Branch deleted successfully!' });
-      fetchBranches();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        title: 'Error',
-        message: 'Failed to delete branch',
-      });
-    }
-  }, [isAdmin, token, fetchBranches]);
 
-  const handleViewAssets = useCallback((branch) => {
-    navigate(`/assets?branch=${encodeURIComponent(branch.name)}`);
-  }, [navigate]);
+      setShowModal(true);
+    },
+    [canManage, safeSetFormValues]
+  );
 
-  const handleOpenForm = useCallback(() => {
-    resetForm();
-    setEditingId(null);
-    setShowModal(true);
-  }, [resetForm]);
+  const handleDelete = useCallback(
+    async (id) => {
+      if (!isAdmin) {
+        setAlert({ type: "error", title: "Error", message: "Only admin can delete" });
+        return;
+      }
+
+      if (!window.confirm("Are you sure you want to delete this branch?")) return;
+
+      try {
+        await api.delete(`/api/branches/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setAlert({ type: "success", title: "Success", message: "Branch deleted successfully!" });
+
+        // If last item removed, you may want to move one page back
+        fetchBranches();
+      } catch (err) {
+        setAlert({
+          type: "error",
+          title: "Error",
+          message:
+            err.response?.data?.message ||
+            `Failed to delete (${err.response?.status || "unknown"})`,
+        });
+      }
+    },
+    [isAdmin, token, fetchBranches]
+  );
 
   const closeModal = useCallback(() => {
     setShowModal(false);
@@ -193,20 +263,16 @@ export default function Branch() {
     setEditingId(null);
   }, [resetForm]);
 
+  const handleViewAssets = useCallback(
+    (branch) => navigate(`/assets?branch=${encodeURIComponent(branch.name)}`),
+    [navigate]
+  );
+
   const handlePageChange = (page) => setCurrentPage(page);
+
   const handlePageSizeChange = (size) => {
     setPageSize(size);
     setCurrentPage(1);
-  };
-
-  const getStationName = (b) => {
-    // supports both backend styles
-    if (b?.service_station_name) return b.service_station_name;
-    if (b?.serviceStation?.name) return b.serviceStation.name;
-
-    // fallback: resolve from fetched stations list
-    const found = serviceStations.find((s) => s.id === b.service_station_id);
-    return found?.name || '—';
   };
 
   if (loading && branches.length === 0) {
@@ -216,7 +282,7 @@ export default function Branch() {
           <div className="device-header">
             <h2>Branch Management</h2>
           </div>
-          <SkeletonTable rows={5} cols={8} />
+          <SkeletonTable rows={5} cols={9} />
         </main>
         <Footer />
       </>
@@ -258,27 +324,27 @@ export default function Branch() {
         {/* Modal Form */}
         <Modal
           isOpen={showModal}
-          title={editingId ? 'Edit Branch' : 'Add New Branch'}
+          title={editingId ? "Edit Branch" : "Add New Branch"}
           onClose={closeModal}
           actions={
             <div className="modal-actions">
               <Button variant="secondary" onClick={closeModal}>
                 Cancel
               </Button>
+
+              {/* ✅ real submit, no dispatchEvent */}
               <Button
                 variant="primary"
                 type="submit"
+                form="branch-form"
                 loading={isSubmitting}
-                onClick={() =>
-                  document.querySelector('.branch-form').dispatchEvent(new Event('submit', { bubbles: true }))
-                }
               >
-                {editingId ? 'Update Branch' : 'Add Branch'}
+                {editingId ? "Update Branch" : "Add Branch"}
               </Button>
             </div>
           }
         >
-          <form className="branch-form" onSubmit={handleSubmit}>
+          <form id="branch-form" className="branch-form" onSubmit={handleSubmit}>
             <FormInput
               label="Branch Name"
               name="name"
@@ -290,6 +356,7 @@ export default function Branch() {
               touched={touched.name}
               required
             />
+
             <FormInput
               label="Manager Name"
               name="manager_name"
@@ -300,6 +367,7 @@ export default function Branch() {
               error={errors.manager_name}
               touched={touched.manager_name}
             />
+
             <FormInput
               label="Address"
               name="address"
@@ -310,6 +378,7 @@ export default function Branch() {
               error={errors.address}
               touched={touched.address}
             />
+
             <FormInput
               label="Contact Number"
               name="contact"
@@ -321,6 +390,7 @@ export default function Branch() {
               touched={touched.contact}
               type="tel"
             />
+
             <FormInput
               label="Extension Number"
               name="ext_no"
@@ -332,7 +402,7 @@ export default function Branch() {
               touched={touched.ext_no}
             />
 
-            {/* ✅ Service station dropdown (OG table) */}
+            {/* Service station dropdown */}
             <div className="form-group">
               <label className="form-label">Service Station</label>
               <select
@@ -349,6 +419,7 @@ export default function Branch() {
                   </option>
                 ))}
               </select>
+
               {touched.service_station_id && errors.service_station_id && (
                 <small className="error-text">{errors.service_station_id}</small>
               )}
@@ -385,28 +456,33 @@ export default function Branch() {
                   <th>Assets</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredBranches.map((b) => (
                   <tr key={b.id}>
                     <td>{b.id}</td>
-                    <td><strong>{b.name}</strong></td>
-                    <td>{b.manager_name || '—'}</td>
-                    <td>{b.address || '—'}</td>
-                    <td>{b.contact || '—'}</td>
-                    <td>{b.ext_no || '—'}</td>
-
-                    {/* ✅ fetch from OG table */}
+                    <td>
+                      <strong>{b.name}</strong>
+                    </td>
+                    <td>{b.manager_name || "—"}</td>
+                    <td>{b.address || "—"}</td>
+                    <td>{b.contact || "—"}</td>
+                    <td>{b.ext_no || "—"}</td>
                     <td>{getStationName(b)}</td>
-
-                    <td>{b.region || '—'}</td>
+                    <td>{b.region || "—"}</td>
 
                     {canManage && (
                       <td className="action-cell">
                         <Button size="small" variant="primary" onClick={() => handleEdit(b)}>
                           Edit
                         </Button>
+
                         {isAdmin && (
-                          <Button size="small" variant="danger" onClick={() => handleDelete(b.id)}>
+                          <Button
+                            size="small"
+                            variant="danger"
+                            onClick={() => handleDelete(b.id)}
+                          >
                             Delete
                           </Button>
                         )}
@@ -417,7 +493,11 @@ export default function Branch() {
                       <Button size="small" variant="secondary" onClick={() => handleViewAssets(b)}>
                         Assets
                       </Button>
-                      <Button size="small" variant="secondary" onClick={() => navigate(`/branches/${b.id}`)}>
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        onClick={() => navigate(`/branches/${b.id}`)}
+                      >
                         Details
                       </Button>
                     </td>
@@ -440,9 +520,11 @@ export default function Branch() {
             onPageChange={handlePageChange}
             pageSize={pageSize}
             onPageSizeChange={handlePageSizeChange}
+            totalItems={totalItems}
           />
         )}
       </main>
+
       <Footer />
     </>
   );
