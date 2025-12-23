@@ -29,17 +29,19 @@ export default function Footer() {
             <ul>
               <li><a href="/">Home</a></li>
               <li><a href="/branches">Branches</a></li>
-              <li><a href="/software">Software</a></li>
+              <li><a href="/assets">Assets</a></li>
+              <li><a href="/requests" >Request</a></li>
+              <li><a href="/requests" >Help</a></li>
             </ul>
           </div>
 
           <div className="footer-social">
             <h5>Follow Us</h5>
             <div className="social-icons">
-              <a href="https://facebook.com" target="_blank">Facebook</a>
+              <a href="https://facebook.https://www.facebook.com/Nepallife.Insurance" target="_blank">Facebook</a>
               <a href="https://twitter.com" target="_blank">Twitter</a>
-              <a href="https://linkedin.com" target="_blank">LinkedIn</a>
-              <a href="https://instagram.com" target="_blank">Instagram</a>
+              <a href="https://linkedin.https://np.linkedin.com/company/nepallife-insurance" target="_blank">LinkedIn</a>
+              <a href="https://instagram.https://www.instagram.com/nepallife.insurance" target="_blank">Instagram</a>
             </div>
           </div>
         </div>

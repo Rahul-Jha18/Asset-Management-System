@@ -1,7 +1,11 @@
 // backend/middleware/adminMiddleware.js
 
-// Normalize role so "Admin", "sub-admin", "SUBADMIN" all work
-const normRole = (role) => (role || "").toLowerCase().replace(/-/g, "").trim();
+// Normalize role so "Admin", "sub-admin", "SUB ADMIN", "sub_admin" all work
+const normRole = (role) =>
+  String(role || "")
+    .toLowerCase()
+    .replace(/[\s_-]/g, "") // remove spaces, underscores, hyphens
+    .trim();
 
 exports.adminOrSubadmin = (req, res, next) => {
   if (!req.user) {
@@ -32,7 +36,6 @@ exports.adminOnlyDelete = (req, res, next) => {
 };
 
 exports.allowRoles = (...roles) => {
-  // roles passed should be normalized already like: 'admin', 'subadmin'
   const allowed = roles.map(normRole);
 
   return (req, res, next) => {
