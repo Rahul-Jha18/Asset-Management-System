@@ -1,9 +1,7 @@
-// backend/models/branch_infra.js
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 const Branch = require("./Branch");
 
-// ================= CORE INFRA =================
 const BranchInfra = sequelize.define(
   "BranchInfra",
   {
@@ -34,7 +32,6 @@ const BranchInfra = sequelize.define(
   }
 );
 
-// ================= SCANNER =================
 const BranchScanner = sequelize.define(
   "BranchScanner",
   {
@@ -43,20 +40,11 @@ const BranchScanner = sequelize.define(
     scanner_name: { type: DataTypes.STRING },
     scanner_model: { type: DataTypes.STRING },
     scanner_number: { type: DataTypes.STRING },
-    // optional future fields:
-    // scanner_serial_no: { type: DataTypes.STRING },
-    // scanner_location: { type: DataTypes.STRING },
-    // scanner_condition: { type: DataTypes.STRING },
-    // scanner_status: { type: DataTypes.STRING },
-    // remarks: { type: DataTypes.TEXT },
+    remarks: { type: DataTypes.TEXT },
   },
-  {
-    tableName: "branch_scanners",
-    timestamps: true,
-  }
+  { tableName: "branch_scanners", timestamps: true }
 );
 
-// ================= PROJECTOR =================
 const BranchProjector = sequelize.define(
   "BranchProjector",
   {
@@ -67,15 +55,11 @@ const BranchProjector = sequelize.define(
     projector_purchase_date: { type: DataTypes.DATE },
     projector_status: { type: DataTypes.STRING },
     location: { type: DataTypes.STRING },
-    remarks: { type: DataTypes.TEXT }, // add if column exists
+    remarks: { type: DataTypes.TEXT },
   },
-  {
-    tableName: "branch_projectors",
-    timestamps: true,
-  }
+  { tableName: "branch_projectors", timestamps: true }
 );
 
-// ================= PRINTER =================
 const BranchPrinter = sequelize.define(
   "BranchPrinter",
   {
@@ -87,13 +71,9 @@ const BranchPrinter = sequelize.define(
     printer_type: { type: DataTypes.ENUM("USB", "Network"), defaultValue: "USB" },
     printer_status: { type: DataTypes.ENUM("Active", "Down"), defaultValue: "Active" },
   },
-  {
-    tableName: "branch_printers",
-    timestamps: true,
-  }
+  { tableName: "branch_printers", timestamps: true }
 );
 
-// ================= DESKTOP =================
 const BranchDesktop = sequelize.define(
   "BranchDesktop",
   {
@@ -107,16 +87,12 @@ const BranchDesktop = sequelize.define(
     desktop_fiscal_year: { type: DataTypes.STRING },
     desktop_processor: { type: DataTypes.STRING },
     desktop_domain: { type: DataTypes.STRING },
-    desktop_ids: { type: DataTypes.STRING }, // add if column exists
-    remarks: { type: DataTypes.TEXT }, // add if column exists
+    desktop_ids: { type: DataTypes.STRING },
+    remarks: { type: DataTypes.TEXT },
   },
-  {
-    tableName: "branch_desktops",
-    timestamps: true,
-  }
+  { tableName: "branch_desktops", timestamps: true }
 );
 
-// ================= LAPTOP =================
 const BranchLaptop = sequelize.define(
   "BranchLaptop",
   {
@@ -131,16 +107,12 @@ const BranchLaptop = sequelize.define(
     laptop_user: { type: DataTypes.STRING },
     laptop_purchase_date: { type: DataTypes.DATE },
     laptop_fiscal_year: { type: DataTypes.STRING },
-    laptop_ids: { type: DataTypes.STRING }, // add if column exists
-    remarks: { type: DataTypes.TEXT }, // add if column exists
+    laptop_ids: { type: DataTypes.STRING },
+    remarks: { type: DataTypes.TEXT },
   },
-  {
-    tableName: "branch_laptops",
-    timestamps: true,
-  }
+  { tableName: "branch_laptops", timestamps: true }
 );
 
-// ================= CCTV =================
 const BranchCctv = sequelize.define(
   "BranchCctv",
   {
@@ -153,13 +125,9 @@ const BranchCctv = sequelize.define(
     cctv_record_days: { type: DataTypes.INTEGER },
     cctv_nvr_details: { type: DataTypes.TEXT },
   },
-  {
-    tableName: "branch_cctv",
-    timestamps: true,
-  }
+  { tableName: "branch_cctv", timestamps: true }
 );
 
-// ================= PANEL =================
 const BranchPanel = sequelize.define(
   "BranchPanel",
   {
@@ -172,15 +140,11 @@ const BranchPanel = sequelize.define(
     panel_purchase_year: { type: DataTypes.INTEGER },
     panel_status: { type: DataTypes.STRING },
     location: { type: DataTypes.STRING },
-    remarks: { type: DataTypes.TEXT }, // add if column exists
+    remarks: { type: DataTypes.TEXT },
   },
-  {
-    tableName: "branch_panels",
-    timestamps: true,
-  }
+  { tableName: "branch_panels", timestamps: true }
 );
 
-// ================= IP PHONE =================
 const BranchIpPhone = sequelize.define(
   "BranchIpPhone",
   {
@@ -191,43 +155,22 @@ const BranchIpPhone = sequelize.define(
     ip_telephone_ext_no: { type: DataTypes.STRING },
     model: { type: DataTypes.STRING },
   },
-  {
-    tableName: "branch_ip_phones",
-    timestamps: true,
-  }
+  { tableName: "branch_ip_phones", timestamps: true }
 );
 
-// ================= ASSOCIATIONS =================
-// Infra = single record per branch
+// Associations
 Branch.hasOne(BranchInfra, { foreignKey: "branchId", as: "infra" });
 BranchInfra.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
 
-// Devices = multiple records per branch
 Branch.hasMany(BranchScanner, { foreignKey: "branchId", as: "scanners" });
-BranchScanner.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
-
 Branch.hasMany(BranchProjector, { foreignKey: "branchId", as: "projectors" });
-BranchProjector.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
-
 Branch.hasMany(BranchPrinter, { foreignKey: "branchId", as: "printers" });
-BranchPrinter.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
-
 Branch.hasMany(BranchDesktop, { foreignKey: "branchId", as: "desktops" });
-BranchDesktop.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
-
 Branch.hasMany(BranchLaptop, { foreignKey: "branchId", as: "laptops" });
-BranchLaptop.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
-
 Branch.hasMany(BranchCctv, { foreignKey: "branchId", as: "cctvs" });
-BranchCctv.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
-
 Branch.hasMany(BranchPanel, { foreignKey: "branchId", as: "panels" });
-BranchPanel.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
-
 Branch.hasMany(BranchIpPhone, { foreignKey: "branchId", as: "ipphones" });
-BranchIpPhone.belongsTo(Branch, { foreignKey: "branchId", as: "branch" });
 
-// ================= EXPORT =================
 module.exports = {
   BranchInfra,
   BranchScanner,

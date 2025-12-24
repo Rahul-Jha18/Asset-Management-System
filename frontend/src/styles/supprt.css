@@ -48,7 +48,41 @@
   color: var(--muted);
   font-size: 13px;
 }
+.support__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
 
+.support__table th,
+.support__table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* ✅ truncate text (6–7 words visually) */
+.truncate {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* status cell */
+.status-cell select {
+  padding: 5px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+}
+
+/* hover row */
+.support__table tbody tr:hover {
+  background: #3b3b3b;
+}
 .support__title{
   margin: 12px 0 8px;
   font-size: clamp(28px, 3.2vw, 44px);

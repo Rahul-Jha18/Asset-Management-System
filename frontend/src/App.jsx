@@ -8,8 +8,8 @@ import Branch from './pages/Branch';
 import BranchDetails from './pages/BranchDetails';
 import Assets from './pages/Assets';
 import AssetDetailsPage from './pages/AssetDetailsPage';
-import RequestPage from './pages/RequestPage';
-import SupportPage from './pages/supportpage';  
+import RequestPage from './pages/RequestPage'; 
+import SupportPage from './pages/supportpage.jsx';
 
 import Nav from './components/Layout/Nav';
 import { useAuth } from './context/AuthContext';

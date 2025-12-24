@@ -12,6 +12,7 @@ const branchRoutes = require("./routes/branchRoutes");
 const softwareRoutes = require("./routes/softwareRoutes");
 const assetRoutes = require("./routes/assetRoutes");
 const requestRoutes = require("./routes/requestRoutes");
+const supportRoutes = require("./routes/supportRoutes");
 
 // ✅ NEW: service stations route
 const serviceStationRoutes = require("./routes/serviceStationRoutes");
@@ -61,6 +62,7 @@ app.use("/api/service-stations", serviceStationRoutes);
 app.use("/api/software", softwareRoutes);
 app.use("/api/assets", assetRoutes);
 app.use("/api/requests", requestRoutes);
+app.use("/api/support", supportRoutes);
 
 // Test route
 app.get("/", (req, res) => res.json({ message: "Project IMS backend running" }));

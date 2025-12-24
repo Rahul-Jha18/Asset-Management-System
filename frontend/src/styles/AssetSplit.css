@@ -354,6 +354,21 @@ html, body, #root {
   gap: 1.5rem;
   margin-top: 12px;
 }
+/*BranchDetail page edit btn */
+.asset-edit-input{
+  width: 100%;
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  outline: none;
+}
+
+.asset-edit-input:focus{
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
 
 /* ---------------------------------
    SPLIT LAYOUT (KEEP AS IS - NO STRUCTURE CHANGE)
