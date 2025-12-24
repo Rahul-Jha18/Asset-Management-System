@@ -277,7 +277,7 @@ export default function Branch() {
   if (loading && branches.length === 0) {
     return (
       <>
-        <main className="page-container">
+        <main style={{background:'white'}} className="page-container">
           <div className="device-header">
             <h2>Branch Management</h2>
           </div>
@@ -290,7 +290,7 @@ export default function Branch() {
 
   return (
     <>
-      <main className="page-container">
+      <main style={{background:'white'}} className="page-container">
         <div className="device-header">
           <h2>Branch Management</h2>
         </div>

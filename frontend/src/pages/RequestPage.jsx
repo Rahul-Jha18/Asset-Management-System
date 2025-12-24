@@ -206,7 +206,6 @@ export default function RequestPage() {
       return;
     }
 
-    // ✅ mandatory agreement for user create (and for edit too if you want)
     if (!formValues.agreeAccuracy) {
       setAlert({
         type: "error",
@@ -400,7 +399,7 @@ export default function RequestPage() {
   if (loading && requests.length === 0) {
     return (
       <>
-        <main className="page-container">
+        <main style={{ background: "white", }} className="page-container">
           <div className="device-header">
             <h2>Request Management</h2>
           </div>
@@ -413,7 +412,7 @@ export default function RequestPage() {
 
   return (
     <>
-      <main className="page-container">
+      <main style={{ background: "white", }} className="page-container">
         <div className="device-header">
           <h2>Request Management</h2>
         </div>

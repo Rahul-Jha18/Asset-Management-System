@@ -54,7 +54,7 @@ export default function Nav() {
               <Link to="/branches" onClick={() => setMenuOpen(false)}>Branch</Link>
               <Link to="/assets" onClick={() => setMenuOpen(false)}>Asset List</Link>
               <Link to="/requests" onClick={() => setMenuOpen(false)}>Requests</Link>
-              <Link to="/contact" onClick={() => setMenuOpen(false)}>Help</Link>
+              <Link to="/support" onClick={() => setMenuOpen(false)}>Help</Link>
 
               {/* MOBILE AUTH */}
               <div className="mobile-nav-actions">

@@ -9,6 +9,7 @@ import BranchDetails from './pages/BranchDetails';
 import Assets from './pages/Assets';
 import AssetDetailsPage from './pages/AssetDetailsPage';
 import RequestPage from './pages/RequestPage';
+import SupportPage from './pages/supportpage';  
 
 import Nav from './components/Layout/Nav';
 import { useAuth } from './context/AuthContext';
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/assets" element={<Assets />} />
         <Route path="/assets/:id" element={<AssetDetailsPage />} />
         <Route path="/requests" element={<RequestPage />} />
+        <Route path="/support" element={<SupportPage />} />
 
 
       </Route>
