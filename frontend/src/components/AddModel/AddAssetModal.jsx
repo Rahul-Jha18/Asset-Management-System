@@ -204,7 +204,7 @@ const SECTION_ALL_FIELDS = {
   ],
 
   scanner: [
-    "assetId","sub_category_code","scanner_name","scanner_model","location","remarks",
+    "assetId","sub_category_code","scanner_name","scanner_model","assigned_user","location","remarks",
   ],
 
   projector: [
