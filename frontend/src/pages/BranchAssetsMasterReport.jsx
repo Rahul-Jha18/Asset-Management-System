@@ -1040,7 +1040,7 @@ export default function BranchAssetsMasterReport() {
   const canEdit = isAdmin;
   const canEdit1 = isAdmin || isSubAdmin;
 
-  const canDelete = isAdmin;
+  const canDelete = isAdmin || isSubAdmin;
   const currentUserName = user?.name||user?.email||"Unknown User";
   const navigate = useNavigate();
   const location = useLocation();
