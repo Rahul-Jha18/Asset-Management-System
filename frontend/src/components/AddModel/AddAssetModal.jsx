@@ -39,6 +39,7 @@ const MODAL_STYLES = `
   }
   @keyframes am-spin     { to{transform:rotate(360deg)} }
   @keyframes am-slideUp  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes am-slideDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 
   .am-overlay {
     position:fixed; inset:0; z-index:9999;
@@ -165,6 +166,47 @@ const MODAL_STYLES = `
     color:var(--red-600); font-weight:600; margin-top:6px;
   }
   .am-spinner { border-radius:50%; border:2.5px solid var(--gray-200); border-top-color:white; animation:am-spin 0.7s linear infinite; }
+
+  /* ── Employee Select ── */
+  .am-emp-trigger {
+    display:flex; align-items:center; gap:6px;
+    border:1.5px solid var(--gray-300); border-radius:var(--radius);
+    background:rgba(55,65,82,0.07); padding:0 12px; cursor:pointer;
+    transition:all 0.18s ease; min-height:38px; user-select:none;
+  }
+  .am-emp-trigger:hover { border-color:var(--blue-400); background:rgba(59,130,246,0.04); }
+  .am-emp-trigger.open  { border-color:var(--blue-500); background:white; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+  .am-emp-trigger.disabled { opacity:0.55; cursor:not-allowed; pointer-events:none; }
+  .am-emp-dropdown {
+    position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:10000;
+    background:white; border:1.5px solid var(--blue-200); border-radius:var(--radius-lg);
+    box-shadow:0 12px 32px rgba(0,0,0,0.14); overflow:hidden;
+    animation:am-slideDown 0.18s ease both;
+  }
+  .am-emp-search {
+    width:100%; border:none; border-bottom:1.5px solid var(--gray-100);
+    padding:9px 13px; font-size:13px; font-family:'DM Sans',sans-serif;
+    outline:none; background:var(--gray-50); color:var(--gray-900);
+  }
+  .am-emp-search::placeholder { color:var(--gray-400); }
+  .am-emp-list { max-height:210px; overflow-y:auto; padding:4px 0; }
+  .am-emp-list::-webkit-scrollbar { width:3px; }
+  .am-emp-list::-webkit-scrollbar-thumb { background:var(--gray-200); border-radius:999px; }
+  .am-emp-item {
+    display:flex; align-items:center; gap:9px; padding:8px 13px;
+    cursor:pointer; font-size:13px; font-family:'DM Sans',sans-serif;
+    color:var(--gray-800); transition:background 0.1s ease;
+  }
+  .am-emp-item:hover   { background:var(--blue-50); }
+  .am-emp-item.selected { background:var(--blue-50); color:var(--blue-700); font-weight:700; }
+  .am-emp-avatar {
+    width:24px; height:24px; border-radius:50%; flex-shrink:0;
+    background:${NL_GRADIENT}; display:flex; align-items:center;
+    justify-content:center; color:white; font-size:9px; font-weight:800;
+    font-family:'Outfit',sans-serif;
+  }
+  .am-emp-empty { padding:14px 13px; font-size:12px; color:var(--gray-400); font-family:'Outfit',sans-serif; text-align:center; }
+
   @media(max-width:640px) {
     .am-body { padding:14px 16px; }
     .am-header { padding:16px 18px; }
@@ -323,10 +365,7 @@ const SECTION_ALL_FIELDS = {
 
 const SUBCODE_TO_SECTION = {
   DC:"desktop", DT:"desktop",
-
-  QD:"qr_desktop_computer",
-  QC:"qr_desktop_computer",
-
+  QD:"qr_desktop_computer", QC:"qr_desktop_computer",
   LC:"laptop",  LP:"laptop",
   PR:"printer",
   SC:"scanner",
@@ -360,8 +399,7 @@ const isDateKey = (k) => [
 
 const isYearKey = (k) => [
   "installed_year","panel_purchase_year","ups_purchase_year",
-  "monitor_purchase_year","warranty_years",
-  "inverter_purchase_year",
+  "monitor_purchase_year","warranty_years","inverter_purchase_year",
 ].includes(k);
 
 const isYesNoKey = (k) => k === "virtualization";
@@ -377,6 +415,16 @@ const isFullWidthKey = (k) => [
 ].includes(k);
 
 const isReadOnly = (k) => k === "sub_category_code";
+
+// ── Which field keys represent "Assigned User" across all sections ──
+const ASSIGNED_USER_KEYS = new Set([
+  "userName",       // desktop, qr_desktop_computer
+  "laptop_user",    // laptop
+  "assigned_user",  // printer, scanner, panel (alt), ipphone, switch, extra_monitor, ups, inverter
+  "panel_user",     // panel
+  "assigned_to",    // application_software, office_software, licenses, online_conference_tools
+]);
+const isAssignedUserKey = (k) => ASSIGNED_USER_KEYS.has(k);
 
 const niceLabel = (k) =>
   String(k)
@@ -421,7 +469,6 @@ const niceLabel = (k) =>
 
 const sectionDisplayName = (section) => {
   const s = String(section || "").trim().toLowerCase();
-
   if (s === "qr_desktop_computer") return "QR Desktop Computer";
   if (s === "desktop") return "Desktop";
   if (s === "extra_monitor") return "Extra Monitor";
@@ -434,7 +481,6 @@ const sectionDisplayName = (section) => {
   if (s === "windows_os") return "Windows OS";
   if (s === "windows_servers") return "Windows Servers";
   if (s === "online_conference_tools") return "Online Conference Tools";
-
   return String(section || "")
     .replace(/_/g, " ")
     .replace(/\b\w/g, (m) => m.toUpperCase());
@@ -448,7 +494,6 @@ const SECTION_GROUPS = {
     { label:"Monitor",          keys:["monitor_asset_code","monitor_brand","monitor_size","monitor_location","monitor_purchase_year","monitor_status"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   qr_desktop_computer: [
     { label:"QR Desktop Info",  keys:["assetId","sub_category_code","desktop_brand","userName","desktop_ids"] },
     { label:"Specifications",   keys:["desktop_ram","system_model","desktop_ssd","desktop_processor","window_version","window_gen"] },
@@ -456,20 +501,17 @@ const SECTION_GROUPS = {
     { label:"Monitor",          keys:["monitor_name","monitor_asset_code","monitor_brand","monitor_size","monitor_location","monitor_status"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   laptop: [
     { label:"Device Info",      keys:["assetId","sub_category_code","laptop_brand","name","laptop_user"] },
     { label:"Specifications",   keys:["laptop_ram","laptop_ssd","laptop_processor"] },
     { label:"Network & Status", keys:["location","ip_address","status"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   printer: [
     { label:"Printer Info",     keys:["assetId","sub_category_code","assigned_user","printer_name","printer_model","printer_type"] },
     { label:"Network & Status", keys:["printer_status","location","ip_address"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   server: [
     { label:"Identity",         keys:["assetId","sub_category_code","brand","model_no","vendor"] },
     { label:"Network",          keys:["ip_address","location"] },
@@ -477,20 +519,17 @@ const SECTION_GROUPS = {
     { label:"Software",         keys:["windows_server_version","purchase_date"] },
     { label:"Notes",            keys:["specification","remarks"] },
   ],
-
   switch: [
     { label:"Identity",         keys:["assetId","sub_category_code","asset_name","brand","model","type"] },
     { label:"Location & Access",keys:["location","port","assigned_user"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   extra_monitor: [
     { label:"Monitor Details",  keys:["assetId","sub_category_code","monitor_brand","monitor_size"] },
     { label:"Location & Status",keys:["monitor_location","monitor_status"] },
     { label:"Assignment",       keys:["system_model","assigned_user"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   inverter: [
     { label:"Inverter Info",     keys:["assetId","sub_category_code","name","inverter_model"] },
     { label:"Backup & Install",  keys:["inverter_backup_time","inverter_installer","assigned_user","inverter_purchase_year"] },
@@ -498,62 +537,52 @@ const SECTION_GROUPS = {
     { label:"Status & Location", keys:["inverter_status","location"] },
     { label:"Notes",             keys:["remarks"] },
   ],
-
   application_software: [
     { label:"Software Info",    keys:["sub_category_code","software_name","version","vendor_name"] },
     { label:"License",          keys:["license_type","license_key","quantity","purchase_date","expiry_date","assigned_to"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   office_software: [
     { label:"Software Info",    keys:["sub_category_code","software_name","version","vendor_name"] },
     { label:"Installation",     keys:["installed_on","pc_name","installed_by","install_date"] },
     { label:"License",          keys:["license_type","license_key","quantity","purchase_date","expiry_date","assigned_to"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   utility_software: [
     { label:"Software Info",    keys:["sub_category_code","software_name","version"] },
     { label:"Installation",     keys:["pc_name","installed_by","install_date","expiry_date"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   security_software: [
     { label:"Security Product", keys:["sub_category_code","product_name","vendor_name"] },
     { label:"License",          keys:["license_type","total_nodes","expiry_date"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   security_software_installed: [
     { label:"Installed Product",keys:["sub_category_code","product_name","version","pc_name"] },
     { label:"Protection",       keys:["real_time_protection","last_update_date","installed_by","expiry_date"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   services: [
     { label:"Service Info",     keys:["sub_category_code","service_name","service_category","provider_name"] },
     { label:"Contract",         keys:["contract_no","provider_contact","start_date","expiry_date"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   licenses: [
     { label:"License Info",     keys:["sub_category_code","license_name","vendor_name"] },
     { label:"License Details",  keys:["license_type","license_key","quantity","purchase_date","expiry_date","assigned_to"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   windows_os: [
     { label:"OS Info",          keys:["sub_category_code","os_version","vendor_name"] },
     { label:"Activation",       keys:["license_type","license_key","activation_status","installed_date","expiry_date"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   online_conference_tools: [
     { label:"Tool Info",        keys:["sub_category_code","tool_name","vendor_name"] },
     { label:"License",          keys:["license_type","license_key","no_of_users","purchase_date","expiry_date"] },
     { label:"Notes",            keys:["remarks"] },
   ],
-
   windows_servers: [
     { label:"Server OS",        keys:["sub_category_code","server_name","server_role","os_version"] },
     { label:"License",          keys:["license_type","license_key","cores_licensed","expiry_date"] },
@@ -561,12 +590,168 @@ const SECTION_GROUPS = {
   ],
 };
 
+/* ─────────────────────────────────────────────────────
+   EmployeeSelect — searchable dropdown for employee names
+───────────────────────────────────────────────────── */
+function EmployeeSelect({ employees, value, onChange, disabled }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen]   = useState(false);
+  const wrapRef = React.useRef(null);
+
+  // Build sorted unique name list from employees array
+  const names = useMemo(() => {
+    const unique = [
+      ...new Set(
+        safeArray(employees)
+          .map((e) => String(e.full_name || e.name || "").trim())
+          .filter(Boolean)
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+    return unique;
+  }, [employees]);
+
+  // Filter by search query
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    return q ? names.filter((n) => n.toLowerCase().includes(q)) : names;
+  }, [names, query]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setOpen(false);
+        setQuery("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const handleSelect = (name) => {
+    onChange(name);
+    setQuery("");
+    setOpen(false);
+  };
+
+  const handleClear = (e) => {
+    e.stopPropagation();
+    onChange("");
+    setQuery("");
+  };
+
+  return (
+    <div ref={wrapRef} style={{ position: "relative" }}>
+      {/* Trigger button */}
+      <div
+        className={`am-emp-trigger${open ? " open" : ""}${disabled ? " disabled" : ""}`}
+        onClick={() => !disabled && setOpen((o) => !o)}
+      >
+        {/* Avatar + name */}
+        {value ? (
+          <>
+            <div className="am-emp-avatar">{value.charAt(0).toUpperCase()}</div>
+            <span style={{ flex: 1, fontSize: 13.5, color: "var(--gray-900)", fontFamily: "'DM Sans',sans-serif", fontWeight: 600 }}>
+              {value}
+            </span>
+          </>
+        ) : (
+          <span style={{ flex: 1, fontSize: 13.5, color: "var(--gray-400)", fontFamily: "'DM Sans',sans-serif" }}>
+            {names.length === 0 ? "No employees loaded" : "— Select employee —"}
+          </span>
+        )}
+
+        {/* Clear button */}
+        {value && !disabled && (
+          <button
+            type="button"
+            onClick={handleClear}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              color: "var(--gray-400)", fontSize: 16, lineHeight: 1,
+              padding: "2px 4px", borderRadius: 4, display: "flex", alignItems: "center",
+            }}
+            title="Clear"
+          >
+            ×
+          </button>
+        )}
+
+        {/* Chevron */}
+        <span style={{
+          color: "var(--gray-400)", fontSize: 11, lineHeight: 1, flexShrink: 0,
+          transition: "transform 0.2s ease",
+          transform: open ? "rotate(180deg)" : "rotate(0deg)",
+        }}>
+          ▼
+        </span>
+      </div>
+
+      {/* Dropdown */}
+      {open && !disabled && (
+        <div className="am-emp-dropdown">
+          {/* Search input */}
+          <input
+            type="text"
+            autoFocus
+            className="am-emp-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={`Search among ${names.length} employees…`}
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* List */}
+          <ul className="am-emp-list" style={{ listStyle: "none", margin: 0, padding: "4px 0" }}>
+            {filtered.length === 0 ? (
+              <li className="am-emp-empty">
+                {query ? `No match for "${query}"` : "No employees available"}
+              </li>
+            ) : (
+              filtered.map((name) => (
+                <li
+                  key={name}
+                  className={`am-emp-item${name === value ? " selected" : ""}`}
+                  onClick={() => handleSelect(name)}
+                >
+                  <div className="am-emp-avatar">{name.charAt(0).toUpperCase()}</div>
+                  <span style={{ flex: 1 }}>{name}</span>
+                  {name === value && (
+                    <span style={{ fontSize: 12, color: "var(--blue-600)", fontWeight: 800 }}>✓</span>
+                  )}
+                </li>
+              ))
+            )}
+          </ul>
+
+          {/* Footer hint */}
+          {names.length > 0 && (
+            <div style={{
+              padding: "6px 13px", borderTop: "1px solid var(--gray-100)",
+              fontSize: 10, color: "var(--gray-400)", fontFamily: "'Outfit',sans-serif",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}>
+              <span>{filtered.length} of {names.length} employees</span>
+              <span>↑↓ browse · click to select</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN COMPONENT
+═══════════════════════════════════════════════════ */
 export default function AddAssetModal({
   open,
   onClose,
-  branches = [],
-  groups   = [],
-  subCats  = [],
+  branches  = [],
+  groups    = [],
+  subCats   = [],
+  employees = [],          // ← employee list for the assigned-user dropdown
   fetchAddSubCats,
   addSaving = false,
   onSubmit,
@@ -586,16 +771,14 @@ export default function AddAssetModal({
     setForm({});
   }, [open]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!open) return;
-
     const onKey = (e) => {
       if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
       }
     };
-
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
@@ -623,9 +806,7 @@ export default function AddAssetModal({
       selectedSubCat?.tableName ||
       selectedSubCat?.asset_type ||
       selectedSubCat?.assetType;
-
     if (api) return normalizeSection(api);
-
     return SUBCODE_TO_SECTION[String(subCode || "").trim().toUpperCase()] || "";
   }, [selectedSubCat, subCode]);
 
@@ -636,14 +817,9 @@ export default function AddAssetModal({
 
   const fieldGroups = useMemo(() => {
     const preset = SECTION_GROUPS[section];
-
     if (preset) return preset;
-
-    const mainFields = fieldsForSection.filter(
-      (k) => k !== "remarks" && !isFullWidthKey(k)
-    );
+    const mainFields = fieldsForSection.filter((k) => k !== "remarks" && !isFullWidthKey(k));
     const wideFields = fieldsForSection.filter(isFullWidthKey);
-
     return [
       { label: "Asset Details", keys: mainFields },
       ...(wideFields.length ? [{ label: "Notes", keys: wideFields }] : []),
@@ -655,12 +831,10 @@ export default function AddAssetModal({
   const onChange = (e) => {
     const { name, value } = e.target;
     let v = value;
-
     if (isYearKey(name)) {
       const n = Number(value);
       v = value === "" ? "" : Number.isFinite(n) ? String(n) : value;
     }
-
     setForm((p) => ({ ...p, [name]: v }));
   };
 
@@ -675,38 +849,25 @@ export default function AddAssetModal({
 
   const handleSave = () => {
     const err = validate();
-
-    if (err) {
-      alert(err);
-      return;
-    }
-
+    if (err) { alert(err); return; }
     const payload = {};
-
     fieldsForSection.forEach((k) => {
       const raw = form?.[k];
       payload[k] = raw === "" ? null : raw;
     });
-
-    onSubmit?.({
-      branchId: Number(branchId),
-      section,
-      payload,
-    });
+    onSubmit?.({ branchId: Number(branchId), section, payload });
   };
 
-  const selectedBranch = safeArray(branches).find(
-    (b) => String(b.id) === String(branchId)
-  );
+  const selectedBranch = safeArray(branches).find((b) => String(b.id) === String(branchId));
+  const selectedGroup  = safeArray(groups).find((g) => String(g.id) === String(groupId));
 
-  const selectedGroup = safeArray(groups).find(
-    (g) => String(g.id) === String(groupId)
-  );
-
+  /* ── renderField ── */
   const renderField = (k) => {
-    const wide = isFullWidthKey(k);
+    const wide     = isFullWidthKey(k);
     const readOnly = isReadOnly(k);
+    const isUser   = isAssignedUserKey(k);
 
+    /* read-only badge */
     if (readOnly) {
       return (
         <div key={k} className="am-field-card">
@@ -718,16 +879,38 @@ export default function AddAssetModal({
             value={form?.[k] ?? subCode ?? ""}
             readOnly
             disabled
-            style={{
-              background: "var(--gray-100)",
-              fontWeight: 700,
-              color: "var(--gray-700)",
-            }}
+            style={{ background: "var(--gray-100)", fontWeight: 700, color: "var(--gray-700)" }}
           />
         </div>
       );
     }
 
+    /* ── Assigned-user searchable dropdown ── */
+    if (isUser) {
+      return (
+        <div key={k} className="am-field-card">
+          <label className="am-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {niceLabel(k)}
+            <span style={{
+              fontSize: 9, fontWeight: 600, color: "var(--blue-600)",
+              background: "var(--blue-50)", border: "1px solid var(--blue-200)",
+              borderRadius: 999, padding: "1px 6px", fontFamily: "'Outfit',sans-serif",
+              letterSpacing: "0.06em",
+            }}>
+              👤 Employee
+            </span>
+          </label>
+          <EmployeeSelect
+            employees={employees}
+            value={form?.[k] ?? ""}
+            disabled={addSaving}
+            onChange={(name) => setForm((p) => ({ ...p, [k]: name }))}
+          />
+        </div>
+      );
+    }
+
+    /* all other fields */
     return (
       <div key={k} className={`am-field-card${wide ? " full-width" : ""}`}>
         <label className="am-label">{niceLabel(k)}</label>
@@ -743,24 +926,12 @@ export default function AddAssetModal({
             placeholder={k === "remarks" ? "Any additional notes…" : "Enter details…"}
           />
         ) : isYesNoKey(k) ? (
-          <select
-            className="am-select"
-            name={k}
-            value={form?.[k] ?? "No"}
-            onChange={onChange}
-            disabled={addSaving}
-          >
+          <select className="am-select" name={k} value={form?.[k] ?? "No"} onChange={onChange} disabled={addSaving}>
             <option value="No">No</option>
             <option value="Yes">Yes</option>
           </select>
         ) : isStatusKey(k) ? (
-          <select
-            className="am-select"
-            name={k}
-            value={form?.[k] ?? "Active"}
-            onChange={onChange}
-            disabled={addSaving}
-          >
+          <select className="am-select" name={k} value={form?.[k] ?? "Active"} onChange={onChange} disabled={addSaving}>
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
             <option value="Repair">Repair</option>
@@ -800,142 +971,65 @@ export default function AddAssetModal({
     );
   };
 
+  /* ── RENDER ── */
   return (
     <>
       <style>{FONTS}{MODAL_STYLES}</style>
 
       <div
-      className="am-overlay"
-      onMouseDown={(e) => {
-        e.stopPropagation();
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
-    >
+        className="am-overlay"
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="am-panel">
+          {/* ── HEADER ── */}
           <div className="am-header">
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "rgba(255,255,255,0.55)",
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  fontFamily: "Outfit,sans-serif",
-                  marginBottom: 4,
-                }}
-              >
+              <div style={{
+                fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)",
+                letterSpacing: "0.15em", textTransform: "uppercase",
+                fontFamily: "Outfit,sans-serif", marginBottom: 4,
+              }}>
                 Asset Management
               </div>
-
-              <div
-                style={{
-                  fontFamily: "Outfit,sans-serif",
-                  fontWeight: 800,
-                  fontSize: "clamp(1rem,3vw,1.35rem)",
-                  color: "white",
-                  letterSpacing: "-0.02em",
-                }}
-              >
+              <div style={{
+                fontFamily: "Outfit,sans-serif", fontWeight: 800,
+                fontSize: "clamp(1rem,3vw,1.35rem)", color: "white", letterSpacing: "-0.02em",
+              }}>
                 Add New Asset
               </div>
-
               <div className="am-step-track">
                 <div className={`am-step-dot ${step === 1 ? "active" : "done"}`}>
                   {step > 1 ? "✓" : "1"}
                 </div>
-
                 <div className={`am-step-line ${step > 1 ? "done" : ""}`} />
-
-                <div
-                  className={`am-step-dot ${
-                    step === 2 ? "active" : step > 2 ? "done" : "pending"
-                  }`}
-                >
+                <div className={`am-step-dot ${step === 2 ? "active" : step > 2 ? "done" : "pending"}`}>
                   2
                 </div>
-
-                <div
-                  style={{
-                    marginLeft: 10,
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 6,
-                    alignItems: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: "rgba(255,255,255,0.65)",
-                      fontFamily: "Outfit,sans-serif",
-                    }}
-                  >
+                <div style={{ marginLeft: 10, display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", fontFamily: "Outfit,sans-serif" }}>
                     {step === 1 ? "Select branch & category" : "Fill asset details"}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end",
-                gap: 8,
-              }}
-            >
-              <button
-                className="am-btn am-btn-white am-btn-sm"
-                onClick={onClose}
-                disabled={addSaving}
-              >
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+              <button className="am-btn am-btn-white am-btn-sm" onClick={onClose} disabled={addSaving}>
                 ✕ Close
               </button>
 
               {step === 2 && section && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 6,
-                    justifyContent: "flex-end",
-                  }}
-                >
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-end" }}>
                   {selectedBranch && (
-                    <span
-                      className="am-badge am-badge-blue"
-                      style={{
-                        background: "rgba(255,255,255,0.15)",
-                        color: "white",
-                        borderColor: "rgba(255,255,255,0.3)",
-                      }}
-                    >
+                    <span className="am-badge am-badge-blue" style={{ background: "rgba(255,255,255,0.15)", color: "white", borderColor: "rgba(255,255,255,0.3)" }}>
                       🏢 {selectedBranch.name}
                     </span>
                   )}
-
-                  <span
-                    className="am-badge"
-                    style={{
-                      background: "rgba(255,255,255,0.12)",
-                      color: "rgba(255,255,255,0.85)",
-                      borderColor: "rgba(255,255,255,0.2)",
-                    }}
-                  >
+                  <span className="am-badge" style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.2)" }}>
                     📂 {sectionDisplayName(section)}
                   </span>
-
-                  <span
-                    className="am-badge"
-                    style={{
-                      background: "rgba(255,255,255,0.12)",
-                      color: "rgba(255,255,255,0.85)",
-                      borderColor: "rgba(255,255,255,0.2)",
-                    }}
-                  >
+                  <span className="am-badge" style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.2)" }}>
                     {fieldsForSection.length} fields
                   </span>
                 </div>
@@ -943,42 +1037,35 @@ export default function AddAssetModal({
             </div>
           </div>
 
+          {/* ── BODY ── */}
           <div className="am-body">
+            {/* STEP 1 */}
             {step === 1 && (
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {/* Branch */}
                 <div className="am-sel-card">
                   <span className="am-sel-card-label">🏢 Branch *</span>
-
                   <select
                     className="am-select"
                     value={branchId}
-                    onChange={(e) => {
-                      setBranchId(e.target.value);
-                      setForm({});
-                    }}
+                    onChange={(e) => { setBranchId(e.target.value); setForm({}); }}
                     disabled={addSaving}
                   >
                     <option value="">-- Select Branch --</option>
-
                     {safeArray(branches).map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
+                      <option key={b.id} value={b.id}>{b.name}</option>
                     ))}
                   </select>
-
                   {branchId && (
                     <div style={{ marginTop: 8 }}>
-                      <span className="am-badge am-badge-blue">
-                        ✓ {selectedBranch?.name || `Branch #${branchId}`}
-                      </span>
+                      <span className="am-badge am-badge-blue">✓ {selectedBranch?.name || `Branch #${branchId}`}</span>
                     </div>
                   )}
                 </div>
 
+                {/* Category */}
                 <div className="am-sel-card">
                   <span className="am-sel-card-label">📁 Category (Group) *</span>
-
                   <select
                     className="am-select"
                     value={groupId}
@@ -992,62 +1079,37 @@ export default function AddAssetModal({
                     disabled={addSaving}
                   >
                     <option value="">-- Select Category --</option>
-
                     {safeArray(groups).map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name} ({g.id})
-                      </option>
+                      <option key={g.id} value={g.id}>{g.name} ({g.id})</option>
                     ))}
                   </select>
-
                   {groupId && (
                     <div style={{ marginTop: 8 }}>
-                      <span className="am-badge am-badge-green">
-                        ✓ {selectedGroup?.name || groupId}
-                      </span>
+                      <span className="am-badge am-badge-green">✓ {selectedGroup?.name || groupId}</span>
                     </div>
                   )}
                 </div>
 
+                {/* Sub Category */}
                 <div className="am-sel-card">
                   <span className="am-sel-card-label">🏷 Sub Category *</span>
-
                   <select
                     className="am-select"
                     value={subCode}
-                    onChange={(e) => {
-                      setSubCode(e.target.value);
-                      setForm({});
-                    }}
+                    onChange={(e) => { setSubCode(e.target.value); setForm({}); }}
                     disabled={addSaving || !groupId}
                   >
                     <option value="">-- Select Sub Category --</option>
-
                     {safeArray(subCats).map((s) => (
-                      <option key={s.code} value={s.code}>
-                        {s.name} ({s.code})
-                      </option>
+                      <option key={s.code} value={s.code}>{s.name} ({s.code})</option>
                     ))}
                   </select>
 
                   {subCode && (
-                    <div
-                      style={{
-                        marginTop: 10,
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 8,
-                        alignItems: "center",
-                      }}
-                    >
-                      <span className="am-badge am-badge-amber">
-                        {selectedSubCat?.name || subCode} · {subCode}
-                      </span>
-
+                    <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                      <span className="am-badge am-badge-amber">{selectedSubCat?.name || subCode} · {subCode}</span>
                       {section ? (
-                        <span className="am-badge am-badge-green">
-                          📂 {sectionDisplayName(section)} · {fieldsForSection.length} fields
-                        </span>
+                        <span className="am-badge am-badge-green">📂 {sectionDisplayName(section)} · {fieldsForSection.length} fields</span>
                       ) : (
                         <span className="am-badge am-badge-red">⚠ Section unmapped</span>
                       )}
@@ -1063,82 +1125,64 @@ export default function AddAssetModal({
                     </div>
                   )}
                 </div>
+
+                {/* Employee count hint */}
+                {employees.length > 0 && (
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "10px 14px", borderRadius: 10,
+                    background: "var(--blue-50)", border: "1.5px solid var(--blue-200)",
+                    fontSize: 12, color: "var(--blue-700)", fontFamily: "'Outfit',sans-serif", fontWeight: 600,
+                  }}>
+                    <span style={{ fontSize: 15 }}>👤</span>
+                    <span>
+                      <strong>{employees.length}</strong> employees loaded —
+                      Assigned User fields will show a searchable dropdown.
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 
+            {/* STEP 2 */}
             {step === 2 && (
               <div>
+                {/* Summary strip */}
                 <div className="am-summary-strip">
-                  <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      background: `linear-gradient(135deg,${NL_BLUE},${NL_BLUE2})`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 15,
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8,
+                    background: `linear-gradient(135deg,${NL_BLUE},${NL_BLUE2})`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 15, flexShrink: 0,
+                  }}>
                     📦
                   </div>
-
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontFamily: "Outfit,sans-serif",
-                        fontWeight: 700,
-                        fontSize: 13,
-                        color: "var(--gray-800)",
-                      }}
-                    >
-                      {selectedSubCat?.name || subCode} —{" "}
-                      {selectedBranch?.name || `Branch #${branchId}`}
+                    <div style={{ fontFamily: "Outfit,sans-serif", fontWeight: 700, fontSize: 13, color: "var(--gray-800)" }}>
+                      {selectedSubCat?.name || subCode} — {selectedBranch?.name || `Branch #${branchId}`}
                     </div>
-
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "var(--gray-500)",
-                        marginTop: 2,
-                        display: "flex",
-                        gap: 8,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <span>
-                        Section: <strong>{sectionDisplayName(section)}</strong>
-                      </span>
-                      <span>
-                        Fields: <strong>{fieldsForSection.length}</strong>
-                      </span>
+                    <div style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <span>Section: <strong>{sectionDisplayName(section)}</strong></span>
+                      <span>Fields: <strong>{fieldsForSection.length}</strong></span>
                     </div>
                   </div>
                 </div>
 
+                {/* Field grid */}
                 <div className="am-field-grid">
                   {fieldGroups.map((group, gi) => (
                     <React.Fragment key={gi}>
                       <div className="am-section-divider">
                         <div
                           className="am-section-divider-line"
-                          style={{
-                            background: "linear-gradient(90deg,var(--blue-200),transparent)",
-                          }}
+                          style={{ background: "linear-gradient(90deg,var(--blue-200),transparent)" }}
                         />
-
                         <span className="am-section-divider-label">{group.label}</span>
-
                         <div
                           className="am-section-divider-line"
-                          style={{
-                            background: "linear-gradient(270deg,var(--green-200),transparent)",
-                          }}
+                          style={{ background: "linear-gradient(270deg,var(--green-200),transparent)" }}
                         />
                       </div>
-
                       {group.keys.map((k) => renderField(k))}
                     </React.Fragment>
                   ))}
@@ -1147,24 +1191,19 @@ export default function AddAssetModal({
             )}
           </div>
 
+          {/* ── FOOTER ── */}
           <div className="am-footer">
             <div className="am-footer-note">
               {step === 1
                 ? "Select branch, category and sub-category to proceed."
                 : "All DB fields for the selected section. Empty fields are saved as null."}
             </div>
-
             <div className="am-footer-actions">
               {step === 1 ? (
                 <>
-                  <button
-                    className="am-btn am-btn-ghost am-btn-sm"
-                    onClick={onClose}
-                    disabled={addSaving}
-                  >
+                  <button className="am-btn am-btn-ghost am-btn-sm" onClick={onClose} disabled={addSaving}>
                     Cancel
                   </button>
-
                   <button
                     className="am-btn am-btn-primary am-btn-sm"
                     onClick={() => setStep(2)}
@@ -1175,19 +1214,10 @@ export default function AddAssetModal({
                 </>
               ) : (
                 <>
-                  <button
-                    className="am-btn am-btn-ghost am-btn-sm"
-                    onClick={() => setStep(1)}
-                    disabled={addSaving}
-                  >
+                  <button className="am-btn am-btn-ghost am-btn-sm" onClick={() => setStep(1)} disabled={addSaving}>
                     ← Back
                   </button>
-
-                  <button
-                    className="am-btn am-btn-success am-btn-sm"
-                    onClick={handleSave}
-                    disabled={addSaving}
-                  >
+                  <button className="am-btn am-btn-success am-btn-sm" onClick={handleSave} disabled={addSaving}>
                     {addSaving ? (
                       <>
                         <div className="am-spinner" style={{ width: 13, height: 13 }} />

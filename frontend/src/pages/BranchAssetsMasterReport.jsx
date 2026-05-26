@@ -2197,9 +2197,8 @@ const activeBranchName = useMemo(
                   </div>
                 </div>
               )}
-
               <HeaderMenu/>
-              <AddAssetModal open={showAddModal} onClose={()=>setShowAddModal(false)} branches={branchOptions} groups={groups} subCats={filteredSubCats} fetchAddSubCats={fetchAddSubCats} addSaving={addSaving} onSubmit={handleAddAssetSubmit}/>
+              <AddAssetModal open={showAddModal} onClose={()=>setShowAddModal(false)} branches={branchOptions} groups={groups} subCats={filteredSubCats} fetchAddSubCats={fetchAddSubCats} employees={employees} addSaving={addSaving} onSubmit={handleAddAssetSubmit}/>
               <AssetTransferHistoryModal
                 isOpen={transferHistoryOpen}
                 onClose={()=>setTransferHistoryOpen(false)}
