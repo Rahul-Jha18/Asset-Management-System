@@ -663,12 +663,13 @@ exports.windowsServers = deviceCrud(BranchWindowsServers, true);
 
 exports.cctvs = {
   list: asyncHandler(async (req, res) => {
-    const branch = await Branch.findByPk(req.params.id);
+    const branchId = Number(req.params.id);
 
+    const branch = await Branch.findByPk(branchId);
     if (!branch) return sendError(res, "Branch not found", 404);
 
     const rows = await BranchCctv.findAll({
-      where: { branch_code: branch.branch_code },
+      where: { branchId },
       order: [["cctv_id", "ASC"]],
       include: [{ model: Camera, as: "cameras", required: false }],
     });
@@ -677,38 +678,58 @@ exports.cctvs = {
   }),
 
   create: asyncHandler(async (req, res) => {
-    const branch = await Branch.findByPk(req.params.id);
+    const branchId = Number(req.params.id);
 
+    const branch = await Branch.findByPk(branchId);
     if (!branch) return sendError(res, "Branch not found", 404);
 
-    const row = await BranchCctv.create({ branch_code: branch.branch_code, ...req.body });
+    const payload = {
+      ...req.body,
+      branchId,
+      assetId: req.body.assetId === "" ? null : req.body.assetId ?? null,
+      cctv_record_days: req.body.cctv_record_days === "" ? null : req.body.cctv_record_days,
+      channel: req.body.channel === "" ? null : req.body.channel,
+      purchase_date: req.body.purchase_date === "" ? null : req.body.purchase_date,
+    };
+
+    const row = await BranchCctv.create(payload);
 
     return sendSuccess(res, row, "Created successfully", 201);
   }),
 
   update: asyncHandler(async (req, res) => {
-    const branch = await Branch.findByPk(req.params.id);
+    const branchId = Number(req.params.id);
 
+    const branch = await Branch.findByPk(branchId);
     if (!branch) return sendError(res, "Branch not found", 404);
 
     const row = await BranchCctv.findOne({
-      where: { cctv_id: req.params.rowId, branch_code: branch.branch_code },
+      where: { cctv_id: req.params.rowId, branchId },
     });
 
     if (!row) return sendError(res, "Record not found", 404);
 
-    await row.update(req.body);
+    const payload = {
+      ...req.body,
+      assetId: req.body.assetId === "" ? null : req.body.assetId ?? null,
+      cctv_record_days: req.body.cctv_record_days === "" ? null : req.body.cctv_record_days,
+      channel: req.body.channel === "" ? null : req.body.channel,
+      purchase_date: req.body.purchase_date === "" ? null : req.body.purchase_date,
+    };
+
+    await row.update(payload);
 
     return sendSuccess(res, row, "Updated successfully");
   }),
 
   remove: asyncHandler(async (req, res) => {
-    const branch = await Branch.findByPk(req.params.id);
+    const branchId = Number(req.params.id);
 
+    const branch = await Branch.findByPk(branchId);
     if (!branch) return sendError(res, "Branch not found", 404);
 
     const row = await BranchCctv.findOne({
-      where: { cctv_id: req.params.rowId, branch_code: branch.branch_code },
+      where: { cctv_id: req.params.rowId, branchId },
     });
 
     if (!row) return sendError(res, "Record not found", 404);
@@ -733,29 +754,28 @@ exports.cameras = {
   }),
 
   create: asyncHandler(async (req, res) => {
-    const { cctvId } = req.params;
+    const cctvId = Number(req.params.cctvId);
 
     const cctv = await BranchCctv.findByPk(cctvId);
-
     if (!cctv) return sendError(res, "CCTV not found", 404);
 
     const camera = await Camera.create({
-      cctv_asset_id: cctv.assetId,
       ...req.body,
+      cctv_id: cctvId,
     });
 
     return sendSuccess(res, camera, "Camera created successfully", 201);
   }),
 
   update: asyncHandler(async (req, res) => {
-    const { cctvId, cameraId } = req.params;
+    const cctvId = Number(req.params.cctvId);
+    const cameraId = Number(req.params.cameraId);
 
     const cctv = await BranchCctv.findByPk(cctvId);
-
     if (!cctv) return sendError(res, "CCTV not found", 404);
 
     const camera = await Camera.findOne({
-      where: { id: cameraId, cctv_asset_id: cctv.assetId },
+      where: { id: cameraId, cctv_id: cctvId },
     });
 
     if (!camera) return sendError(res, "Camera not found", 404);
@@ -766,14 +786,14 @@ exports.cameras = {
   }),
 
   remove: asyncHandler(async (req, res) => {
-    const { cctvId, cameraId } = req.params;
+    const cctvId = Number(req.params.cctvId);
+    const cameraId = Number(req.params.cameraId);
 
     const cctv = await BranchCctv.findByPk(cctvId);
-
     if (!cctv) return sendError(res, "CCTV not found", 404);
 
     const camera = await Camera.findOne({
-      where: { id: cameraId, cctv_asset_id: cctv.assetId },
+      where: { id: cameraId, cctv_id: cctvId },
     });
 
     if (!camera) return sendError(res, "Camera not found", 404);

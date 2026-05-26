@@ -185,14 +185,14 @@ if (Branch && BranchCctv && !Branch.associations?.cctvs) {
 
 if (BranchCctv && Camera && !BranchCctv.associations?.cameras) {
   BranchCctv.hasMany(Camera, {
-    foreignKey: "cctv_asset_id",
-    sourceKey: "assetId",
+    foreignKey: "cctv_id",
+    sourceKey: "cctv_id",
     as: "cameras",
   });
 
   Camera.belongsTo(BranchCctv, {
-    foreignKey: "cctv_asset_id",
-    targetKey: "assetId",
+    foreignKey: "cctv_id",
+    targetKey: "cctv_id",
     as: "cctv",
   });
 }

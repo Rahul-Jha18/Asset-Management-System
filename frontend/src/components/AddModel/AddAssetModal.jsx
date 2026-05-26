@@ -215,6 +215,17 @@ const MODAL_STYLES = `
   }
 `;
 
+const BRAND_OPTIONS = ["Dell", "Lenovo", "HP", "Acer"];
+
+const isBrandDropdownKey = (section, key) => {
+  const s = String(section || "").toLowerCase();
+
+  return (
+    (s === "desktop" && ["desktop_brand", "monitor_brand"].includes(key)) ||
+    (s === "extra_monitor" && key === "monitor_brand")
+  );
+};
+
 const SECTION_ALL_FIELDS = {
   desktop: [
     "assetId","sub_category_code","desktop_brand","userName","desktop_ids",
@@ -226,13 +237,9 @@ const SECTION_ALL_FIELDS = {
   ],
 
   qr_desktop_computer: [
-    "assetId","sub_category_code","desktop_brand","userName","desktop_ids",
-    "desktop_ram","system_model","desktop_ssd","desktop_processor","window_version","window_gen",
-    "location","ip_address","status","expiry_date",
-    "monitor_name","monitor_asset_code","monitor_brand","monitor_size","monitor_location",
-    "monitor_status",
-    "remarks",
-  ],
+  "assetId",
+  "sub_category_code",
+],
 
   laptop: [
     "assetId","sub_category_code","laptop_brand","name","laptop_user",
@@ -418,11 +425,11 @@ const isReadOnly = (k) => k === "sub_category_code";
 
 // ── Which field keys represent "Assigned User" across all sections ──
 const ASSIGNED_USER_KEYS = new Set([
-  "userName",       // desktop, qr_desktop_computer
-  "laptop_user",    // laptop
-  "assigned_user",  // printer, scanner, panel (alt), ipphone, switch, extra_monitor, ups, inverter
-  "panel_user",     // panel
-  "assigned_to",    // application_software, office_software, licenses, online_conference_tools
+  "userName",      
+  "laptop_user",   
+  "assigned_user",  
+  "panel_user",     
+  "assigned_to",    
 ]);
 const isAssignedUserKey = (k) => ASSIGNED_USER_KEYS.has(k);
 
@@ -469,7 +476,7 @@ const niceLabel = (k) =>
 
 const sectionDisplayName = (section) => {
   const s = String(section || "").trim().toLowerCase();
-  if (s === "qr_desktop_computer") return "QR Desktop Computer";
+  if (s === "qr_desktop_computer") return "QR Monitor";
   if (s === "desktop") return "Desktop";
   if (s === "extra_monitor") return "Extra Monitor";
   if (s === "firewall_router") return "Firewall / Router";
@@ -495,12 +502,11 @@ const SECTION_GROUPS = {
     { label:"Notes",            keys:["remarks"] },
   ],
   qr_desktop_computer: [
-    { label:"QR Desktop Info",  keys:["assetId","sub_category_code","desktop_brand","userName","desktop_ids"] },
-    { label:"Specifications",   keys:["desktop_ram","system_model","desktop_ssd","desktop_processor","window_version","window_gen"] },
-    { label:"Network & Status", keys:["location","ip_address","status","expiry_date"] },
-    { label:"Monitor",          keys:["monitor_name","monitor_asset_code","monitor_brand","monitor_size","monitor_location","monitor_status"] },
-    { label:"Notes",            keys:["remarks"] },
-  ],
+    {
+      label: "QR Monitor Info",
+      keys: ["assetId", "sub_category_code"],
+    },
+  ], 
   laptop: [
     { label:"Device Info",      keys:["assetId","sub_category_code","laptop_brand","name","laptop_user"] },
     { label:"Specifications",   keys:["laptop_ram","laptop_ssd","laptop_processor"] },
@@ -866,6 +872,7 @@ export default function AddAssetModal({
     const wide     = isFullWidthKey(k);
     const readOnly = isReadOnly(k);
     const isUser   = isAssignedUserKey(k);
+    const isBrandDropdown = isBrandDropdownKey(section, k);
 
     /* read-only badge */
     if (readOnly) {
@@ -884,6 +891,28 @@ export default function AddAssetModal({
         </div>
       );
     }
+
+    if (isBrandDropdown) {
+  return (
+    <div key={k} className={`am-field-card${wide ? " full-width" : ""}`}>
+      <label className="am-label">{niceLabel(k)}</label>
+
+      <select
+        className="am-select"
+        name={k}
+        value={form?.[k] ?? ""}
+        onChange={onChange}
+      >
+        <option value="">— Select Brand —</option>
+        {BRAND_OPTIONS.map((brand) => (
+          <option key={brand} value={brand}>
+            {brand}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
     /* ── Assigned-user searchable dropdown ── */
     if (isUser) {

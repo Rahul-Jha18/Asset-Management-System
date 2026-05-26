@@ -218,7 +218,7 @@ const BranchCctv = sequelize.define(
   {
     cctv_id:           { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     branchId:          { type: DataTypes.INTEGER, allowNull: false },
-    assetId:           { type: DataTypes.STRING(50), allowNull: false },
+    assetId:           { type: DataTypes.STRING(50), allowNull: true },
     sub_category_code: { type: DataTypes.STRING(5), allowNull: true },
     cctv_brand:        { type: DataTypes.STRING, allowNull: true },
     cctv_nvr_ip:       { type: DataTypes.STRING, allowNull: true },
@@ -236,12 +236,12 @@ const BranchCctv = sequelize.define(
 const Camera = sequelize.define(
   "Camera",
   {
-    id:            { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    cctv_asset_id: { type: DataTypes.STRING(50), allowNull: false },
-    camera_model:  { type: DataTypes.STRING, allowNull: true },
-    location:      { type: DataTypes.STRING, allowNull: true },
-    cctv_status:   { type: DataTypes.ENUM("On","Off","Repair"), defaultValue: "On" },
-    remarks:       { type: DataTypes.TEXT, allowNull: true },
+    id:           { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    cctv_id:      { type: DataTypes.INTEGER, allowNull: false },
+    camera_model: { type: DataTypes.STRING, allowNull: true },
+    location:     { type: DataTypes.STRING, allowNull: true },
+    cctv_status:  { type: DataTypes.ENUM("On","Off","Repair"), defaultValue: "On" },
+    remarks:      { type: DataTypes.TEXT, allowNull: true },
   },
   { tableName: "camera", timestamps: false }
 );
