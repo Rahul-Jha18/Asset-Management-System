@@ -44,6 +44,13 @@ const authorizeBranchAccess = asyncHandler(async (req, res, next) => {
 router.get("/with-assets/all", protect, branchController.getBranchesWithAssets);
 router.get("/all", protect, branchController.getAllBranches);
 
+// Camera routes must stay BEFORE router.use("/:id", ...).
+// Otherwise /cctvs/:cctvId/cameras is wrongly treated as branch id = "cctvs".
+router.get("/cctvs/:cctvId/cameras", protect, branchController.cameras.list);
+router.post("/cctvs/:cctvId/cameras", protect, adminOrSubadmin, branchController.cameras.create);
+router.put("/cctvs/:cctvId/cameras/:cameraId", protect, adminOrSubadmin, branchController.cameras.update);
+router.delete("/cctvs/:cctvId/cameras/:cameraId", protect, adminOrSubadmin, branchController.cameras.remove);
+
 router.use("/:id", protect, authorizeBranchAccess);
 
 router.get("/:id/assets-summary", protect, branchController.getBranchAssetsSummary);
@@ -132,10 +139,11 @@ router.post("/:id/cctvs", protect, adminOrSubadmin, branchController.cctvs.creat
 router.put("/:id/cctvs/:rowId", protect, adminOrSubadmin, branchController.cctvs.update);
 router.delete("/:id/cctvs/:rowId", protect, adminOrSubadmin, branchController.cctvs.remove);
 
-router.get("/cctvs/:cctvId/cameras", protect, branchController.cameras.list);
-router.post("/cctvs/:cctvId/cameras", protect, adminOrSubadmin, branchController.cameras.create);
-router.put("/cctvs/:cctvId/cameras/:cameraId", protect, adminOrSubadmin, branchController.cameras.update);
-router.delete("/cctvs/:cctvId/cameras/:cameraId", protect, adminOrSubadmin, branchController.cameras.remove);
+// Nested camera aliases. These also work when caller already has branch id.
+router.get("/:id/cctvs/:cctvId/cameras", protect, branchController.cameras.list);
+router.post("/:id/cctvs/:cctvId/cameras", protect, adminOrSubadmin, branchController.cameras.create);
+router.put("/:id/cctvs/:cctvId/cameras/:cameraId", protect, adminOrSubadmin, branchController.cameras.update);
+router.delete("/:id/cctvs/:cctvId/cameras/:cameraId", protect, adminOrSubadmin, branchController.cameras.remove);
 
 router.get("/:id/panels", protect, branchController.panels.list);
 router.post("/:id/panels", protect, adminOrSubadmin, branchController.panels.create);

@@ -362,9 +362,28 @@ const getAssignedUser = (section, rawObj) => {
   }
 };
 
+const sectionDisplayName = (section) => {
+  const s = String(section || "").trim().toLowerCase();
+  if (s === "qr_desktop_computer") return "QR Monitor";
+  if (s === "desktop") return "Desktop";
+  if (s === "extra_monitor") return "Extra Monitor";
+  if (s === "firewall_router") return "Firewall / Router";
+  if (s === "application_software") return "Application Software";
+  if (s === "office_software") return "Office Software";
+  if (s === "utility_software") return "Utility Software";
+  if (s === "security_software") return "Security Software";
+  if (s === "security_software_installed") return "Security Software Installed";
+  if (s === "windows_os") return "Windows OS";
+  if (s === "windows_servers") return "Windows Servers";
+  if (s === "online_conference_tools") return "Online Conference Tools";
+  return String(section || "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (m) => m.toUpperCase());
+};
+
 // ─── mapToExcelRow ────────────────────────────────────────────────────────────
 const mapToExcelRow = (section, d, branchName) => {
-  const base = { Section:section, Branch:branchName, "Asset Code":d?.assetId||d?.asset_id||"", "Sub-Cat Code":d?.sub_category_code||"", Remarks:d?.remarks||"" };
+  const base = { Section:sectionDisplayName(section), Branch:branchName, "Asset Code":d?.assetId||d?.asset_id||"", "Sub-Cat Code":d?.sub_category_code||"", Remarks:d?.remarks||"" };
   switch (section) {
     case "switch": return {...base,"Asset Name":d?.asset_name||"","Model":d?.model||"","Type":d?.type||"","Brand":d?.brand||"","Location":d?.location||"","Port":d?.port||"","Assigned User":d?.assigned_user||""};
     case "inverter":
@@ -829,7 +848,7 @@ const sectionRouteMap = {
 // ─── SECTION_ICONS ────────────────────────────────────────────────────────────
 const SECTION_ICONS = {
   desktop:"🖥",qr_desktop_computer:"🖥️",extra_monitor:"🖥",laptop:"💻",printer:"🖨",scanner:"📠",projector:"📽",panel:"📺",
-  ipphone:"📞",cctv:"📹",server:"🖧",firewall_router:"🔒",connectivity:"🌐",ups:"🔋",inverter:"🔌",switch:"🔀",
+  ipphone:"📞",cctv:"📹",camera:"📷",server:"🖧",firewall_router:"🔒",connectivity:"🌐",ups:"🔋",inverter:"🔌",switch:"🔀",
   application_software:"💾",office_software:"📋",utility_software:"🔧",
   security_software:"🛡",security_software_installed:"🔐",
   services:"🔩",licenses:"🪪",windows_os:"🪟",windows_servers:"🏗",
@@ -953,7 +972,7 @@ function InactiveAssetsSection({rows,onViewAsset}) {
             </div>
             <select value={sectionFilter} onChange={e=>{setSectionFilter(e.target.value);setPage(1);}} className="rpt-select" style={{width:"auto",minWidth:130}}>
               <option value="">All Sections</option>
-              {sectionOptions.map(s=><option key={s} value={s}>{SECTION_ICONS[s]||""} {s}</option>)}
+              {sectionOptions.map(s=><option key={s} value={s}>{SECTION_ICONS[s]||""} {sectionDisplayName(s)}</option>)}
             </select>
             <select value={branchFilter} onChange={e=>{setBranchFilter(e.target.value);setPage(1);}} className="rpt-select" style={{width:"auto",minWidth:150}}>
               <option value="">All Branches</option>
@@ -974,7 +993,7 @@ function InactiveAssetsSection({rows,onViewAsset}) {
                     <div style={{display:"flex",alignItems:"center",gap:8,flex:1,minWidth:0}}>
                       <span style={{fontSize:18,flexShrink:0}}>{SECTION_ICONS[r.section]||"📦"}</span>
                       <div style={{minWidth:0}}>
-                        <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"var(--text-sm)",color:"var(--gray-900)",textTransform:"uppercase"}}>{r.section}</div>
+                        <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"var(--text-sm)",color:"var(--gray-900)",textTransform:"uppercase"}}>{sectionDisplayName(r.section)}</div>
                         <div style={{fontSize:"var(--text-xs)",color:"var(--gray-400)",fontFamily:"Outfit,sans-serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.assetId||"No Code"}</div>
                       </div>
                     </div>
@@ -1086,6 +1105,8 @@ const [employeesLoading, setEmployeesLoading] = useState(false);
   const [importing,setImporting] = useState(false);
   const [showAddModal,setShowAddModal] = useState(false);
   const [addSaving,setAddSaving] = useState(false);
+  const [cameraForm,setCameraForm] = useState({ camera_model: "", location: "", cctv_status: "On", remarks: "" });
+  const [cameraSaving,setCameraSaving] = useState(false);
   const [addGroupId,setAddGroupId] = useState("");
   const [assignedUserFilter,setAssignedUserFilter] = useState("");
   const [headerMenu,setHeaderMenu] = useState(null);
@@ -1225,13 +1246,76 @@ const activeBranchName = useMemo(
     if (!cfg?.plural){setAlert({type:"error",title:"Add Asset",message:`No route for section: ${section}`});return;}
     try {
       setAddSaving(true);
-      await api.post(`/api/branches/${branchId}/${cfg.plural}`,payload,{headers:{Authorization:`Bearer ${token}`}});
-      setAlert({type:"success",title:"Success",message:"Asset added!"});
+
+      const cameras = Array.isArray(payload?.cameras) ? payload.cameras : [];
+      const assetPayload = { ...payload };
+      delete assetPayload.cameras;
+
+      const created = await api.post(`/api/branches/${branchId}/${cfg.plural}`,assetPayload,{headers:{Authorization:`Bearer ${token}`}});
+
+      const createdData = created?.data?.data || created?.data || {};
+      const cctvId = createdData?.cctv_id || createdData?.id;
+
+      if (String(section||"").toLowerCase()==="cctv" && cctvId && cameras.length>0) {
+        await Promise.all(cameras.map((cam)=>
+          api.post(`/api/branches/cctvs/${cctvId}/cameras`, cam, {headers:{Authorization:`Bearer ${token}`}})
+        ));
+      }
+
+      setAlert({type:"success",title:"Success",message:String(section||"").toLowerCase()==="cctv"&&cameras.length>0?`CCTV and ${cameras.length} camera(s) added!`:"Asset added!"});
       setShowAddModal(false);
       await fetchAll();
     } catch(err){setAlert({type:"error",title:"Add Asset Failed",message:err?.response?.data?.message||err?.message||"Failed"});}
     finally{setAddSaving(false);}
   },[token,fetchAll]);
+
+  const handleAddCamera = useCallback(async()=>{
+    if (!token || detailRow?.section !== "cctv") return;
+
+    const cctvId = detailRow?.details?.cctv_id || detailRow?.details?.id;
+    if (!cctvId) {
+      setAlert({type:"error",title:"Camera",message:"CCTV ID missing. Please refresh and try again."});
+      return;
+    }
+
+    if (!String(cameraForm.camera_model || "").trim() && !String(cameraForm.location || "").trim()) {
+      setAlert({type:"error",title:"Camera",message:"Please enter at least Camera Model or Location."});
+      return;
+    }
+
+    try {
+      setCameraSaving(true);
+      const payload = {
+        camera_model: cameraForm.camera_model || null,
+        location: cameraForm.location || null,
+        cctv_status: cameraForm.cctv_status || "On",
+        remarks: cameraForm.remarks || null,
+      };
+
+      const created = await api.post(`/api/branches/cctvs/${cctvId}/cameras`, payload, {headers:{Authorization:`Bearer ${token}`}});
+      const createdCamera = created?.data?.data || created?.data;
+
+      setDetailRow((prev)=>{
+        if (!prev) return prev;
+        const oldCameras = Array.isArray(prev.details?.cameras) ? prev.details.cameras : [];
+        return {
+          ...prev,
+          details: {
+            ...prev.details,
+            cameras: [...oldCameras, createdCamera],
+          },
+        };
+      });
+
+      setCameraForm({ camera_model: "", location: "", cctv_status: "On", remarks: "" });
+      setAlert({type:"success",title:"Camera",message:"Camera added successfully."});
+      await fetchAll();
+    } catch(err){
+      setAlert({type:"error",title:"Camera Add Failed",message:err?.response?.data?.message||err?.message||"Failed to add camera"});
+    } finally {
+      setCameraSaving(false);
+    }
+  },[token,detailRow,cameraForm,fetchAll]);
 
   const reportRows = useMemo(
   () => sortByDeviceId(toReportRows(roleFilteredBranches, subCatMap, groupMap)),
@@ -1669,7 +1753,7 @@ const activeBranchName = useMemo(
                     <span className="chip" style={{background:"var(--green-50)",color:"var(--green-700)",border:"1px solid var(--green-200)"}}>✅ {statusCounts.Active} Active</span>
                     <span className="chip" style={{background:"var(--red-50)",color:"var(--red-600)",border:"1px solid var(--red-100)"}}>⚠ {statusCounts.Inactive+statusCounts.Repair} Issues</span>
                     {branchFilter&&(<span className="active-filter-chip">🏢 {activeBranchName}<button onClick={()=>{setBranchFilter("");navigate("/branch-assets-report");}}>×</button></span>)}
-                    {sectionFilter&&(<span className="active-filter-chip" style={{background:"var(--purple-600)"}}>{SECTION_ICONS[sectionFilter]||"📦"} {sectionFilter}<button onClick={()=>setSectionFilter("")}>×</button></span>)}
+                    {sectionFilter&&(<span className="active-filter-chip" style={{background:"var(--purple-600)"}}>{SECTION_ICONS[sectionFilter]||"📦"} {sectionDisplayName(sectionFilter)}<button onClick={()=>setSectionFilter("")}>×</button></span>)}
                     {statusFilter&&(<span className="active-filter-chip" style={{background:"var(--green-600)"}}>● {statusFilter}<button onClick={()=>setStatusFilter("")}>×</button></span>)}
                     {assignedUserFilter&&(<span className="active-filter-chip" style={{background:"#7c3aed"}}>👤 {assignedUserFilter}<button onClick={()=>setAssignedUserFilter("")}>×</button></span>)}
                     {activeFiltersCount>0&&(<button onClick={clearFilters} style={{padding:"3px 9px",borderRadius:999,fontSize:"var(--text-xs)",fontWeight:700,background:"var(--red-50)",border:"1.5px solid var(--red-100)",color:"var(--red-600)",cursor:"pointer",fontFamily:"Outfit,sans-serif"}}>Clear All</button>)}
@@ -1828,7 +1912,7 @@ const activeBranchName = useMemo(
                             <td style={{color:"var(--gray-400)",fontWeight:600,fontFamily:"Outfit,sans-serif",fontSize:"var(--text-xs)"}} onClick={e=>e.stopPropagation()}>{globalIndex}</td>
                             <td onClick={e=>e.stopPropagation()}>
                               <div>
-                                <div style={{fontWeight:700,color:"var(--gray-900)",fontSize:"var(--text-sm)",fontFamily:"Outfit,sans-serif",textTransform:"uppercase"}}>{show(r.section)}</div>
+                                <div style={{fontWeight:700,color:"var(--gray-900)",fontSize:"var(--text-sm)",fontFamily:"Outfit,sans-serif",textTransform:"uppercase"}}>{sectionDisplayName(r.section)}</div>
                                 <div style={{fontSize:"var(--text-xs)",color:"var(--gray-400)",marginTop:1,display:"flex",alignItems:"center",gap:4}}>
                                   {show(r.assetId)}{r.assetId&&r.assetId!=="N/A"&&(<button onClick={e=>{e.stopPropagation();copyToClipboard(r.assetId);}} style={{background:"none",border:"none",cursor:"pointer",opacity:0.35,padding:"1px 3px",fontSize:10,borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.35"}>📋</button>)}
                                 </div>
@@ -1886,7 +1970,7 @@ const activeBranchName = useMemo(
                             </div>
                           </div>
                           <div style={{display:"flex",flexWrap:"wrap",gap:5,alignItems:"center"}}>
-                            <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.18)",fontSize:"var(--text-xs)",fontWeight:700,color:"white"}}>{show(detailRow?.section)}</span>
+                            <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.18)",fontSize:"var(--text-xs)",fontWeight:700,color:"white"}}>{sectionDisplayName(detailRow?.section)}</span>
                             <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.85)"}}>{show(detailRow?.subCategoryCode)}</span>
                             <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.85)"}}>🏢 {show(detailRow?.branch)}</span>
                             {detailRow?.assignedUser&&<span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.8)"}}>👤 {detailRow.assignedUser}</span>}
@@ -1908,7 +1992,7 @@ const activeBranchName = useMemo(
                         <button className={`detail-tab${detailTab==="info"?" active":""}`} onClick={()=>setDetailTab("info")}><span>📋</span><span className="tab-label">Information</span></button>
                         {canEdit1&&(<button className={`detail-tab${detailTab==="edit"?" active":""}`} onClick={handleOpenEdit}><span>✏️</span><span className="tab-label">Edit</span></button>)}
                         {canTransfer&&(<button className={`detail-tab${detailTab==="transfer"?" active":""}`} onClick={()=>{setDetailTab("transfer");resetTransferState();}}><span>🔄</span><span className="tab-label">Transfer</span></button>)}
-                        {detailRow?.section==="cctv"&&detailRow?.details?.cameras?.length>0&&(<button className={`detail-tab${detailTab==="cameras"?" active":""}`} onClick={()=>setDetailTab("cameras")}><span>📹</span><span className="tab-label">Cameras ({detailRow.details.cameras.length})</span></button>)}
+                        {detailRow?.section==="cctv"&&(<button className={`detail-tab${detailTab==="cameras"?" active":""}`} onClick={()=>setDetailTab("cameras")}><span>📹</span><span className="tab-label">Cameras ({detailRow.details?.cameras?.length || 0})</span></button>)}
                       </div>
                     </div>
 
@@ -1921,7 +2005,7 @@ const activeBranchName = useMemo(
                               {icon:"🏢",label:"Branch",value:show(detailRow?.branch),sub:`Updated: ${formatUpdated(detailRow?.lastUpdated)}`,accent:NL_BLUE},
                               {icon:"🗂",label:"Category / Sub",value:show(detailRow?.categoryId),sub:`${show(detailRow?.subCategoryName)} · ${show(detailRow?.subCategoryCode)}`,accent:"#7c3aed"},
                               {icon:"⚙️",label:"Model / Info",value:show(detailRow?.model),sub:`Year: ${show(detailRow?.purchaseYear)}`,accent:NL_BLUE2},
-                              {icon:"👤",label:"Assigned User",value:detailRow?.assignedUser||"Unassigned",sub:`Section: ${show(detailRow?.section)}`,accent:NL_RED},
+                              {icon:"👤",label:"Assigned User",value:detailRow?.assignedUser||"Unassigned",sub:`Section: ${sectionDisplayName(detailRow?.section)}`,accent:NL_RED},
                             ].map((card,i)=>(
                               <div key={i} className="ar-info-card">
                                 <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:7}}>
@@ -2145,52 +2229,87 @@ const activeBranchName = useMemo(
                       )}
 
                       {/* CAMERAS */}
-                      {detailTab==="cameras"&&detailRow?.section==="cctv"&&detailRow?.details?.cameras&&(
+                      {detailTab==="cameras"&&detailRow?.section==="cctv"&&(
                         <div>
-                          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"clamp(12px,1.5vw,17px)",flexWrap:"wrap",gap:8}}>
-                            <div>
-                              <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.5vw,15px)",color:"var(--gray-800)",display:"flex",alignItems:"center",gap:7}}>
-                                📹 CCTV Cameras
-                                <span style={{background:NL_BLUE,color:"white",borderRadius:999,padding:"1px 8px",fontSize:12,fontWeight:700}}>{detailRow.details.cameras.length}</span>
-                              </div>
-                              <div style={{fontSize:"var(--text-sm)",color:"var(--gray-500)",marginTop:2}}>NVR: {detailRow.assetId} · {detailRow.branch}</div>
-                            </div>
-                            <div style={{display:"flex",gap:7}}>
-                              <span style={{padding:"4px 11px",borderRadius:999,background:"var(--green-50)",color:"var(--green-700)",border:"1px solid var(--green-200)",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Outfit,sans-serif"}}>{detailRow.details.cameras.filter(c=>c.cctv_status==="On").length} Online</span>
-                              <span style={{padding:"4px 11px",borderRadius:999,background:"var(--red-50)",color:"var(--red-600)",border:"1px solid var(--red-100)",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Outfit,sans-serif"}}>{detailRow.details.cameras.filter(c=>c.cctv_status!=="On").length} Offline</span>
-                            </div>
-                          </div>
-                          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(clamp(180px,20vw,230px),1fr))",gap:"clamp(11px,1.5vw,15px)"}}>
-                            {detailRow.details.cameras.map((camera,idx)=>{
-                              const isOn=camera.cctv_status==="On";
-                              return (
-                                <div key={camera.id||idx} className="camera-card">
-                                  <div className="camera-card-header" style={{background:isOn?"var(--green-50)":"var(--gray-50)"}}>
-                                    <div style={{display:"flex",alignItems:"center",gap:9}}>
-                                      <div className="camera-icon" style={{background:isOn?NL_GRADIENT:"var(--gray-300)"}}>{idx+1}</div>
-                                      <div>
-                                        <div style={{fontSize:"var(--text-sm)",fontWeight:700,color:"var(--gray-800)"}}>Camera {idx+1}</div>
-                                        <div style={{fontSize:"var(--text-xs)",color:"var(--gray-500)"}}>ID: {camera.id||"N/A"}</div>
-                                      </div>
+                          {(() => {
+                            const cameras = Array.isArray(detailRow?.details?.cameras) ? detailRow.details.cameras : [];
+                            return (
+                              <>
+                                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"clamp(12px,1.5vw,17px)",flexWrap:"wrap",gap:8}}>
+                                  <div>
+                                    <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.5vw,15px)",color:"var(--gray-800)",display:"flex",alignItems:"center",gap:7}}>
+                                      📹 CCTV Cameras
+                                      <span style={{background:NL_BLUE,color:"white",borderRadius:999,padding:"1px 8px",fontSize:12,fontWeight:700}}>{cameras.length}</span>
                                     </div>
-                                    <span className={`ar-status ${isOn?"ar-status-active":"ar-status-inactive"}`}>{camera.cctv_status||"Unknown"}</span>
+                                    <div style={{fontSize:"var(--text-sm)",color:"var(--gray-500)",marginTop:2}}>NVR: {detailRow.assetId || "N/A"} · {detailRow.branch}</div>
                                   </div>
-                                  <div style={{padding:"clamp(10px,1.3vw,14px)",display:"flex",flexDirection:"column",gap:7}}>
-                                    {[{icon:"📷",label:"Model",val:camera.camera_model},{icon:"📍",label:"Location",val:camera.location}].map(({icon,label,val})=>(
-                                      <div key={label} style={{padding:"7px 9px",background:"var(--gray-50)",border:"1px solid var(--gray-200)",borderRadius:8,display:"flex",gap:7,alignItems:"flex-start"}}>
-                                        <span style={{fontSize:13,flexShrink:0}}>{icon}</span>
-                                        <div>
-                                          <div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",marginBottom:1}}>{label}</div>
-                                          <div style={{fontSize:"var(--text-sm)",fontWeight:600,color:"var(--gray-700)"}}>{val||"Not specified"}</div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                    {camera.remarks&&<div style={{padding:"7px 9px",background:"var(--amber-50)",border:"1px solid var(--amber-100)",borderRadius:8,fontSize:"var(--text-xs)",color:"var(--amber-700)",fontStyle:"italic"}}>💬 {camera.remarks}</div>}
+                                  <div style={{display:"flex",gap:7}}>
+                                    <span style={{padding:"4px 11px",borderRadius:999,background:"var(--green-50)",color:"var(--green-700)",border:"1px solid var(--green-200)",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Outfit,sans-serif"}}>{cameras.filter(c=>c.cctv_status==="On").length} Online</span>
+                                    <span style={{padding:"4px 11px",borderRadius:999,background:"var(--red-50)",color:"var(--red-600)",border:"1px solid var(--red-100)",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Outfit,sans-serif"}}>{cameras.filter(c=>c.cctv_status!=="On").length} Offline</span>
                                   </div>
                                 </div>
-                              );
-                            })}
-                          </div>
+
+                                {canEdit1 && (
+                                  <div style={{background:"white",border:"1.5px solid var(--blue-200)",borderRadius:14,padding:"clamp(12px,1.5vw,16px)",marginBottom:16}}>
+                                    <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"var(--text-sm)",color:"var(--gray-800)",marginBottom:10}}>+ Add Camera to this CCTV</div>
+                                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:10}}>
+                                      <input className="rpt-input" type="text" value={cameraForm.camera_model} onChange={e=>setCameraForm(p=>({...p,camera_model:e.target.value}))} placeholder="Camera model" disabled={cameraSaving}/>
+                                      <input className="rpt-input" type="text" value={cameraForm.location} onChange={e=>setCameraForm(p=>({...p,location:e.target.value}))} placeholder="Location" disabled={cameraSaving}/>
+                                      <select className="rpt-select" value={cameraForm.cctv_status} onChange={e=>setCameraForm(p=>({...p,cctv_status:e.target.value}))} disabled={cameraSaving}>
+                                        <option value="On">On</option>
+                                        <option value="Off">Off</option>
+                                        <option value="Repair">Repair</option>
+                                      </select>
+                                      <input className="rpt-input" type="text" value={cameraForm.remarks} onChange={e=>setCameraForm(p=>({...p,remarks:e.target.value}))} placeholder="Remarks" disabled={cameraSaving}/>
+                                    </div>
+                                    <div style={{display:"flex",justifyContent:"flex-end",marginTop:10}}>
+                                      <button className="ar-btn ar-btn-success ar-btn-sm" onClick={handleAddCamera} disabled={cameraSaving}>{cameraSaving?"Saving...":"+ Add Camera"}</button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {cameras.length===0 ? (
+                                  <div className="ar-empty" style={{padding:"30px 20px"}}>
+                                    <div style={{fontSize:34}}>📷</div>
+                                    <div style={{fontWeight:800,color:"var(--gray-700)",fontFamily:"Outfit,sans-serif"}}>No cameras added yet</div>
+                                    <div style={{fontSize:"var(--text-sm)",color:"var(--gray-400)"}}>Use the form above to add cameras under this CCTV/NVR.</div>
+                                  </div>
+                                ) : (
+                                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(clamp(180px,20vw,230px),1fr))",gap:"clamp(11px,1.5vw,15px)"}}>
+                                    {cameras.map((camera,idx)=>{
+                                      const isOn=camera.cctv_status==="On";
+                                      return (
+                                        <div key={camera.id||idx} className="camera-card">
+                                          <div className="camera-card-header" style={{background:isOn?"var(--green-50)":"var(--gray-50)"}}>
+                                            <div style={{display:"flex",alignItems:"center",gap:9}}>
+                                              <div className="camera-icon" style={{background:isOn?NL_GRADIENT:"var(--gray-300)"}}>{idx+1}</div>
+                                              <div>
+                                                <div style={{fontSize:"var(--text-sm)",fontWeight:700,color:"var(--gray-800)"}}>Camera {idx+1}</div>
+                                                <div style={{fontSize:"var(--text-xs)",color:"var(--gray-500)"}}>ID: {camera.id||"N/A"}</div>
+                                              </div>
+                                            </div>
+                                            <span className={`ar-status ${isOn?"ar-status-active":"ar-status-inactive"}`}>{camera.cctv_status||"Unknown"}</span>
+                                          </div>
+                                          <div style={{padding:"clamp(10px,1.3vw,14px)",display:"flex",flexDirection:"column",gap:7}}>
+                                            {[{icon:"📷",label:"Model",val:camera.camera_model},{icon:"📍",label:"Location",val:camera.location}].map(({icon,label,val})=>(
+                                              <div key={label} style={{padding:"7px 9px",background:"var(--gray-50)",border:"1px solid var(--gray-200)",borderRadius:8,display:"flex",gap:7,alignItems:"flex-start"}}>
+                                                <span style={{fontSize:13,flexShrink:0}}>{icon}</span>
+                                                <div>
+                                                  <div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",marginBottom:1}}>{label}</div>
+                                                  <div style={{fontSize:"var(--text-sm)",fontWeight:600,color:"var(--gray-700)"}}>{val||"Not specified"}</div>
+                                                </div>
+                                              </div>
+                                            ))}
+                                            {camera.remarks&&<div style={{padding:"7px 9px",background:"var(--amber-50)",border:"1px solid var(--amber-100)",borderRadius:8,fontSize:"var(--text-xs)",color:"var(--amber-700)",fontStyle:"italic"}}>💬 {camera.remarks}</div>}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>

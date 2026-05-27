@@ -18,7 +18,6 @@ const EXCEL_HEADERS = {
     "Monitor Brand",
     "Monitor Size",
     "Monitor Location",
-    "Windows Gen",
     "Monitor Purchase Year",
     "Monitor Status",
     "Status",

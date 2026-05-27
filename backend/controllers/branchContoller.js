@@ -282,7 +282,7 @@ exports.getBranchAssetsSummary = asyncHandler(async (req, res) => {
     BranchWindowsOS.count({ where: { branchId } }),
     BranchOnlineConferenceTools.count({ where: { branchId } }),
     BranchWindowsServers.count({ where: { branchId } }),
-    BranchCctv.count({ where: { branch_code: branch.branch_code } }),
+    BranchCctv.count({ where: { branchId } }),
     BranchConnectivity.count({ where: { branchId } }),
     BranchUps.count({ where: { branchId } }),
     Inverter.count({ where: { branchId } }),

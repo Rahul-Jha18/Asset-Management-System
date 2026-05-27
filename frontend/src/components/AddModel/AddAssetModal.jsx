@@ -3,6 +3,9 @@ import React, { useMemo, useState, useEffect } from "react";
 
 const safeArray = (v) => (!v ? [] : Array.isArray(v) ? v : [v]);
 
+const isCameraSubCode = (code) =>
+  ["CR", "CM", "CAM", "CAMERA"].includes(String(code || "").trim().toUpperCase());
+
 /* ─── Google Fonts ─── */
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');`;
 
@@ -207,11 +210,27 @@ const MODAL_STYLES = `
   }
   .am-emp-empty { padding:14px 13px; font-size:12px; color:var(--gray-400); font-family:'Outfit',sans-serif; text-align:center; }
 
+  /* ── Camera Card ── */
+  .am-camera-card {
+    background:white; border:1.5px solid var(--blue-100);
+    border-radius:var(--radius-lg); padding:14px 16px;
+    margin-bottom:10px; position:relative; overflow:hidden;
+    animation:am-slideUp 0.2s ease both;
+  }
+  .am-camera-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:${NL_GRADIENT};
+  }
+  .am-camera-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:10px; margin-top:10px;
+  }
+
   @media(max-width:640px) {
     .am-body { padding:14px 16px; }
     .am-header { padding:16px 18px; }
     .am-footer { padding:10px 18px; }
     .am-field-grid { grid-template-columns:1fr; }
+    .am-camera-grid { grid-template-columns:1fr; }
   }
 `;
 
@@ -219,7 +238,6 @@ const BRAND_OPTIONS = ["Dell", "Lenovo", "HP", "Acer"];
 
 const isBrandDropdownKey = (section, key) => {
   const s = String(section || "").toLowerCase();
-
   return (
     (s === "desktop" && ["desktop_brand", "monitor_brand"].includes(key)) ||
     (s === "extra_monitor" && key === "monitor_brand")
@@ -236,10 +254,12 @@ const SECTION_ALL_FIELDS = {
     "remarks",
   ],
 
+  // QR Monitor: only the fields present in excelHeaders.js.
+  // Section and Branch are already selected in Step 1, so only these two are editable here.
   qr_desktop_computer: [
-  "assetId",
-  "sub_category_code",
-],
+    "assetId",
+    "sub_category_code",
+  ],
 
   laptop: [
     "assetId","sub_category_code","laptop_brand","name","laptop_user",
@@ -372,7 +392,8 @@ const SECTION_ALL_FIELDS = {
 
 const SUBCODE_TO_SECTION = {
   DC:"desktop", DT:"desktop",
-  QD:"qr_desktop_computer", QC:"qr_desktop_computer",
+  // ── QR Monitor: QM is new canonical code, QD/QC kept for backward compat ──
+  QM:"qr_desktop_computer", QD:"qr_desktop_computer", QC:"qr_desktop_computer",
   LC:"laptop",  LP:"laptop",
   PR:"printer",
   SC:"scanner",
@@ -423,13 +444,8 @@ const isFullWidthKey = (k) => [
 
 const isReadOnly = (k) => k === "sub_category_code";
 
-// ── Which field keys represent "Assigned User" across all sections ──
 const ASSIGNED_USER_KEYS = new Set([
-  "userName",      
-  "laptop_user",   
-  "assigned_user",  
-  "panel_user",     
-  "assigned_to",    
+  "userName","laptop_user","assigned_user","panel_user","assigned_to",
 ]);
 const isAssignedUserKey = (k) => ASSIGNED_USER_KEYS.has(k);
 
@@ -463,7 +479,6 @@ const niceLabel = (k) =>
     .replace(/^License Name$/, "Name")
     .replace(/^Vendor Name$/, "Vendor")
     .replace(/^No Of Users$/, "No of Users")
-    .replace(/^Qr Desktop Computer$/, "QR Desktop Computer")
     .replace(/^Desktop Ids$/, "Desktop ID")
     .replace(/^Desktop Brand$/, "Brand")
     .replace(/^Desktop Ram$/, "RAM")
@@ -474,9 +489,10 @@ const niceLabel = (k) =>
     .replace(/^Username$/, "Assigned User")
     .replace(/^User Name$/, "Assigned User");
 
+// ── CHANGED: qr_desktop_computer now displays as "QR Monitor" ──
 const sectionDisplayName = (section) => {
   const s = String(section || "").trim().toLowerCase();
-  if (s === "qr_desktop_computer") return "QR Monitor";
+  if (s === "qr_desktop_computer") return "QR Monitor";  // ← renamed display
   if (s === "desktop") return "Desktop";
   if (s === "extra_monitor") return "Extra Monitor";
   if (s === "firewall_router") return "Firewall / Router";
@@ -501,12 +517,14 @@ const SECTION_GROUPS = {
     { label:"Monitor",          keys:["monitor_asset_code","monitor_brand","monitor_size","monitor_location","monitor_purchase_year","monitor_status"] },
     { label:"Notes",            keys:["remarks"] },
   ],
+  // ── QR Monitor: only Asset Code and Sub-Cat Code ──
   qr_desktop_computer: [
     {
       label: "QR Monitor Info",
       keys: ["assetId", "sub_category_code"],
     },
-  ], 
+  ],
+
   laptop: [
     { label:"Device Info",      keys:["assetId","sub_category_code","laptop_brand","name","laptop_user"] },
     { label:"Specifications",   keys:["laptop_ram","laptop_ssd","laptop_processor"] },
@@ -517,6 +535,11 @@ const SECTION_GROUPS = {
     { label:"Printer Info",     keys:["assetId","sub_category_code","assigned_user","printer_name","printer_model","printer_type"] },
     { label:"Network & Status", keys:["printer_status","location","ip_address"] },
     { label:"Notes",            keys:["remarks"] },
+  ],
+  cctv: [
+    { label:"NVR / System Info", keys:["assetId","sub_category_code","cctv_brand","cctv_nvr_ip","cctv_record_days"] },
+    { label:"Capacity & Vendor", keys:["capacity","channel","vendor","purchase_date"] },
+    { label:"Notes",             keys:["remarks"] },
   ],
   server: [
     { label:"Identity",         keys:["assetId","sub_category_code","brand","model_no","vendor"] },
@@ -604,7 +627,6 @@ function EmployeeSelect({ employees, value, onChange, disabled }) {
   const [open, setOpen]   = useState(false);
   const wrapRef = React.useRef(null);
 
-  // Build sorted unique name list from employees array
   const names = useMemo(() => {
     const unique = [
       ...new Set(
@@ -616,13 +638,11 @@ function EmployeeSelect({ employees, value, onChange, disabled }) {
     return unique;
   }, [employees]);
 
-  // Filter by search query
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     return q ? names.filter((n) => n.toLowerCase().includes(q)) : names;
   }, [names, query]);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
@@ -635,26 +655,15 @@ function EmployeeSelect({ employees, value, onChange, disabled }) {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const handleSelect = (name) => {
-    onChange(name);
-    setQuery("");
-    setOpen(false);
-  };
-
-  const handleClear = (e) => {
-    e.stopPropagation();
-    onChange("");
-    setQuery("");
-  };
+  const handleSelect = (name) => { onChange(name); setQuery(""); setOpen(false); };
+  const handleClear  = (e) => { e.stopPropagation(); onChange(""); setQuery(""); };
 
   return (
     <div ref={wrapRef} style={{ position: "relative" }}>
-      {/* Trigger button */}
       <div
         className={`am-emp-trigger${open ? " open" : ""}${disabled ? " disabled" : ""}`}
         onClick={() => !disabled && setOpen((o) => !o)}
       >
-        {/* Avatar + name */}
         {value ? (
           <>
             <div className="am-emp-avatar">{value.charAt(0).toUpperCase()}</div>
@@ -667,77 +676,40 @@ function EmployeeSelect({ employees, value, onChange, disabled }) {
             {names.length === 0 ? "No employees loaded" : "— Select employee —"}
           </span>
         )}
-
-        {/* Clear button */}
         {value && !disabled && (
-          <button
-            type="button"
-            onClick={handleClear}
-            style={{
-              background: "none", border: "none", cursor: "pointer",
-              color: "var(--gray-400)", fontSize: 16, lineHeight: 1,
-              padding: "2px 4px", borderRadius: 4, display: "flex", alignItems: "center",
-            }}
-            title="Clear"
-          >
+          <button type="button" onClick={handleClear}
+            style={{ background:"none",border:"none",cursor:"pointer",color:"var(--gray-400)",fontSize:16,lineHeight:1,padding:"2px 4px",borderRadius:4,display:"flex",alignItems:"center" }}>
             ×
           </button>
         )}
-
-        {/* Chevron */}
-        <span style={{
-          color: "var(--gray-400)", fontSize: 11, lineHeight: 1, flexShrink: 0,
-          transition: "transform 0.2s ease",
-          transform: open ? "rotate(180deg)" : "rotate(0deg)",
-        }}>
-          ▼
-        </span>
+        <span style={{ color:"var(--gray-400)",fontSize:11,lineHeight:1,flexShrink:0,transition:"transform 0.2s ease",transform:open?"rotate(180deg)":"rotate(0deg)" }}>▼</span>
       </div>
 
-      {/* Dropdown */}
       {open && !disabled && (
         <div className="am-emp-dropdown">
-          {/* Search input */}
-          <input
-            type="text"
-            autoFocus
-            className="am-emp-search"
-            value={query}
+          <input type="text" autoFocus className="am-emp-search" value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search among ${names.length} employees…`}
             onClick={(e) => e.stopPropagation()}
           />
-
-          {/* List */}
-          <ul className="am-emp-list" style={{ listStyle: "none", margin: 0, padding: "4px 0" }}>
+          <ul className="am-emp-list" style={{ listStyle:"none",margin:0,padding:"4px 0" }}>
             {filtered.length === 0 ? (
               <li className="am-emp-empty">
                 {query ? `No match for "${query}"` : "No employees available"}
               </li>
             ) : (
               filtered.map((name) => (
-                <li
-                  key={name}
-                  className={`am-emp-item${name === value ? " selected" : ""}`}
-                  onClick={() => handleSelect(name)}
-                >
+                <li key={name} className={`am-emp-item${name === value ? " selected" : ""}`}
+                  onClick={() => handleSelect(name)}>
                   <div className="am-emp-avatar">{name.charAt(0).toUpperCase()}</div>
                   <span style={{ flex: 1 }}>{name}</span>
-                  {name === value && (
-                    <span style={{ fontSize: 12, color: "var(--blue-600)", fontWeight: 800 }}>✓</span>
-                  )}
+                  {name === value && <span style={{ fontSize:12,color:"var(--blue-600)",fontWeight:800 }}>✓</span>}
                 </li>
               ))
             )}
           </ul>
-
-          {/* Footer hint */}
           {names.length > 0 && (
-            <div style={{
-              padding: "6px 13px", borderTop: "1px solid var(--gray-100)",
-              fontSize: 10, color: "var(--gray-400)", fontFamily: "'Outfit',sans-serif",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-            }}>
+            <div style={{ padding:"6px 13px",borderTop:"1px solid var(--gray-100)",fontSize:10,color:"var(--gray-400)",fontFamily:"'Outfit',sans-serif",display:"flex",alignItems:"center",justifyContent:"space-between" }}>
               <span>{filtered.length} of {names.length} employees</span>
               <span>↑↓ browse · click to select</span>
             </div>
@@ -757,16 +729,18 @@ export default function AddAssetModal({
   branches  = [],
   groups    = [],
   subCats   = [],
-  employees = [],          // ← employee list for the assigned-user dropdown
+  employees = [],
   fetchAddSubCats,
   addSaving = false,
   onSubmit,
 }) {
-  const [step, setStep] = useState(1);
+  const [step, setStep]       = useState(1);
   const [branchId, setBranchId] = useState("");
-  const [groupId, setGroupId] = useState("");
-  const [subCode, setSubCode] = useState("");
-  const [form, setForm] = useState({});
+  const [groupId, setGroupId]   = useState("");
+  const [subCode, setSubCode]   = useState("");
+  const [form, setForm]         = useState({});
+  // ── CCTV cameras state ──
+  const [cameras, setCameras]   = useState([]);
 
   useEffect(() => {
     if (!open) return;
@@ -775,15 +749,13 @@ export default function AddAssetModal({
     setGroupId("");
     setSubCode("");
     setForm({});
+    setCameras([]);
   }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -791,6 +763,11 @@ export default function AddAssetModal({
 
   useEffect(() => {
     setForm((prev) => ({ ...prev, sub_category_code: subCode || "" }));
+  }, [subCode]);
+
+  // Reset cameras when section changes away from cctv
+  useEffect(() => {
+    if (section !== "cctv") setCameras([]);
   }, [subCode]);
 
   const selectedSubCat = useMemo(
@@ -834,6 +811,19 @@ export default function AddAssetModal({
 
   if (!open) return null;
 
+  /* ── Camera helpers ── */
+  const addCamera = () =>
+    setCameras((prev) => [
+      ...prev,
+      { camera_model: "", location: "", cctv_status: "On", remarks: "" },
+    ]);
+  const removeCamera = (idx) =>
+    setCameras((prev) => prev.filter((_, i) => i !== idx));
+  const updateCamera = (idx, field, value) =>
+    setCameras((prev) =>
+      prev.map((c, i) => (i === idx ? { ...c, [field]: value } : c))
+    );
+
   const onChange = (e) => {
     const { name, value } = e.target;
     let v = value;
@@ -846,9 +836,9 @@ export default function AddAssetModal({
 
   const validate = () => {
     if (!branchId) return "Please select a Branch.";
-    if (!groupId) return "Please select a Category.";
-    if (!subCode) return "Please select a Sub Category.";
-    if (!section) return "Cannot determine asset section for this Sub Category.";
+    if (!groupId)  return "Please select a Category.";
+    if (!subCode)  return "Please select a Sub Category.";
+    if (!section)  return "Cannot determine asset section for this Sub Category.";
     if (!fieldsForSection.length) return `No field map found for section: ${section}`;
     return "";
   };
@@ -861,6 +851,12 @@ export default function AddAssetModal({
       const raw = form?.[k];
       payload[k] = raw === "" ? null : raw;
     });
+    // ── include cameras array for CCTV ──
+    if (section === "cctv") {
+      payload.cameras = cameras.filter(
+        (c) => c.camera_model || c.location
+      );
+    }
     onSubmit?.({ branchId: Number(branchId), section, payload });
   };
 
@@ -869,63 +865,43 @@ export default function AddAssetModal({
 
   /* ── renderField ── */
   const renderField = (k) => {
-    const wide     = isFullWidthKey(k);
-    const readOnly = isReadOnly(k);
-    const isUser   = isAssignedUserKey(k);
+    const wide            = isFullWidthKey(k);
+    const readOnly        = isReadOnly(k);
+    const isUser          = isAssignedUserKey(k);
     const isBrandDropdown = isBrandDropdownKey(section, k);
 
-    /* read-only badge */
     if (readOnly) {
       return (
         <div key={k} className="am-field-card">
           <label className="am-label">{niceLabel(k)}</label>
-          <input
-            type="text"
-            className="am-input"
-            name={k}
-            value={form?.[k] ?? subCode ?? ""}
-            readOnly
-            disabled
-            style={{ background: "var(--gray-100)", fontWeight: 700, color: "var(--gray-700)" }}
+          <input type="text" className="am-input" name={k}
+            value={form?.[k] ?? subCode ?? ""} readOnly disabled
+            style={{ background:"var(--gray-100)",fontWeight:700,color:"var(--gray-700)" }}
           />
         </div>
       );
     }
 
     if (isBrandDropdown) {
-  return (
-    <div key={k} className={`am-field-card${wide ? " full-width" : ""}`}>
-      <label className="am-label">{niceLabel(k)}</label>
+      return (
+        <div key={k} className={`am-field-card${wide ? " full-width" : ""}`}>
+          <label className="am-label">{niceLabel(k)}</label>
+          <select className="am-select" name={k} value={form?.[k] ?? ""} onChange={onChange}>
+            <option value="">— Select Brand —</option>
+            {BRAND_OPTIONS.map((brand) => (
+              <option key={brand} value={brand}>{brand}</option>
+            ))}
+          </select>
+        </div>
+      );
+    }
 
-      <select
-        className="am-select"
-        name={k}
-        value={form?.[k] ?? ""}
-        onChange={onChange}
-      >
-        <option value="">— Select Brand —</option>
-        {BRAND_OPTIONS.map((brand) => (
-          <option key={brand} value={brand}>
-            {brand}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-    /* ── Assigned-user searchable dropdown ── */
     if (isUser) {
       return (
         <div key={k} className="am-field-card">
-          <label className="am-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <label className="am-label" style={{ display:"flex",alignItems:"center",gap:6 }}>
             {niceLabel(k)}
-            <span style={{
-              fontSize: 9, fontWeight: 600, color: "var(--blue-600)",
-              background: "var(--blue-50)", border: "1px solid var(--blue-200)",
-              borderRadius: 999, padding: "1px 6px", fontFamily: "'Outfit',sans-serif",
-              letterSpacing: "0.06em",
-            }}>
+            <span style={{ fontSize:9,fontWeight:600,color:"var(--blue-600)",background:"var(--blue-50)",border:"1px solid var(--blue-200)",borderRadius:999,padding:"1px 6px",fontFamily:"'Outfit',sans-serif",letterSpacing:"0.06em" }}>
               👤 Employee
             </span>
           </label>
@@ -939,19 +915,12 @@ export default function AddAssetModal({
       );
     }
 
-    /* all other fields */
     return (
       <div key={k} className={`am-field-card${wide ? " full-width" : ""}`}>
         <label className="am-label">{niceLabel(k)}</label>
-
         {wide ? (
-          <textarea
-            className="am-textarea"
-            name={k}
-            value={form?.[k] ?? ""}
-            onChange={onChange}
-            rows={k === "remarks" ? 3 : 4}
-            disabled={addSaving}
+          <textarea className="am-textarea" name={k} value={form?.[k] ?? ""} onChange={onChange}
+            rows={k === "remarks" ? 3 : 4} disabled={addSaving}
             placeholder={k === "remarks" ? "Any additional notes…" : "Enter details…"}
           />
         ) : isYesNoKey(k) ? (
@@ -966,36 +935,105 @@ export default function AddAssetModal({
             <option value="Repair">Repair</option>
           </select>
         ) : isDateKey(k) ? (
-          <input
-            type="date"
-            className="am-input"
-            name={k}
-            value={form?.[k] ?? ""}
-            onChange={onChange}
-            disabled={addSaving}
-          />
+          <input type="date" className="am-input" name={k} value={form?.[k] ?? ""} onChange={onChange} disabled={addSaving}/>
         ) : isYearKey(k) ? (
-          <input
-            type="number"
-            className="am-input"
-            name={k}
-            value={form?.[k] ?? ""}
-            onChange={onChange}
-            disabled={addSaving}
-            placeholder="YYYY"
-            min="1990"
-            max="2099"
+          <input type="number" className="am-input" name={k} value={form?.[k] ?? ""} onChange={onChange}
+            disabled={addSaving} placeholder="YYYY" min="1990" max="2099"
           />
         ) : (
-          <input
-            type="text"
-            className="am-input"
-            name={k}
-            value={form?.[k] ?? ""}
-            onChange={onChange}
-            disabled={addSaving}
-          />
+          <input type="text" className="am-input" name={k} value={form?.[k] ?? ""} onChange={onChange} disabled={addSaving}/>
         )}
+      </div>
+    );
+  };
+
+  /* ── CCTV cameras section (shown in step 2 below field grid) ── */
+  const renderCamerasSection = () => {
+    if (section !== "cctv") return null;
+    return (
+      <div style={{ marginTop: 20 }}>
+        {/* Divider header */}
+        <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:14 }}>
+          <div style={{ height:1,flex:1,background:"linear-gradient(90deg,var(--blue-200),transparent)" }}/>
+          <span style={{ fontSize:10,fontWeight:800,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.12em",fontFamily:"Outfit,sans-serif",whiteSpace:"nowrap" }}>
+            📹 Cameras ({cameras.length})
+          </span>
+          <div style={{ height:1,flex:1,background:"linear-gradient(270deg,var(--green-200),transparent)" }}/>
+        </div>
+
+        {/* Camera cards */}
+        {cameras.length === 0 && (
+          <div style={{ textAlign:"center",padding:"18px",background:"white",borderRadius:12,border:"1.5px dashed var(--gray-200)",color:"var(--gray-400)",fontSize:12,fontFamily:"Outfit,sans-serif",marginBottom:10 }}>
+            No cameras added yet — click <strong>+ Add Camera</strong> below to add one
+          </div>
+        )}
+
+        {cameras.map((cam, idx) => (
+          <div key={idx} className="am-camera-card">
+            {/* Card header row */}
+            <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8 }}>
+              <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                <div style={{ width:28,height:28,borderRadius:8,background:`linear-gradient(135deg,${NL_BLUE},${NL_BLUE2})`,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:12,fontWeight:800,fontFamily:"Outfit,sans-serif",flexShrink:0 }}>
+                  {idx + 1}
+                </div>
+                <span style={{ fontFamily:"Outfit,sans-serif",fontWeight:700,fontSize:12,color:"var(--gray-700)" }}>
+                  Camera #{idx + 1}
+                </span>
+              </div>
+              <button type="button" onClick={() => removeCamera(idx)} disabled={addSaving}
+                style={{ background:"var(--red-50)",border:"1.5px solid var(--red-100)",color:"var(--red-600)",borderRadius:7,padding:"4px 10px",cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"Outfit,sans-serif" }}>
+                ✕ Remove
+              </button>
+            </div>
+
+            <div className="am-camera-grid">
+              <div>
+                <label className="am-label">Camera Model</label>
+                <input type="text" className="am-input"
+                  value={cam.camera_model}
+                  onChange={(e) => updateCamera(idx, "camera_model", e.target.value)}
+                  placeholder="e.g. Hikvision DS-2CD2143"
+                  disabled={addSaving}
+                />
+              </div>
+              <div>
+                <label className="am-label">Location</label>
+                <input type="text" className="am-input"
+                  value={cam.location}
+                  onChange={(e) => updateCamera(idx, "location", e.target.value)}
+                  placeholder="e.g. Main Entrance"
+                  disabled={addSaving}
+                />
+              </div>
+              <div>
+                <label className="am-label">Status</label>
+                <select className="am-select"
+                  value={cam.cctv_status}
+                  onChange={(e) => updateCamera(idx, "cctv_status", e.target.value)}
+                  disabled={addSaving}>
+                  <option value="On">On</option>
+                  <option value="Off">Off</option>
+                  <option value="Repair">Repair</option>
+                </select>
+              </div>
+              <div>
+                <label className="am-label">Remarks</label>
+                <input type="text" className="am-input"
+                  value={cam.remarks}
+                  onChange={(e) => updateCamera(idx, "remarks", e.target.value)}
+                  placeholder="Any notes…"
+                  disabled={addSaving}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <button type="button" className="am-btn am-btn-primary am-btn-sm"
+          onClick={addCamera} disabled={addSaving}
+          style={{ marginTop: 4, width:"100%", justifyContent:"center" }}>
+          + Add Camera
+        </button>
       </div>
     );
   };
@@ -1013,18 +1051,11 @@ export default function AddAssetModal({
         <div className="am-panel">
           {/* ── HEADER ── */}
           <div className="am-header">
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)",
-                letterSpacing: "0.15em", textTransform: "uppercase",
-                fontFamily: "Outfit,sans-serif", marginBottom: 4,
-              }}>
+            <div style={{ flex:1,minWidth:0 }}>
+              <div style={{ fontSize:10,fontWeight:700,color:"rgba(255,255,255,0.55)",letterSpacing:"0.15em",textTransform:"uppercase",fontFamily:"Outfit,sans-serif",marginBottom:4 }}>
                 Asset Management
               </div>
-              <div style={{
-                fontFamily: "Outfit,sans-serif", fontWeight: 800,
-                fontSize: "clamp(1rem,3vw,1.35rem)", color: "white", letterSpacing: "-0.02em",
-              }}>
+              <div style={{ fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"clamp(1rem,3vw,1.35rem)",color:"white",letterSpacing:"-0.02em" }}>
                 Add New Asset
               </div>
               <div className="am-step-track">
@@ -1035,32 +1066,37 @@ export default function AddAssetModal({
                 <div className={`am-step-dot ${step === 2 ? "active" : step > 2 ? "done" : "pending"}`}>
                   2
                 </div>
-                <div style={{ marginLeft: 10, display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", fontFamily: "Outfit,sans-serif" }}>
+                <div style={{ marginLeft:10,display:"flex",flexWrap:"wrap",gap:6,alignItems:"center" }}>
+                  <span style={{ fontSize:11,color:"rgba(255,255,255,0.65)",fontFamily:"Outfit,sans-serif" }}>
                     {step === 1 ? "Select branch & category" : "Fill asset details"}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+            <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8 }}>
               <button className="am-btn am-btn-white am-btn-sm" onClick={onClose} disabled={addSaving}>
                 ✕ Close
               </button>
 
               {step === 2 && section && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-end" }}>
+                <div style={{ display:"flex",flexWrap:"wrap",gap:6,justifyContent:"flex-end" }}>
                   {selectedBranch && (
-                    <span className="am-badge am-badge-blue" style={{ background: "rgba(255,255,255,0.15)", color: "white", borderColor: "rgba(255,255,255,0.3)" }}>
+                    <span className="am-badge am-badge-blue" style={{ background:"rgba(255,255,255,0.15)",color:"white",borderColor:"rgba(255,255,255,0.3)" }}>
                       🏢 {selectedBranch.name}
                     </span>
                   )}
-                  <span className="am-badge" style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.2)" }}>
+                  <span className="am-badge" style={{ background:"rgba(255,255,255,0.12)",color:"rgba(255,255,255,0.85)",borderColor:"rgba(255,255,255,0.2)" }}>
                     📂 {sectionDisplayName(section)}
                   </span>
-                  <span className="am-badge" style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.2)" }}>
+                  <span className="am-badge" style={{ background:"rgba(255,255,255,0.12)",color:"rgba(255,255,255,0.85)",borderColor:"rgba(255,255,255,0.2)" }}>
                     {fieldsForSection.length} fields
                   </span>
+                  {section === "cctv" && (
+                    <span className="am-badge" style={{ background:"rgba(255,255,255,0.12)",color:"rgba(255,255,255,0.85)",borderColor:"rgba(255,255,255,0.2)" }}>
+                      📹 {cameras.length} cameras
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -1068,25 +1104,23 @@ export default function AddAssetModal({
 
           {/* ── BODY ── */}
           <div className="am-body">
+
             {/* STEP 1 */}
             {step === 1 && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
                 {/* Branch */}
                 <div className="am-sel-card">
                   <span className="am-sel-card-label">🏢 Branch *</span>
-                  <select
-                    className="am-select"
-                    value={branchId}
+                  <select className="am-select" value={branchId}
                     onChange={(e) => { setBranchId(e.target.value); setForm({}); }}
-                    disabled={addSaving}
-                  >
+                    disabled={addSaving}>
                     <option value="">-- Select Branch --</option>
                     {safeArray(branches).map((b) => (
                       <option key={b.id} value={b.id}>{b.name}</option>
                     ))}
                   </select>
                   {branchId && (
-                    <div style={{ marginTop: 8 }}>
+                    <div style={{ marginTop:8 }}>
                       <span className="am-badge am-badge-blue">✓ {selectedBranch?.name || `Branch #${branchId}`}</span>
                     </div>
                   )}
@@ -1095,9 +1129,7 @@ export default function AddAssetModal({
                 {/* Category */}
                 <div className="am-sel-card">
                   <span className="am-sel-card-label">📁 Category (Group) *</span>
-                  <select
-                    className="am-select"
-                    value={groupId}
+                  <select className="am-select" value={groupId}
                     onChange={(e) => {
                       const gid = e.target.value;
                       setGroupId(gid);
@@ -1105,15 +1137,14 @@ export default function AddAssetModal({
                       setForm({});
                       fetchAddSubCats?.(gid);
                     }}
-                    disabled={addSaving}
-                  >
+                    disabled={addSaving}>
                     <option value="">-- Select Category --</option>
                     {safeArray(groups).map((g) => (
                       <option key={g.id} value={g.id}>{g.name} ({g.id})</option>
                     ))}
                   </select>
                   {groupId && (
-                    <div style={{ marginTop: 8 }}>
+                    <div style={{ marginTop:8 }}>
                       <span className="am-badge am-badge-green">✓ {selectedGroup?.name || groupId}</span>
                     </div>
                   )}
@@ -1122,32 +1153,34 @@ export default function AddAssetModal({
                 {/* Sub Category */}
                 <div className="am-sel-card">
                   <span className="am-sel-card-label">🏷 Sub Category *</span>
-                  <select
-                    className="am-select"
-                    value={subCode}
-                    onChange={(e) => { setSubCode(e.target.value); setForm({}); }}
-                    disabled={addSaving || !groupId}
-                  >
+                  <select className="am-select" value={subCode}
+                    onChange={(e) => { setSubCode(e.target.value); setForm({}); setCameras([]); }}
+                    disabled={addSaving || !groupId}>
                     <option value="">-- Select Sub Category --</option>
-                    {safeArray(subCats).map((s) => (
-                      <option key={s.code} value={s.code}>{s.name} ({s.code})</option>
-                    ))}
+                    {safeArray(subCats)
+                      .filter((s) => !isCameraSubCode(s.code))
+                      .map((s) => (
+                        <option key={s.code} value={s.code}>{s.name} ({s.code})</option>
+                      ))}
                   </select>
 
                   {subCode && (
-                    <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                    <div style={{ marginTop:10,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center" }}>
                       <span className="am-badge am-badge-amber">{selectedSubCat?.name || subCode} · {subCode}</span>
                       {section ? (
                         <span className="am-badge am-badge-green">📂 {sectionDisplayName(section)} · {fieldsForSection.length} fields</span>
                       ) : (
                         <span className="am-badge am-badge-red">⚠ Section unmapped</span>
                       )}
+                      {section === "cctv" && (
+                        <span className="am-badge am-badge-blue">📹 Cameras can be added in next step</span>
+                      )}
                     </div>
                   )}
 
                   {!section && subCode && (
                     <div className="am-warn">
-                      <span style={{ fontSize: 16 }}>⚠️</span>
+                      <span style={{ fontSize:16 }}>⚠️</span>
                       Cannot infer section for sub-code <strong>{subCode}</strong>.
                       Add <code>section</code> to the subcategory API or extend{" "}
                       <code>SUBCODE_TO_SECTION</code>.
@@ -1157,13 +1190,8 @@ export default function AddAssetModal({
 
                 {/* Employee count hint */}
                 {employees.length > 0 && (
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    padding: "10px 14px", borderRadius: 10,
-                    background: "var(--blue-50)", border: "1.5px solid var(--blue-200)",
-                    fontSize: 12, color: "var(--blue-700)", fontFamily: "'Outfit',sans-serif", fontWeight: 600,
-                  }}>
-                    <span style={{ fontSize: 15 }}>👤</span>
+                  <div style={{ display:"flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,background:"var(--blue-50)",border:"1.5px solid var(--blue-200)",fontSize:12,color:"var(--blue-700)",fontFamily:"'Outfit',sans-serif",fontWeight:600 }}>
+                    <span style={{ fontSize:15 }}>👤</span>
                     <span>
                       <strong>{employees.length}</strong> employees loaded —
                       Assigned User fields will show a searchable dropdown.
@@ -1178,21 +1206,17 @@ export default function AddAssetModal({
               <div>
                 {/* Summary strip */}
                 <div className="am-summary-strip">
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 8,
-                    background: `linear-gradient(135deg,${NL_BLUE},${NL_BLUE2})`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 15, flexShrink: 0,
-                  }}>
+                  <div style={{ width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,${NL_BLUE},${NL_BLUE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0 }}>
                     📦
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: "Outfit,sans-serif", fontWeight: 700, fontSize: 13, color: "var(--gray-800)" }}>
+                  <div style={{ flex:1,minWidth:0 }}>
+                    <div style={{ fontFamily:"Outfit,sans-serif",fontWeight:700,fontSize:13,color:"var(--gray-800)" }}>
                       {selectedSubCat?.name || subCode} — {selectedBranch?.name || `Branch #${branchId}`}
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <div style={{ fontSize:11,color:"var(--gray-500)",marginTop:2,display:"flex",gap:8,flexWrap:"wrap" }}>
                       <span>Section: <strong>{sectionDisplayName(section)}</strong></span>
                       <span>Fields: <strong>{fieldsForSection.length}</strong></span>
+                      {section === "cctv" && <span>Cameras: <strong>{cameras.length}</strong></span>}
                     </div>
                   </div>
                 </div>
@@ -1202,20 +1226,19 @@ export default function AddAssetModal({
                   {fieldGroups.map((group, gi) => (
                     <React.Fragment key={gi}>
                       <div className="am-section-divider">
-                        <div
-                          className="am-section-divider-line"
-                          style={{ background: "linear-gradient(90deg,var(--blue-200),transparent)" }}
-                        />
+                        <div className="am-section-divider-line"
+                          style={{ background:"linear-gradient(90deg,var(--blue-200),transparent)" }}/>
                         <span className="am-section-divider-label">{group.label}</span>
-                        <div
-                          className="am-section-divider-line"
-                          style={{ background: "linear-gradient(270deg,var(--green-200),transparent)" }}
-                        />
+                        <div className="am-section-divider-line"
+                          style={{ background:"linear-gradient(270deg,var(--green-200),transparent)" }}/>
                       </div>
                       {group.keys.map((k) => renderField(k))}
                     </React.Fragment>
                   ))}
                 </div>
+
+                {/* ── CCTV cameras inline section ── */}
+                {renderCamerasSection()}
               </div>
             )}
           </div>
@@ -1225,7 +1248,9 @@ export default function AddAssetModal({
             <div className="am-footer-note">
               {step === 1
                 ? "Select branch, category and sub-category to proceed."
-                : "All DB fields for the selected section. Empty fields are saved as null."}
+                : section === "cctv"
+                  ? "Fill NVR details above, then add individual cameras below the fields."
+                  : "All DB fields for the selected section. Empty fields are saved as null."}
             </div>
             <div className="am-footer-actions">
               {step === 1 ? (
@@ -1233,11 +1258,9 @@ export default function AddAssetModal({
                   <button className="am-btn am-btn-ghost am-btn-sm" onClick={onClose} disabled={addSaving}>
                     Cancel
                   </button>
-                  <button
-                    className="am-btn am-btn-primary am-btn-sm"
+                  <button className="am-btn am-btn-primary am-btn-sm"
                     onClick={() => setStep(2)}
-                    disabled={!branchId || !groupId || !subCode || !section || addSaving}
-                  >
+                    disabled={!branchId || !groupId || !subCode || !section || addSaving}>
                     Next →
                   </button>
                 </>
@@ -1248,12 +1271,9 @@ export default function AddAssetModal({
                   </button>
                   <button className="am-btn am-btn-success am-btn-sm" onClick={handleSave} disabled={addSaving}>
                     {addSaving ? (
-                      <>
-                        <div className="am-spinner" style={{ width: 13, height: 13 }} />
-                        Saving…
-                      </>
+                      <><div className="am-spinner" style={{ width:13,height:13 }} />Saving…</>
                     ) : (
-                      <>💾 Save Asset</>
+                      <>💾 Save Asset{section === "cctv" && cameras.length > 0 ? ` + ${cameras.length} Camera${cameras.length > 1 ? "s" : ""}` : ""}</>
                     )}
                   </button>
                 </>

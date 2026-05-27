@@ -73,7 +73,7 @@ async function runExpiryCheck({ daysAhead = 3 } = {}) {
 
     // existing hardware / network tables kept unchanged
 // { entityType: "servers", model: BranchServer, nameKeys: ["ip_address"], dateField: "expiry_date" },
-    { entityType: "servers", model: BranchServer, nameKeys: ["ip_address"], dateField: "warranty_expiry" },
+    { entityType: "servers", model: BranchServer, nameKeys: ["ip_address"] },
     { entityType: "firewall_routers", model: BranchFirewallRouter, nameKeys: ["model"], dateField: "license_expiry" },
   ];
 
