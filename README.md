@@ -1,14 +1,13 @@
-#Admin Side View 
-![alt text](./frontend/src/assets/image-1.png)
-![alt text](./frontend/src/assets/image-3.png)
-![alt text](./frontend/src/assets/image-2.png)
-![alt text](./frontend/src/assets/image-4.png)
-![alt text](./frontend/src/assets/image-5.png)
-![alt text](./frontend/src/assets/image-8.png)
-![alt text](./frontend/src/assets/image-6.png)
-![alt text](./frontend/src/assets/image-7.png)
-![alt text](./frontend/src/assets/image-9.png)
-![alt text](./frontend/src/assets/image.png)
+>#Admin Side View 
+<img width="1574" height="773" alt="image" src="https://github.com/user-attachments/assets/1adf4b6b-a77c-4f02-8e0a-e0d0aee1ce1c" />
+<img width="1569" height="751" alt="image" src="https://github.com/user-attachments/assets/9b2b6f36-65de-4405-820d-e4648c59ec62" />
+<img width="1593" height="766" alt="image" src="https://github.com/user-attachments/assets/18703546-eda2-4bae-ad8e-9c2281d9e536" />
+<img width="1568" height="778" alt="image" src="https://github.com/user-attachments/assets/11f51ca5-b883-4f31-9e15-449ba1a38395" />
+<img width="1598" height="688" alt="image" src="https://github.com/user-attachments/assets/03242930-a778-4284-91dc-3e9bb52f5154" />
+<img width="1583" height="762" alt="image" src="https://github.com/user-attachments/assets/11f4204e-42c2-4886-acac-356d76236c5e" />
+<img width="1593" height="778" alt="image" src="https://github.com/user-attachments/assets/d4a4e039-32ed-4a69-9a80-a4550a5d5cc7" />
+
+
 
 #User Side : Sub,it help request and can view data , Not allowed to make changes.
 <img width="1340" height="634" alt="image" src="https://github.com/user-attachments/assets/6ae819f3-7bc7-4776-9348-cb4d596cf164" />
