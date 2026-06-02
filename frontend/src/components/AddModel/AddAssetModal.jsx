@@ -618,7 +618,6 @@ const SECTION_GROUPS = {
     { label:"Notes",            keys:["remarks"] },
   ],
 };
-
 /* ─────────────────────────────────────────────────────
    EmployeeSelect — allows manual typing + dropdown select
 ───────────────────────────────────────────────────── */
