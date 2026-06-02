@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const path = require("path");
@@ -15,9 +14,13 @@ const employeeRoutes = require("./routes/employeeRoutes");
 
 const app = express();
 
+// Disable ETag so GET /api/employees does not return 304 cached response
+app.disable("etag");
+
 // Security headers
 app.use(helmet());
 app.disable("x-powered-by");
+
 // CORS
 const allowedOrigins = [
   process.env.CLIENT_URL,
@@ -25,7 +28,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   "http://localhost:3001",
-  "http://127.0.0.1:3001"
+  "http://127.0.0.1:3001",
 ].filter(Boolean);
 
 app.use(
@@ -37,7 +40,12 @@ app.use(
       return cb(new Error("Not allowed by CORS: " + origin));
     },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Cache-Control",
+      "Pragma",
+    ],
     credentials: true,
   })
 );
@@ -54,12 +62,21 @@ if (process.env.NODE_ENV !== "production") {
 // Serve uploaded files publicly
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Rate limit (auth only)
+// Rate limit auth only
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "production" ? 100 : 5000,
   standardHeaders: true,
   legacyHeaders: false,
+});
+
+// No-cache middleware for employee endpoints
+app.use("/api/employees", (req, res, next) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+  res.set("Surrogate-Control", "no-store");
+  next();
 });
 
 // Routes
@@ -95,6 +112,6 @@ app.use((req, res) => {
 });
 
 // Error handler
-app.use(errorHandler);  
+app.use(errorHandler);
 
 module.exports = app;

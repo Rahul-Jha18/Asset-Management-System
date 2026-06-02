@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import Footer from "../components/Layout/Footer";
@@ -58,29 +58,6 @@ const PAGE_STYLES = `
   .em-root   { font-family:'DM Sans',sans-serif; background:var(--gray-50); max-height:90vh; color:var(--gray-900); }
   .em-layout { display:flex; max-height:100vh; }
 
-  .em-sidebar {
-    background:linear-gradient(168deg,#0a1628 0%,#1a3050 45%,#0c1e33 100%);
-    border-right:1px solid rgba(59,130,246,0.13);
-    box-shadow:5px 0 30px rgba(0,0,0,0.25);
-    position:relative; overflow:hidden;
-    transition:width 0.3s cubic-bezier(0.4,0,0.2,1); flex-shrink:0;
-  }
-  .em-sidebar::before { content:''; position:absolute; top:-70px; right:-50px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle,rgba(59,130,246,0.18) 0%,transparent 70%); pointer-events:none; }
-  .em-sidebar::after  { content:''; position:absolute; bottom:-50px; left:-30px; width:140px; height:140px; border-radius:50%; background:radial-gradient(circle,rgba(34,197,94,0.12) 0%,transparent 70%); pointer-events:none; }
-  .em-sidebar-inner   { height:100%; display:flex; flex-direction:column; padding:26px 20px; min-width:220px; position:relative; z-index:1; }
-
-  .em-nav-item {
-    display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:13px;
-    background:transparent; border:1.5px solid transparent;
-    color:rgba(255,255,255,0.52); font-size:13.5px; font-weight:500;
-    cursor:pointer; text-align:left; width:100%;
-    transition:all 0.22s cubic-bezier(0.4,0,0.2,1);
-    font-family:'DM Sans',sans-serif; letter-spacing:0.01em;
-  }
-  .em-nav-item:hover { background:linear-gradient(135deg,rgba(59,130,246,0.16),rgba(34,197,94,0.08)); border-color:rgba(59,130,246,0.28); color:#93c5fd; transform:translateX(5px); }
-  .em-nav-icon { width:30px; height:30px; border-radius:9px; background:rgba(255,255,255,0.07); display:inline-flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; transition:background 0.2s; }
-  .em-nav-item:hover .em-nav-icon { background:rgba(59,130,246,0.2); }
-
   .em-main   { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
   .em-topbar {
     background:var(--white); border-bottom:1px solid var(--gray-100);
@@ -134,6 +111,8 @@ const PAGE_STYLES = `
   .em-btn-sky-outline:hover:not(:disabled)  { background:var(--sky-100); }
   .em-btn-rose-outline  { background:var(--rose-50); border:1.5px solid var(--rose-200); color:var(--rose-600); }
   .em-btn-rose-outline:hover:not(:disabled) { background:var(--rose-100); }
+  .em-btn-amber-outline { background:var(--amber-50); border:1.5px solid var(--amber-100); color:var(--amber-600); }
+  .em-btn-amber-outline:hover:not(:disabled) { background:var(--amber-100); }
   .em-btn-sm   { padding:6px 12px; font-size:12px; }
   .em-btn-icon { width:34px; height:34px; padding:0; justify-content:center; border-radius:var(--radius); }
 
@@ -219,13 +198,12 @@ const PAGE_STYLES = `
   .em-modal-overlay { position:fixed; inset:0; z-index:9999; background:rgba(17,24,39,0.65); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; padding:16px; animation:fadeIn 0.2s ease; }
   .em-modal-panel   { width:100%; max-width:760px; background:white; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-lg); animation:bounceIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; border:1.5px solid var(--gray-200); }
   .em-modal-header  { padding:22px 26px; }
-  .em-modal-body    { padding:20px 26px; display:flex; flex-direction:column; gap:16px; }
+  .em-modal-body    { padding:20px 26px; display:flex; flex-direction:column; gap:16px; max-height:70vh; overflow-y:auto; }
   .em-modal-footer  { padding:16px 26px 24px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--gray-100); }
 
   .em-form-block { border-radius:var(--radius-lg); border:1.5px solid var(--gray-200); overflow:hidden; background:white; box-shadow:var(--shadow-sm); }
   .em-form-block-header { padding:11px 16px; display:flex; align-items:center; gap:10px; border-bottom:1.5px solid var(--gray-100); }
   .em-form-block-body   { padding:16px; display:flex; flex-direction:column; gap:14px; }
-  .em-form-grid-2       { display:grid; gridTemplateColumns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
   .em-form-grid-2       { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
 
   .em-search-wrap { position:relative; }
@@ -235,16 +213,45 @@ const PAGE_STYLES = `
   .em-empty   { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; gap:12px; text-align:center; }
   .em-spinner { border-radius:50%; border:2.5px solid var(--gray-200); border-top-color:var(--blue-500); animation:spin 0.7s linear infinite; }
 
-  .em-mobile-overlay { position:fixed; inset:0; z-index:49; background:rgba(17,24,39,0.4); }
+  /* Export dropdown */
+  .em-dropdown-wrap { position:relative; display:inline-flex; }
+  .em-dropdown-menu {
+    position:absolute; top:calc(100% + 6px); right:0; z-index:200;
+    background:white; border:1.5px solid var(--gray-200); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-lg); min-width:190px; overflow:hidden;
+    animation:fadeUp 0.15s ease both;
+  }
+  .em-dropdown-item {
+    display:flex; align-items:center; gap:10px; padding:10px 14px;
+    font-size:13px; font-weight:600; font-family:'Outfit',sans-serif;
+    color:var(--gray-700); cursor:pointer; border:none; background:none; width:100%; text-align:left;
+    transition:background 0.12s;
+  }
+  .em-dropdown-item:hover { background:var(--blue-50); color:var(--blue-700); }
+  .em-dropdown-item .dd-icon { font-size:15px; }
+  .em-dropdown-divider { height:1px; background:var(--gray-100); margin:4px 0; }
+
+  /* Import preview table */
+  .im-preview-table { width:100%; border-collapse:collapse; }
+  .im-preview-table thead th { padding:9px 12px; text-align:left; font-size:11px; font-weight:700; font-family:'Outfit',sans-serif; background:#eff6ff; color:#1e3a8a; border-bottom:1px solid #bfdbfe; }
+  .im-preview-table tbody td { padding:9px 12px; font-size:12.5px; border-bottom:1px solid #f1f5f9; color:var(--gray-700); }
+  .im-preview-table tbody tr:last-child td { border-bottom:none; }
+  .im-preview-table tbody tr:hover td { background:#f8fafc; }
+
+  /* Import summary cards */
+  .im-summary { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
+  .im-summary-card { flex:1; min-width:90px; padding:12px; border-radius:10px; text-align:center; border:1.5px solid; }
+  .im-summary-card .val { font-family:'Outfit',sans-serif; font-weight:900; font-size:1.4rem; }
+  .im-summary-card .lbl { font-size:10px; font-weight:700; font-family:'Outfit',sans-serif; margin-top:2px; text-transform:uppercase; letter-spacing:.05em; opacity:.75; }
+  .im-summary-card.total  { background:var(--blue-50);   border-color:var(--blue-200);  color:var(--blue-700); }
+  .im-summary-card.ok     { background:var(--green-50);  border-color:var(--green-200); color:var(--green-700); }
+  .im-summary-card.warn   { background:var(--amber-50);  border-color:var(--amber-100); color:var(--amber-600); }
+  .im-summary-card.err    { background:var(--red-50);    border-color:var(--red-100);   color:var(--red-600); }
 
   ::-webkit-scrollbar { width:5px; height:5px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:var(--gray-300); border-radius:999px; }
 
-  @media(max-width:1024px) {
-    .em-sidebar { position:fixed; top:0; left:0; height:100vh; z-index:100; }
-    .em-content { padding:3px; }
-  }
   @media(max-width:640px) {
     .em-topbar { padding:8px 10px; }
     .em-content { padding:1px; }
@@ -256,59 +263,156 @@ const PAGE_STYLES = `
   }
 `;
 
-/* ── Helpers ──────────────────────────────────────────────────── */
+/* ── Constants ── */
+const EXCEL_COLUMNS = [
+  { key: "employee_code", header: "Employee Code", width: 16 },
+  { key: "full_name",     header: "Full Name",     width: 24 },
+  { key: "email",         header: "Email",         width: 28 },
+  { key: "department",    header: "Department",    width: 18 },
+  { key: "designation",   header: "Designation",   width: 20 },
+  { key: "phone",         header: "Phone",         width: 16 },
+  { key: "branch",        header: "Branch",        width: 18 },
+  { key: "status",        header: "Status",        width: 12 },
+];
+
 const defaultForm = {
-  employee_code: "",
-  full_name: "",
-  email: "",
-  department: "",
-  designation: "",
-  phone: "",
-  branch: "",
-  status: "active",
+  employee_code: "", full_name: "", email: "",
+  department: "", designation: "", phone: "", branch: "", status: "active",
+};
+
+/* ── normalizeRows: fuzzy, case-insensitive Excel column matching ──
+   Handles any column name your Excel file might use.
+   Rows only require at least one of: employee_code OR full_name.
+   employee_code is auto-generated as "AUTO-{index}" when missing.
+── */
+const FIELD_ALIASES = {
+  employee_code: [
+    "employee_code","employeecode","emp_code","empcode",
+    "employee code","emp code","code","staff code","staffcode",
+    "id","emp id","empid","employee id","employeeid","staff id",
+  ],
+  full_name: [
+    "full_name","fullname","full name","name","employee name",
+    "employeename","staff name","staffname","employee_name",
+    "emp name","empname",
+  ],
+  email: [
+    "email","email address","emailaddress","e-mail","e mail",
+    "mail","email id","emailid",
+  ],
+  department: [
+    "department","dept","dept.","department name","departmentname",
+  ],
+  designation: [
+    "designation","position","post","job title","jobtitle",
+    "title","role","job role",
+  ],
+  phone: [
+    "phone","phone number","phonenumber","mobile","mobile number",
+    "mobilenumber","contact","contact no","contact number",
+    "contactno","cell","telephone","tel",
+  ],
+  branch: [
+    "branch","branch name","branchname","office","location",
+    "branch office",
+  ],
+  status: ["status","active status","activestatus","emp status"],
+};
+
+const fuzzyMatch = (rowKey, aliasList) => {
+  const k = String(rowKey).toLowerCase().trim().replace(/\s+/g, " ");
+  return aliasList.some((alias) => alias === k);
+};
+
+const getValueFuzzy = (row, aliasList) => {
+  for (const rowKey of Object.keys(row)) {
+    if (fuzzyMatch(rowKey, aliasList)) {
+      const v = row[rowKey];
+      if (v !== undefined && v !== null && String(v).trim() !== "") {
+        return String(v).trim();
+      }
+    }
+  }
+  return "";
 };
 
 const normalizeRows = (rows) => {
   return rows
-    .map((row) => ({
-      employee_code: String(
-        row.employee_code ??
-          row["employee_code"] ??
-          row["Employee Code"] ??
-          row["Code"] ??
-          ""
-      ).trim(),
-      full_name: String(
-        row.full_name ??
-          row["full_name"] ??
-          row["Full Name"] ??
-          row["Name"] ??
-          ""
-      ).trim(),
-      email: String(row.email ?? row["Email"] ?? "").trim(),
-      department: String(row.department ?? row["Department"] ?? "").trim(),
-      designation: String(row.designation ?? row["Designation"] ?? "").trim(),
-      phone: String(row.phone ?? row["Phone"] ?? "").trim(),
-      branch: String(row.branch ?? row["Branch"] ?? "").trim(),
-      status: String(row.status ?? row["Status"] ?? "active").trim().toLowerCase() || "active",
-    }))
-    .filter((row) => row.employee_code || row.full_name);
+    .map((row, idx) => {
+      const status = getValueFuzzy(row, FIELD_ALIASES.status).toLowerCase();
+      const empCode = getValueFuzzy(row, FIELD_ALIASES.employee_code);
+      const fullName = getValueFuzzy(row, FIELD_ALIASES.full_name);
+
+      // Skip completely blank rows
+      if (!empCode && !fullName) return null;
+
+      return {
+        // Auto-generate code if missing so the row is never rejected
+        employee_code: empCode || `AUTO-${String(idx + 1).padStart(4, "0")}`,
+        full_name:     fullName || empCode,   // fall back to code as name if truly blank
+        email:         getValueFuzzy(row, FIELD_ALIASES.email),
+        department:    getValueFuzzy(row, FIELD_ALIASES.department),
+        designation:   getValueFuzzy(row, FIELD_ALIASES.designation),
+        phone:         getValueFuzzy(row, FIELD_ALIASES.phone),
+        branch:        getValueFuzzy(row, FIELD_ALIASES.branch),
+        status:        status === "inactive" ? "inactive" : "active",
+      };
+    })
+    .filter(Boolean);
 };
 
-const AVATAR_COLORS = [
-  "#2563eb",
-  "#16a34a",
-  "#7c3aed",
-  "#e11d48",
-  "#d97706",
-  "#0284c7",
-  "#0f766e",
-  "#9333ea",
-  "#db2777",
-];
+/* ── Excel export helper ── */
+const buildWorkbook = (data, sheetName = "Employees") => {
+  const headerRow = EXCEL_COLUMNS.map((c) => c.header);
+  const dataRows  = data.map((r) => EXCEL_COLUMNS.map((c) => r[c.key] ?? ""));
 
-const avatarColor = (name) =>
-  AVATAR_COLORS[(name || "?").charCodeAt(0) % AVATAR_COLORS.length];
+  const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
+
+  // Column widths
+  ws["!cols"] = EXCEL_COLUMNS.map((c) => ({ wch: c.width }));
+
+  // Header row style (row 0)
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  for (let C = range.s.c; C <= range.e.c; C++) {
+    const cellAddr = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!ws[cellAddr]) continue;
+    ws[cellAddr].s = {
+      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+      fill: { fgColor: { rgb: "0B5CAB" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        bottom: { style: "medium", color: { rgb: "FFFFFF" } },
+        right:  { style: "thin",   color: { rgb: "FFFFFF" } },
+      },
+    };
+  }
+
+  // Data rows alternating fill + borders
+  for (let R = 1; R <= range.e.r; R++) {
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cellAddr = XLSX.utils.encode_cell({ r: R, c: C });
+      if (!ws[cellAddr]) ws[cellAddr] = { v: "", t: "s" };
+      ws[cellAddr].s = {
+        fill: { fgColor: { rgb: R % 2 === 0 ? "EFF6FF" : "FFFFFF" } },
+        alignment: { vertical: "center" },
+        border: {
+          top:    { style: "thin", color: { rgb: "E2E8F0" } },
+          bottom: { style: "thin", color: { rgb: "E2E8F0" } },
+          left:   { style: "thin", color: { rgb: "E2E8F0" } },
+          right:  { style: "thin", color: { rgb: "E2E8F0" } },
+        },
+      };
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  return wb;
+};
+
+/* ── Misc helpers ── */
+const AVATAR_COLORS = ["#2563eb","#16a34a","#7c3aed","#e11d48","#d97706","#0284c7","#0f766e","#9333ea","#db2777"];
+const avatarColor  = (name) => AVATAR_COLORS[(name || "?").charCodeAt(0) % AVATAR_COLORS.length];
 
 const Spinner = ({ size = 28 }) => (
   <div className="em-spinner" style={{ width: size, height: size }} />
@@ -318,11 +422,11 @@ const StatusBadge = ({ status }) => {
   const s = String(status || "").toLowerCase();
   return (
     <span className={`em-status ${s === "active" ? "em-status-active" : "em-status-inactive"}`}>
-      {s === "active" ? "Active" : "Inactive"}
+      {s === "active" ? "✔ Active" : "⏸ Inactive"}
     </span>
   );
 };
-/* ── Icon helper ── */
+
 const makeIcon = (d) => (
   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
     <path strokeLinecap="round" strokeLinejoin="round" d={d} />
@@ -337,360 +441,269 @@ const D = {
   graph:    "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z",
   users:    "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
   radar:    "M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
-  scan:     "M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
 };
 
-function Ic({ d, size = 14 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.85"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={d} />
-    </svg>
-  );
-}
-
+/* ── Hero ── */
 function EmployeeHero({ total, activeCount, inactiveCount, branchCount, deptCount }) {
   return (
     <div className="em-hero-wrap">
       <div className="em-hero-inner">
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              background: "rgba(11,92,171,0.10)",
-              border: "1px solid rgba(11,92,171,0.20)",
-              color: "rgba(11,92,171,0.90)",
-              borderRadius: 999,
-              padding: "5px 12px",
-              fontSize: 10,
-              fontWeight: 900,
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-              marginBottom: 10,
-            }}
-          >
-            <span
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                background: NL_BLUE2,
-                boxShadow: "0 0 8px rgba(20,116,243,0.65)",
-                animation: "pulse 2s ease infinite",
-              }}
-            />
+          <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(11,92,171,0.10)", border:"1px solid rgba(11,92,171,0.20)", color:"rgba(11,92,171,0.90)", borderRadius:999, padding:"5px 12px", fontSize:10, fontWeight:900, letterSpacing:".08em", textTransform:"uppercase", marginBottom:10 }}>
+            <span style={{ width:7, height:7, borderRadius:"50%", background:NL_BLUE2, boxShadow:"0 0 8px rgba(20,116,243,0.65)", animation:"pulse 2s ease infinite" }} />
             Nepal Life · Employee Management
           </div>
-
           <h2 className="em-hero-title">
-            <span className="blue">NEPAL</span>
-            <span className="red">LIFE</span>{" "}
-            <span style={{ color: "rgba(15,23,42,0.65)", fontWeight: 800 }}>
-              Employee Master
-            </span>
+            <span className="blue">NEPAL</span><span className="red">LIFE</span>{" "}
+            <span style={{ color:"rgba(15,23,42,0.65)", fontWeight:800 }}>Employee Master</span>
           </h2>
           <div className="em-hero-divider" />
-          <p className="em-hero-sub">
-            Manage employees, import Excel records, maintain department and branch information, and support frontend employee filters from one unified dashboard.
-          </p>
-
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+          <p className="em-hero-sub">Manage employees, import/export Excel records, maintain department and branch information, and support frontend employee filters from one unified dashboard.</p>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:12 }}>
             {[
-              { label: `${total} Total`, bg: "rgba(11,92,171,0.10)", color: NL_BLUE, border: "rgba(11,92,171,0.2)" },
-              { label: `${activeCount} Active`, bg: "rgba(22,163,74,0.08)", color: "var(--green-700)", border: "var(--green-200)" },
-              { label: `${inactiveCount} Inactive`, bg: "rgba(107,114,128,0.10)", color: "var(--gray-700)", border: "var(--gray-200)" },
-              { label: `${branchCount} Branches`, bg: "rgba(245,158,11,0.08)", color: "var(--amber-600)", border: "var(--amber-100)" },
-              { label: `${deptCount} Departments`, bg: "rgba(124,58,237,0.08)", color: "var(--violet-700)", border: "var(--violet-200)" },
+              { label:`${total} Total`,       bg:"rgba(11,92,171,0.10)", color:NL_BLUE,                   border:"rgba(11,92,171,0.2)" },
+              { label:`${activeCount} Active`, bg:"rgba(22,163,74,0.08)", color:"var(--green-700)",         border:"var(--green-200)" },
+              { label:`${inactiveCount} Inactive`, bg:"rgba(107,114,128,0.10)", color:"var(--gray-700)",   border:"var(--gray-200)" },
+              { label:`${branchCount} Branches`,   bg:"rgba(245,158,11,0.08)", color:"var(--amber-600)",   border:"var(--amber-100)" },
+              { label:`${deptCount} Departments`,  bg:"rgba(124,58,237,0.08)", color:"var(--violet-700)",  border:"var(--violet-200)" },
             ].map((s) => (
-              <span
-                key={s.label}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                  padding: "5px 12px",
-                  borderRadius: 999,
-                  background: s.bg,
-                  border: `1px solid ${s.border}`,
-                  color: s.color,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  fontFamily: "Outfit,sans-serif",
-                }}
-              >
+              <span key={s.label} style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"5px 12px", borderRadius:999, background:s.bg, border:`1px solid ${s.border}`, color:s.color, fontSize:11, fontWeight:700, fontFamily:"Outfit,sans-serif" }}>
                 {s.label}
               </span>
             ))}
           </div>
         </div>
-
         <img src={NepalLifeLogo} alt="Nepal Life" className="em-hero-logo" />
       </div>
     </div>
   );
 }
 
+/* ── Export Dropdown ── */
+function ExportDropdown({ onExportAll, onExportFiltered, filteredCount, totalCount }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div className="em-dropdown-wrap" ref={ref}>
+      <button
+        className="em-btn em-btn-amber-outline em-btn-sm"
+        onClick={() => setOpen((v) => !v)}
+        style={{ position:"relative" }}
+      >
+        📥 Export ▾
+      </button>
+      {open && (
+        <div className="em-dropdown-menu">
+          <button className="em-dropdown-item" onClick={() => { onExportAll(); setOpen(false); }}>
+            <span className="dd-icon">📊</span>
+            <div>
+              <div style={{ fontWeight:700 }}>Export All</div>
+              <div style={{ fontSize:11, opacity:.65 }}>{totalCount} employees</div>
+            </div>
+          </button>
+          <button className="em-dropdown-item" onClick={() => { onExportFiltered(); setOpen(false); }}>
+            <span className="dd-icon">🔍</span>
+            <div>
+              <div style={{ fontWeight:700 }}>Export Filtered</div>
+              <div style={{ fontSize:11, opacity:.65 }}>{filteredCount} employees</div>
+            </div>
+          </button>
+          <div className="em-dropdown-divider" />
+          <button className="em-dropdown-item" onClick={() => { onExportAll(true); setOpen(false); }}>
+            <span className="dd-icon">📋</span>
+            <div>
+              <div style={{ fontWeight:700 }}>Download Sample</div>
+              <div style={{ fontSize:11, opacity:.65 }}>Import template</div>
+            </div>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+══════════════════════════════════════════════════════════════ */
 export default function Employee() {
   const navigate = useNavigate();
   const { token, isAdmin, isSubAdmin, user } = useAuth();
   const roleLabel = isAdmin ? "ADMIN" : isSubAdmin ? "SUB ADMIN" : "USER";
 
-  const [rows, setRows] = useState([]);
+  const [rows,    setRows]    = useState([]);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState({ type: "", message: "" });
+  const [alert,   setAlert]   = useState({ type: "", message: "" });
 
-  const [q, setQ] = useState("");
-  const [branchFilter, setBranchFilter] = useState("");
+  const [q,                setQ]                = useState("");
+  const [branchFilter,     setBranchFilter]     = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter,     setStatusFilter]     = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize,    setPageSize]    = useState(10);
 
-  const [menuOpen, setMenuOpen] = useState(true);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [showPanel, setShowPanel] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(defaultForm);
-  const [saving, setSaving] = useState(false);
+  const [editing,   setEditing]   = useState(null);
+  const [form,      setForm]      = useState(defaultForm);
+  const [saving,    setSaving]    = useState(false);
 
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [importRows, setImportRows] = useState([]);
-  const [importing, setImporting] = useState(false);
+  const [importRows,      setImportRows]      = useState([]);
+  const [importResult,    setImportResult]    = useState(null); // {inserted, updated, failed, errors}
+  const [importing,       setImporting]       = useState(false);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    const h = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", h);
-    return () => window.removeEventListener("resize", h);
-  }, []);
-
-  const swWidth = () => {
-    if (windowWidth < 640) return menuOpen ? "85vw" : "0";
-    if (windowWidth < 1024) return menuOpen ? "280px" : "0";
-    return menuOpen ? "260px" : "0";
-  };
-
-  const togglePanel = (p) => setShowPanel((prev) => (prev === p ? "" : p));
-
+  /* ── fetch ── */
   const fetchEmployees = useCallback(async () => {
     if (!token) return;
     try {
       setLoading(true);
       setAlert({ type: "", message: "" });
-
       const res = await api.get("/api/employees", {
-        headers: { Authorization: `Bearer ${token}` },
+        params: { _t: Date.now() },
+        headers: { Authorization: `Bearer ${token}`, "Cache-Control": "no-cache", Pragma: "no-cache" },
       });
-
       setRows(res?.data?.data || []);
     } catch (e) {
-      setAlert({
-        type: "error",
-        message: e?.response?.data?.message || "Failed to fetch employees",
-      });
+      setAlert({ type: "error", message: e?.response?.data?.message || "Failed to fetch employees" });
     } finally {
       setLoading(false);
     }
   }, [token]);
 
-  useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+  useEffect(() => { fetchEmployees(); }, [fetchEmployees]);
 
-  const branchOptions = useMemo(
-    () => [...new Set(rows.map((r) => r.branch).filter(Boolean))].sort(),
-    [rows]
-  );
-
-  const departmentOptions = useMemo(
-    () => [...new Set(rows.map((r) => r.department).filter(Boolean))].sort(),
-    [rows]
-  );
+  /* ── derived ── */
+  const branchOptions     = useMemo(() => [...new Set(rows.map((r) => r.branch).filter(Boolean))].sort(), [rows]);
+  const departmentOptions = useMemo(() => [...new Set(rows.map((r) => r.department).filter(Boolean))].sort(), [rows]);
 
   const filteredRows = useMemo(() => {
     const s = q.trim().toLowerCase();
-
     return rows.filter((row) => {
-      if (branchFilter && row.branch !== branchFilter) return false;
+      if (branchFilter     && row.branch     !== branchFilter)     return false;
       if (departmentFilter && row.department !== departmentFilter) return false;
-      if (statusFilter && String(row.status).toLowerCase() !== statusFilter) return false;
-
+      if (statusFilter     && String(row.status).toLowerCase() !== statusFilter) return false;
       if (!s) return true;
-
-      return [
-        row.employee_code,
-        row.full_name,
-        row.email,
-        row.department,
-        row.designation,
-        row.phone,
-        row.branch,
-        row.status,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(s);
+      return [row.employee_code, row.full_name, row.email, row.department, row.designation, row.phone, row.branch, row.status]
+        .filter(Boolean).join(" ").toLowerCase().includes(s);
     });
   }, [rows, q, branchFilter, departmentFilter, statusFilter]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [q, branchFilter, departmentFilter, statusFilter]);
+  useEffect(() => { setCurrentPage(1); }, [q, branchFilter, departmentFilter, statusFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+  const pagedRows  = useMemo(() => filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize), [filteredRows, currentPage, pageSize]);
 
-  const pagedRows = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredRows.slice(start, start + pageSize);
-  }, [filteredRows, currentPage, pageSize]);
-
-  const totalEmployees = rows.length;
-  const activeCount = rows.filter((r) => String(r.status).toLowerCase() === "active").length;
-  const inactiveCount = rows.filter((r) => String(r.status).toLowerCase() !== "active").length;
-  const branchCount = branchOptions.length;
-  const deptCount = departmentOptions.length;
-
+  const totalEmployees   = rows.length;
+  const activeCount      = rows.filter((r) => String(r.status).toLowerCase() === "active").length;
+  const inactiveCount    = rows.filter((r) => String(r.status).toLowerCase() !== "active").length;
+  const branchCount      = branchOptions.length;
+  const deptCount        = departmentOptions.length;
   const activeFiltersCount = [q, branchFilter, departmentFilter, statusFilter].filter(Boolean).length;
 
-  const clearFilters = () => {
-    setQ("");
-    setBranchFilter("");
-    setDepartmentFilter("");
-    setStatusFilter("");
-    setCurrentPage(1);
-  };
+  const clearFilters = () => { setQ(""); setBranchFilter(""); setDepartmentFilter(""); setStatusFilter(""); setCurrentPage(1); };
+  const togglePanel  = (p) => setShowPanel((prev) => (prev === p ? "" : p));
 
-  const openCreate = () => {
-    setEditing(null);
-    setForm(defaultForm);
-    setModalOpen(true);
-  };
-
-  const openEdit = (row) => {
+  /* ── modal helpers ── */
+  const openCreate = () => { setEditing(null); setForm(defaultForm); setModalOpen(true); };
+  const openEdit   = (row) => {
     setEditing(row);
-    setForm({
-      employee_code: row.employee_code || "",
-      full_name: row.full_name || "",
-      email: row.email || "",
-      department: row.department || "",
-      designation: row.designation || "",
-      phone: row.phone || "",
-      branch: row.branch || "",
-      status: row.status || "active",
-    });
+    setForm({ employee_code: row.employee_code||"", full_name: row.full_name||"", email: row.email||"",
+              department: row.department||"", designation: row.designation||"", phone: row.phone||"",
+              branch: row.branch||"", status: row.status||"active" });
     setModalOpen(true);
   };
+  const closeModal = () => { setEditing(null); setForm(defaultForm); setModalOpen(false); };
 
-  const closeModal = () => {
-    setEditing(null);
-    setForm(defaultForm);
-    setModalOpen(false);
-  };
-
+  /* ── CRUD ── */
   const saveEmployee = async () => {
     if (!token) return;
-
     if (!form.employee_code.trim() || !form.full_name.trim()) {
-      setAlert({
-        type: "error",
-        message: "employee_code and full_name are required",
-      });
+      setAlert({ type: "error", message: "Employee Code and Full Name are required" });
       return;
     }
-
     try {
       setSaving(true);
-
       const payload = {
-        employee_code: form.employee_code.trim(),
-        full_name: form.full_name.trim(),
-        email: form.email.trim() || null,
-        department: form.department.trim() || null,
-        designation: form.designation.trim() || null,
-        phone: form.phone.trim() || null,
-        branch: form.branch.trim() || null,
-        status: form.status || "active",
+        employee_code: form.employee_code.trim(), full_name: form.full_name.trim(),
+        email: form.email.trim() || null, department: form.department.trim() || null,
+        designation: form.designation.trim() || null, phone: form.phone.trim() || null,
+        branch: form.branch.trim() || null, status: form.status || "active",
       };
-
       if (editing) {
-        await api.put(`/api/employees/${editing.id}`, payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.put(`/api/employees/${editing.id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
         setAlert({ type: "success", message: "Employee updated successfully" });
       } else {
-        await api.post("/api/employees", payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.post("/api/employees", payload, { headers: { Authorization: `Bearer ${token}` } });
         setAlert({ type: "success", message: "Employee created successfully" });
       }
-
       closeModal();
       fetchEmployees();
     } catch (e) {
-      setAlert({
-        type: "error",
-        message: e?.response?.data?.message || "Failed to save employee",
-      });
+      setAlert({ type: "error", message: e?.response?.data?.message || "Failed to save employee" });
     } finally {
       setSaving(false);
     }
   };
 
   const deleteEmployee = async (id) => {
-    if (!token || !window.confirm("Delete this employee?")) return;
-
+    if (!token || !window.confirm("Delete this employee? This cannot be undone.")) return;
     try {
-      await api.delete(`/api/employees/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      await api.delete(`/api/employees/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       setAlert({ type: "success", message: "Employee deleted successfully" });
       fetchEmployees();
     } catch (e) {
-      setAlert({
-        type: "error",
-        message: e?.response?.data?.message || "Failed to delete employee",
-      });
+      setAlert({ type: "error", message: e?.response?.data?.message || "Failed to delete employee" });
     }
   };
+
+  /* ── EXCEL IMPORT ── */
+  const [detectedCols, setDetectedCols] = useState([]);
 
   const handleExcelSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     try {
       const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const parsed = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      const wb     = XLSX.read(buffer, { type: "array" });
+      const ws     = wb.Sheets[wb.SheetNames[0]];
+      // raw:false → dates/numbers come as display strings; defval:"" → no undefined cells
+      const parsed = XLSX.utils.sheet_to_json(ws, { defval: "", raw: false });
+
+      if (parsed.length === 0) {
+        setAlert({ type: "error", message: "The Excel file appears to be empty or has no data rows." });
+        return;
+      }
+
+      const cols = Object.keys(parsed[0]);
+      setDetectedCols(cols);
+
       const normalized = normalizeRows(parsed);
 
+      if (normalized.length === 0) {
+        setAlert({
+          type: "error",
+          message: `No valid rows found. Detected columns in your file: [${cols.join(", ")}]. Please check headers.`,
+        });
+        return;
+      }
+
       setImportRows(normalized);
+      setImportResult(null);
       setImportModalOpen(true);
-      setAlert({
-        type: "success",
-        message: `${normalized.length} row(s) parsed`,
-      });
-    } catch {
-      setAlert({
-        type: "error",
-        message: "Failed to parse Excel file",
-      });
+      setAlert({ type: "success", message: `${normalized.length} row(s) parsed from "${file.name}"` });
+    } catch (err) {
+      console.error("Excel parse error:", err);
+      setAlert({ type: "error", message: "Failed to parse Excel file. Make sure it is a valid .xlsx or .xls file." });
     } finally {
       e.target.value = "";
     }
@@ -698,110 +711,80 @@ export default function Employee() {
 
   const handleImport = async () => {
     if (!token || importRows.length === 0) return;
-
     try {
       setImporting(true);
-
-      const res = await api.post(
-        "/api/employees/import",
-        { rows: importRows },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setAlert({
-        type: "success",
-        message: res?.data?.message || "Import completed successfully",
+      const res        = await api.post("/api/employees/import", { rows: importRows }, {
+        headers: { Authorization: `Bearer ${token}`, "Cache-Control": "no-cache", Pragma: "no-cache" },
       });
-
-      setImportRows([]);
-      setImportModalOpen(false);
-      fetchEmployees();
+      const d = res?.data?.data;
+      setImportResult(d);
+      setAlert({
+        type: d?.failed > 0 ? "error" : "success",
+        message: res?.data?.message || "Import completed",
+      });
+      if (d?.failed === 0) {
+        setImportRows([]);
+        setTimeout(() => setImportModalOpen(false), 1800);
+      }
+      setCurrentPage(1);
+      await fetchEmployees();
     } catch (e) {
-      setAlert({
-        type: "error",
-        message: e?.response?.data?.message || "Failed to import employees",
-      });
+      setAlert({ type: "error", message: e?.response?.data?.message || "Failed to import employees" });
     } finally {
       setImporting(false);
     }
   };
 
-  const downloadSample = () => {
-    const sample = [
-      {
-        employee_code: "EMP001",
-        full_name: "Ram Sharma",
-        email: "ram@nepallife.com.np",
-        department: "IT",
-        designation: "Officer",
-        phone: "9800000001",
-        branch: "Kathmandu",
-        status: "active",
-      },
-      {
-        employee_code: "EMP002",
-        full_name: "Sita Rai",
-        email: "sita@nepallife.com.np",
-        department: "Finance",
-        designation: "Assistant",
-        phone: "9800000002",
-        branch: "Pokhara",
-        status: "active",
-      },
-    ];
-
-    const ws = XLSX.utils.json_to_sheet(sample);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Employees");
-    XLSX.writeFile(wb, "employee_import_sample.xlsx");
+  /* ── EXCEL EXPORT ── */
+  const exportToExcel = (data, filename) => {
+    // Use xlsx-js-style if available for styled export, else plain xlsx
+    const wb = buildWorkbook(data);
+    XLSX.writeFile(wb, filename, { bookType: "xlsx", type: "binary", cellStyles: true });
   };
 
-  /* ── nav items ── */
-  const navItems = [
-    { label: "Analytics",      path: "/assetdashboard",       icon: makeIcon(D.graph) },
-    { label: "Branches",       path: "/branches",             icon: makeIcon(D.branch) },
-    { label: "Asset Master",   path: "/branch-assets-report", icon: makeIcon(D.assets) },
-    { label: "Requests",       path: "/requests",             icon: makeIcon(D.requests), show: isAdmin || isSubAdmin },
-    { label: "Users",          path: "/admin/users",          icon: makeIcon(D.users),    show: isAdmin },
-    { label: "Asset Tracking", path: "/asset-tracking",       icon: makeIcon(D.radar) },
-    { label: "Help & Support", path: "/support",              icon: makeIcon(D.help) },
-  ].filter(i => i.show !== false);
+  const handleExportAll = (sample = false) => {
+    if (sample) {
+      const sampleData = [
+        { employee_code:"EMP001", full_name:"Ram Sharma",   email:"ram@nepallife.com.np",  department:"IT",      designation:"Officer",   phone:"9800000001", branch:"Kathmandu", status:"active" },
+        { employee_code:"EMP002", full_name:"Sita Rai",     email:"sita@nepallife.com.np", department:"Finance", designation:"Assistant", phone:"9800000002", branch:"Pokhara",   status:"active" },
+        { employee_code:"EMP003", full_name:"Hari Thapa",   email:"hari@nepallife.com.np", department:"HR",      designation:"Manager",   phone:"9800000003", branch:"Lalitpur",  status:"inactive" },
+      ];
+      exportToExcel(sampleData, "employee_import_sample.xlsx");
+      setAlert({ type: "success", message: "Sample template downloaded (3 example rows)" });
+    } else {
+      if (rows.length === 0) { setAlert({ type: "error", message: "No employees to export" }); return; }
+      exportToExcel(rows, `Nepal_Life_Employees_All_${new Date().toISOString().slice(0,10)}.xlsx`);
+      setAlert({ type: "success", message: `Exported ${rows.length} employees to Excel` });
+    }
+  };
 
+  const handleExportFiltered = () => {
+    if (filteredRows.length === 0) { setAlert({ type: "error", message: "No employees match the current filters" }); return; }
+    exportToExcel(filteredRows, `Nepal_Life_Employees_Filtered_${new Date().toISOString().slice(0,10)}.xlsx`);
+    setAlert({ type: "success", message: `Exported ${filteredRows.length} filtered employees to Excel` });
+  };
+
+  /* ── nav ── */
+  const navItems = [
+    { label:"Analytics",      path:"/assetdashboard",       icon:makeIcon(D.graph) },
+    { label:"Branches",       path:"/branches",             icon:makeIcon(D.branch) },
+    { label:"Asset Master",   path:"/branch-assets-report", icon:makeIcon(D.assets) },
+    { label:"Requests",       path:"/requests",             icon:makeIcon(D.requests), show: isAdmin || isSubAdmin },
+    { label:"Users",          path:"/admin/users",          icon:makeIcon(D.users),    show: isAdmin },
+    { label:"Asset Tracking", path:"/asset-tracking",       icon:makeIcon(D.radar) },
+    { label:"Help & Support", path:"/support",              icon:makeIcon(D.help) },
+  ].filter((i) => i.show !== false);
+
+  /* ── Access guard ── */
   if (!(isAdmin || isSubAdmin)) {
     return (
       <>
-        <div
-          className="em-root"
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
-        >
-          <div
-            style={{
-              background: "white",
-              border: "1.5px solid var(--red-100)",
-              borderRadius: "var(--radius-xl)",
-              padding: "48px 40px",
-              textAlign: "center",
-              maxWidth: 380,
-              boxShadow: "var(--shadow-lg)",
-            }}
-          >
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🚫</div>
-            <h2
-              style={{
-                fontFamily: "Outfit,sans-serif",
-                fontWeight: 800,
-                fontSize: 20,
-                margin: "0 0 8px",
-              }}
-            >
-              Access Denied
-            </h2>
-            <p style={{ color: "var(--gray-500)", fontSize: 14, margin: "0 0 20px" }}>
-              You don't have permission to view this page.
-            </p>
-            <button className="em-btn em-btn-primary" onClick={() => navigate(-1)}>
-              ← Go Back
-            </button>
+        <div className="em-root" style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+          <div style={{ background:"white", border:"1.5px solid var(--red-100)", borderRadius:"var(--radius-xl)", padding:"48px 40px", textAlign:"center", maxWidth:380, boxShadow:"var(--shadow-lg)" }}>
+            <div style={{ fontSize:48, marginBottom:12 }}>🚫</div>
+            <h2 style={{ fontFamily:"Outfit,sans-serif", fontWeight:800, fontSize:20, margin:"0 0 8px" }}>Access Denied</h2>
+            <p style={{ color:"var(--gray-500)", fontSize:14, margin:"0 0 20px" }}>You don't have permission to view this page.</p>
+            <button className="em-btn em-btn-primary" onClick={() => navigate(-1)}>← Go Back</button>
           </div>
         </div>
         <Footer />
@@ -809,663 +792,434 @@ export default function Employee() {
     );
   }
 
+  /* ══════════ RENDER ══════════ */
   return (
     <>
-     <SplitSidebarLayout
-            navItems={navItems}
-            user={user}
-          >
-      <div className="em-root">
-        <style>{FONTS}{PAGE_STYLES}</style>
+      <SplitSidebarLayout navItems={navItems} user={user}>
+        <div className="em-root">
+          <style>{FONTS}{PAGE_STYLES}</style>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".xlsx,.xls"
-          style={{ display: "none" }}
-          onChange={handleExcelSelect}
-        />
+          {/* Hidden file input for import */}
+          <input ref={fileInputRef} type="file" accept=".xlsx,.xls" style={{ display:"none" }} onChange={handleExcelSelect} />
 
-        <div className="em-layout">
-          <main className="em-main">
-            <div className="em-topbar">
-              <div className="em-topbar-left">
-                <div style={{ width: 1, height: 20, background: "var(--gray-200)" }} />
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gray-700)", fontFamily: "Outfit,sans-serif" }}>
-                  Employee Master
+          <div className="em-layout">
+            <main className="em-main">
+
+              {/* ── Topbar ── */}
+              <div className="em-topbar">
+                <div className="em-topbar-left">
+                  <div style={{ width:1, height:20, background:"var(--gray-200)" }} />
+                  <div style={{ fontSize:13, fontWeight:700, color:"var(--gray-700)", fontFamily:"Outfit,sans-serif" }}>
+                    Employee Master
+                  </div>
                 </div>
-              </div>
+                <div className="em-topbar-right">
+                  <div style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"5px 12px", borderRadius:999, fontSize:11, fontWeight:800, fontFamily:"Outfit,sans-serif", letterSpacing:"0.08em", textTransform:"uppercase", border:"1.5px solid var(--gray-200)", background:"var(--gray-100)", color:"var(--gray-700)" }}>
+                    <span style={{ width:6, height:6, borderRadius:"50%", background:"var(--green-500)", animation:"pulse 2s ease infinite" }} />
+                    {roleLabel}
+                  </div>
+                  <button className="em-btn em-btn-blue-outline em-btn-sm" onClick={fetchEmployees}>🔄 Refresh</button>
 
-              <div className="em-topbar-right">
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "5px 12px",
-                    borderRadius: 999,
-                    fontSize: 11,
-                    fontWeight: 800,
-                    fontFamily: "Outfit,sans-serif",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    border: "1.5px solid var(--gray-200)",
-                    background: "var(--gray-100)",
-                    color: "var(--gray-700)",
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: "var(--green-500)",
-                      animation: "pulse 2s ease infinite",
-                    }}
+                  <ExportDropdown
+                    onExportAll={handleExportAll}
+                    onExportFiltered={handleExportFiltered}
+                    filteredCount={filteredRows.length}
+                    totalCount={totalEmployees}
                   />
-                  {roleLabel}
-                </div>
 
-                <button className="em-btn em-btn-blue-outline em-btn-sm" onClick={fetchEmployees}>
-                  Refresh
-                </button>
-
-                <button className="em-btn em-btn-white em-btn-sm" onClick={downloadSample}>
-                  Download Sample
-                </button>
-
-                <button className="em-btn em-btn-success em-btn-sm" onClick={() => fileInputRef.current?.click()}>
-                  Import Employees
-                </button>
-
-                <button className="em-btn em-btn-primary em-btn-sm" onClick={openCreate}>
-                  Add Employee
-                </button>
-              </div>
-            </div>
-
-            <div className="em-panel-toggle-bar">
-              <button className={`em-toggle-pill${showPanel === "hero" ? " active" : ""}`} onClick={() => togglePanel("hero")}>
-                🏛️ Overview
-              </button>
-
-              <button className={`em-toggle-pill${showPanel === "filters" ? " active" : ""}`} onClick={() => togglePanel("filters")}>
-                🔍 Filters
-                {activeFiltersCount > 0 && <span className="pill-badge">{activeFiltersCount}</span>}
-              </button>
-
-              <div className="em-active-filters">
-                {q && (
-                  <span className="em-filter-chip">
-                    🔎 "{q.length > 18 ? q.slice(0, 18) + "…" : q}"
-                    <button onClick={() => setQ("")}>×</button>
-                  </span>
-                )}
-                {branchFilter && (
-                  <span className="em-filter-chip">
-                    🏢 {branchFilter}
-                    <button onClick={() => setBranchFilter("")}>×</button>
-                  </span>
-                )}
-                {departmentFilter && (
-                  <span className="em-filter-chip">
-                    🗂 {departmentFilter}
-                    <button onClick={() => setDepartmentFilter("")}>×</button>
-                  </span>
-                )}
-                {statusFilter && (
-                  <span className="em-filter-chip">
-                    📌 {statusFilter}
-                    <button onClick={() => setStatusFilter("")}>×</button>
-                  </span>
-                )}
-
-                {activeFiltersCount > 0 && (
-                  <button className="em-clear-all" onClick={clearFilters}>
-                    Clear all
+                  <button className="em-btn em-btn-success em-btn-sm" onClick={() => fileInputRef.current?.click()}>
+                    📤 Import Excel
                   </button>
-                )}
-              </div>
-
-              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-                <span className="em-badge em-badge-blue" style={{ fontSize: 11 }}>
-                  {filteredRows.length} / {totalEmployees}
-                </span>
-                <span className="em-badge em-badge-gray" style={{ fontSize: 11 }}>
-                  {roleLabel}
-                </span>
-              </div>
-            </div>
-
-            <div className={`em-collapsible-panel${showPanel === "hero" ? " open" : ""}`}>
-              <div className="em-filter-card" style={{ margin: "2px 2px 0" }}>
-                <EmployeeHero
-                  total={totalEmployees}
-                  activeCount={activeCount}
-                  inactiveCount={inactiveCount}
-                  branchCount={branchCount}
-                  deptCount={deptCount}
-                />
-              </div>
-
-              <div className="em-filter-card" style={{ margin: "10px 2px 0" }}>
-                <div className="em-stats-grid">
-                  <div className="em-stat-card" style={{ "--stat-bar": NL_BLUE }}>
-                    <div className="em-stat-icon" style={{ background: "var(--blue-50)", color: "var(--blue-700)" }}>👥</div>
-                    <div className="em-stat-value">{totalEmployees}</div>
-                    <div className="em-stat-label">Total Employees</div>
-                  </div>
-
-                  <div className="em-stat-card" style={{ "--stat-bar": "#16a34a" }}>
-                    <div className="em-stat-icon" style={{ background: "var(--green-50)", color: "var(--green-700)" }}>✅</div>
-                    <div className="em-stat-value">{activeCount}</div>
-                    <div className="em-stat-label">Active</div>
-                  </div>
-
-                  <div className="em-stat-card" style={{ "--stat-bar": "#6b7280" }}>
-                    <div className="em-stat-icon" style={{ background: "var(--gray-100)", color: "var(--gray-700)" }}>⏸</div>
-                    <div className="em-stat-value">{inactiveCount}</div>
-                    <div className="em-stat-label">Inactive</div>
-                  </div>
-
-                  <div className="em-stat-card" style={{ "--stat-bar": "#d97706" }}>
-                    <div className="em-stat-icon" style={{ background: "var(--amber-50)", color: "var(--amber-600)" }}>🏢</div>
-                    <div className="em-stat-value">{branchCount}</div>
-                    <div className="em-stat-label">Branches</div>
-                  </div>
-
-                  <div className="em-stat-card" style={{ "--stat-bar": "#7c3aed" }}>
-                    <div className="em-stat-icon" style={{ background: "var(--violet-50)", color: "var(--violet-700)" }}>🗂</div>
-                    <div className="em-stat-value">{deptCount}</div>
-                    <div className="em-stat-label">Departments</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className={`em-collapsible-panel${showPanel === "filters" ? " open" : ""}`}>
-              <div className="em-filter-card1" style={{ margin: "2px 2px 0" }}>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
-                    gap: 14,
-                    alignItems: "end",
-                  }}
-                >
-                  <div style={{ gridColumn: "span 2", minWidth: 0 }}>
-                    <label className="em-label">🔎 Search Employees</label>
-                    <div className="em-search-wrap">
-                      <input
-                        type="text"
-                        placeholder="Code, name, email, branch, department..."
-                        className="em-input"
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                      />
-                      <svg className="icon" width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="em-label">🏢 Branch</label>
-                    <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="em-select">
-                      <option value="">All Branches</option>
-                      {branchOptions.map((branch) => (
-                        <option key={branch} value={branch}>{branch}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="em-label">🗂 Department</label>
-                    <select value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)} className="em-select">
-                      <option value="">All Departments</option>
-                      {departmentOptions.map((department) => (
-                        <option key={department} value={department}>{department}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="em-label">📌 Status</label>
-                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="em-select">
-                      <option value="">All Status</option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="em-label">📄 Rows per page</label>
-                    <select
-                      className="em-select"
-                      value={pageSize}
-                      onChange={(e) => {
-                        setPageSize(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                    >
-                      {[5, 10, 20, 50].map((n) => (
-                        <option key={n} value={n}>
-                          {n} per page
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="em-content">
-              {alert.message && (
-                <div className={`em-alert ${alert.type === "error" ? "em-alert-error" : "em-alert-success"}`} style={{ margin: "10px 2px 0" }}>
-                  {alert.type === "error" ? "⚠" : "✅"} {alert.message}
-                  <button
-                    onClick={() => setAlert({ type: "", message: "" })}
-                    style={{
-                      marginLeft: "auto",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "inherit",
-                      fontWeight: 800,
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-
-              <div className="em-table-card" style={{ overflowX: "auto", margin: "14px 2px 0" }}>
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    borderBottom: "1px solid var(--gray-100)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background: loading ? "var(--amber-500)" : "var(--green-500)",
-                        boxShadow: `0 0 8px ${loading ? "rgba(245,158,11,0.6)" : "rgba(34,197,94,0.6)"}`,
-                        animation: loading ? "pulse 1s ease infinite" : "none",
-                      }}
-                    />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "var(--gray-700)", fontFamily: "Outfit,sans-serif" }}>
-                      {loading ? "Loading…" : `${filteredRows.length} of ${totalEmployees} employees`}
-                    </span>
-                  </div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 11, color: "var(--gray-400)", fontFamily: "Outfit,sans-serif" }}>
-                      Page {currentPage} of {totalPages}
-                    </span>
-                  </div>
-                </div>
-
-                {loading ? (
-                  <div className="em-empty">
-                    <Spinner size={36} />
-                    <p style={{ color: "var(--gray-500)", fontSize: 14, margin: 0 }}>Loading employees…</p>
-                  </div>
-                ) : filteredRows.length === 0 ? (
-                  <div className="em-empty">
-                    <div style={{ fontSize: 52 }}>👥</div>
-                    <p style={{ color: "var(--gray-700)", fontWeight: 700, fontSize: 15, margin: 0, fontFamily: "Outfit,sans-serif" }}>
-                      No employees found
-                    </p>
-                    <p style={{ color: "var(--gray-400)", fontSize: 12, margin: 0 }}>
-                      {activeFiltersCount > 0 ? "Try adjusting your filters" : "Add an employee to get started"}
-                    </p>
-                    {activeFiltersCount > 0 ? (
-                      <button className="em-btn em-btn-white" onClick={clearFilters}>
-                        Clear Filters
-                      </button>
-                    ) : (
-                      <button className="em-btn em-btn-success" onClick={openCreate}>
-                        + Add First Employee
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <table className="em-table">
-                    <thead>
-                      <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Department</th>
-                        <th>Designation</th>
-                        <th>Phone</th>
-                        <th>Branch</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pagedRows.map((row) => (
-                        <tr key={row.id}>
-                          <td>{row.employee_code || "—"}</td>
-                          <td>
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <div
-                                style={{
-                                  width: 38,
-                                  height: 38,
-                                  borderRadius: "50%",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  color: "white",
-                                  fontWeight: 800,
-                                  fontSize: 15,
-                                  flexShrink: 0,
-                                  background: avatarColor(row.full_name),
-                                }}
-                              >
-                                {(row.full_name || "?").charAt(0).toUpperCase()}
-                              </div>
-                              <div style={{ minWidth: 0 }}>
-                                <div
-                                  style={{
-                                    fontWeight: 700,
-                                    color: "var(--gray-900)",
-                                    fontSize: 13.5,
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                    maxWidth: 180,
-                                  }}
-                                >
-                                  {row.full_name || "—"}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>{row.email || "—"}</td>
-                          <td>{row.department || "—"}</td>
-                          <td>{row.designation || "—"}</td>
-                          <td>{row.phone || "—"}</td>
-                          <td>{row.branch || "—"}</td>
-                          <td><StatusBadge status={row.status} /></td>
-                          <td>
-                            <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-                              <button className="em-btn em-btn-sky-outline em-btn-sm" onClick={() => openEdit(row)}>
-                                Edit
-                              </button>
-                              <button className="em-btn em-btn-rose-outline em-btn-sm" onClick={() => deleteEmployee(row.id)}>
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-
-              {filteredRows.length > 0 && (
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={(p) => setCurrentPage(p)}
-                  pageSize={pageSize}
-                  onPageSizeChange={(size) => {
-                    setPageSize(size);
-                    setCurrentPage(1);
-                  }}
-                  totalItems={filteredRows.length}
-                />
-              )}
-            </div>
-          </main>
-        </div>
-        {modalOpen && (
-          <div className="em-modal-overlay" onClick={(e) => e.target === e.currentTarget && closeModal()}>
-            <div className="em-modal-panel">
-              <div className="em-modal-header" style={{ background: editing ? "linear-gradient(135deg,#f0f9ff,#dbeafe)" : NL_GRADIENT_90 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        color: editing ? "var(--gray-400)" : "rgba(255,255,255,0.6)",
-                        letterSpacing: "0.15em",
-                        textTransform: "uppercase",
-                        marginBottom: 6,
-                        fontFamily: "Outfit,sans-serif",
-                      }}
-                    >
-                      {editing ? "Edit Employee" : "Create Employee"}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "Outfit,sans-serif",
-                        fontWeight: 800,
-                        fontSize: "clamp(1.1rem,3vw,1.4rem)",
-                        color: editing ? "var(--gray-900)" : "white",
-                        letterSpacing: "-0.02em",
-                      }}
-                    >
-                      {editing ? `Edit: ${editing.full_name}` : "Add Employee to Master"}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={closeModal}
-                    className="em-btn em-btn-sm"
-                    style={{
-                      background: editing ? "var(--gray-100)" : "rgba(255,255,255,0.15)",
-                      border: editing ? "1.5px solid var(--gray-200)" : "1.5px solid rgba(255,255,255,0.25)",
-                      color: editing ? "var(--gray-600)" : "white",
-                      width: 36,
-                      height: 36,
-                      padding: 0,
-                      justifyContent: "center",
-                    }}
-                  >
-                    ✕
+                  <button className="em-btn em-btn-primary em-btn-sm" onClick={openCreate}>
+                    + Add Employee
                   </button>
                 </div>
               </div>
 
-              <div className="em-modal-body">
-                <div className="em-form-block">
-                  <div className="em-form-block-header" style={{ background: "linear-gradient(135deg,#eff6ff,#dbeafe)" }}>
-                    <div
-                      style={{
-                        width: 30,
-                        height: 30,
-                        borderRadius: 9,
-                        background: "linear-gradient(135deg,#2563eb,#6366f1)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 14,
-                      }}
-                    >
-                      👤
+              {/* ── Toggle bar ── */}
+              <div className="em-panel-toggle-bar">
+                <button className={`em-toggle-pill${showPanel === "hero" ? " active" : ""}`} onClick={() => togglePanel("hero")}>
+                  🏛️ Overview
+                </button>
+                <button className={`em-toggle-pill${showPanel === "filters" ? " active" : ""}`} onClick={() => togglePanel("filters")}>
+                  🔍 Filters
+                  {activeFiltersCount > 0 && <span className="pill-badge">{activeFiltersCount}</span>}
+                </button>
+
+                <div className="em-active-filters">
+                  {q              && <span className="em-filter-chip">🔎 "{q.length > 18 ? q.slice(0,18)+"…" : q}"<button onClick={() => setQ("")}>×</button></span>}
+                  {branchFilter     && <span className="em-filter-chip">🏢 {branchFilter}<button onClick={() => setBranchFilter("")}>×</button></span>}
+                  {departmentFilter && <span className="em-filter-chip">🗂 {departmentFilter}<button onClick={() => setDepartmentFilter("")}>×</button></span>}
+                  {statusFilter     && <span className="em-filter-chip">📌 {statusFilter}<button onClick={() => setStatusFilter("")}>×</button></span>}
+                  {activeFiltersCount > 0 && <button className="em-clear-all" onClick={clearFilters}>Clear all</button>}
+                </div>
+
+                <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:8 }}>
+                  <span className="em-badge em-badge-blue" style={{ fontSize:11 }}>{filteredRows.length} / {totalEmployees}</span>
+                  <span className="em-badge em-badge-gray" style={{ fontSize:11 }}>{roleLabel}</span>
+                </div>
+              </div>
+
+              {/* ── Hero panel ── */}
+              <div className={`em-collapsible-panel${showPanel === "hero" ? " open" : ""}`}>
+                <div className="em-filter-card" style={{ margin:"2px 2px 0" }}>
+                  <EmployeeHero total={totalEmployees} activeCount={activeCount} inactiveCount={inactiveCount} branchCount={branchCount} deptCount={deptCount} />
+                </div>
+                <div className="em-filter-card" style={{ margin:"10px 2px 0" }}>
+                  <div className="em-stats-grid">
+                    {[
+                      { icon:"👥", val:totalEmployees, label:"Total Employees", bar:NL_BLUE,    bg:"var(--blue-50)",   color:"var(--blue-700)" },
+                      { icon:"✅", val:activeCount,    label:"Active",          bar:"#16a34a",  bg:"var(--green-50)",  color:"var(--green-700)" },
+                      { icon:"⏸",  val:inactiveCount,  label:"Inactive",        bar:"#6b7280",  bg:"var(--gray-100)",  color:"var(--gray-700)" },
+                      { icon:"🏢", val:branchCount,    label:"Branches",        bar:"#d97706",  bg:"var(--amber-50)",  color:"var(--amber-600)" },
+                      { icon:"🗂",  val:deptCount,      label:"Departments",     bar:"#7c3aed",  bg:"var(--violet-50)", color:"var(--violet-700)" },
+                    ].map((s) => (
+                      <div key={s.label} className="em-stat-card" style={{ "--stat-bar": s.bar }}>
+                        <div className="em-stat-icon" style={{ background:s.bg, color:s.color }}>{s.icon}</div>
+                        <div className="em-stat-value">{s.val}</div>
+                        <div className="em-stat-label">{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Filter panel ── */}
+              <div className={`em-collapsible-panel${showPanel === "filters" ? " open" : ""}`}>
+                <div className="em-filter-card1" style={{ margin:"2px 2px 0" }}>
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:14, alignItems:"end" }}>
+                    <div style={{ gridColumn:"span 2", minWidth:0 }}>
+                      <label className="em-label">🔎 Search Employees</label>
+                      <div className="em-search-wrap">
+                        <input type="text" placeholder="Code, name, email, branch, department…" className="em-input" value={q} onChange={(e) => setQ(e.target.value)} />
+                        <svg className="icon" width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
                     </div>
                     <div>
-                      <div style={{ fontFamily: "Outfit,sans-serif", fontWeight: 800, fontSize: 13, color: "#1e3a8a" }}>
-                        Employee Details
-                      </div>
-                      <div style={{ fontSize: 11, color: "#60a5fa" }}>Core identity and office information</div>
+                      <label className="em-label">🏢 Branch</label>
+                      <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="em-select">
+                        <option value="">All Branches</option>
+                        {branchOptions.map((b) => <option key={b} value={b}>{b}</option>)}
+                      </select>
                     </div>
-                  </div>
-
-                  <div className="em-form-block-body">
-                    <div className="em-form-grid-2">
-                      <div>
-                        <label className="em-label">Employee Code *</label>
-                        <input
-                          className="em-input"
-                          placeholder="EMP001"
-                          value={form.employee_code}
-                          onChange={(e) => setForm((f) => ({ ...f, employee_code: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="em-label">Full Name *</label>
-                        <input
-                          className="em-input"
-                          placeholder="Ram Sharma"
-                          value={form.full_name}
-                          onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="em-label">Email</label>
-                        <input
-                          className="em-input"
-                          placeholder="name@nepallife.com.np"
-                          value={form.email}
-                          onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="em-label">Department</label>
-                        <input
-                          className="em-input"
-                          placeholder="IT"
-                          value={form.department}
-                          onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="em-label">Designation</label>
-                        <input
-                          className="em-input"
-                          placeholder="Officer"
-                          value={form.designation}
-                          onChange={(e) => setForm((f) => ({ ...f, designation: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="em-label">Phone</label>
-                        <input
-                          className="em-input"
-                          placeholder="9800000001"
-                          value={form.phone}
-                          onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="em-label">Branch</label>
-                        <input
-                          className="em-input"
-                          placeholder="Kathmandu"
-                          value={form.branch}
-                          onChange={(e) => setForm((f) => ({ ...f, branch: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="em-label">Status</label>
-                        <select
-                          className="em-select"
-                          value={form.status}
-                          onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-                        >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label className="em-label">🗂 Department</label>
+                      <select value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)} className="em-select">
+                        <option value="">All Departments</option>
+                        {departmentOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="em-label">📌 Status</label>
+                      <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="em-select">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="em-label">📄 Rows per page</label>
+                      <select className="em-select" value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}>
+                        {[5, 10, 20, 50, 100].map((n) => <option key={n} value={n}>{n} per page</option>)}
+                      </select>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="em-modal-footer">
-                <button className="em-btn em-btn-white" onClick={closeModal}>
-                  Cancel
-                </button>
-                <button
-                  className="em-btn"
-                  onClick={saveEmployee}
-                  disabled={saving}
-                  style={{
-                    background: editing ? "linear-gradient(135deg,var(--sky-600),var(--blue-600))" : NL_GRADIENT,
-                    color: "white",
-                    boxShadow: editing
-                      ? "0 2px 12px rgba(2,132,199,0.3)"
-                      : "0 2px 12px rgba(11,92,171,0.3)",
-                  }}
-                >
-                  {saving ? "Saving..." : editing ? "Update Employee" : "Create Employee"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {importModalOpen && (
-          <div className="em-modal-overlay" onClick={(e) => e.target === e.currentTarget && !importing && setImportModalOpen(false)}>
-            <div className="em-modal-panel" style={{ maxWidth: 900 }}>
-              <div className="em-modal-header" style={{ background: NL_GRADIENT_90 }}>
-                <div style={{ color: "white", fontFamily: "Outfit,sans-serif", fontWeight: 800, fontSize: "1.2rem" }}>
-                  Import Employees
-                </div>
-              </div>
+              {/* ── Content ── */}
+              <div className="em-content">
+                {alert.message && (
+                  <div className={`em-alert ${alert.type === "error" ? "em-alert-error" : "em-alert-success"}`} style={{ margin:"10px 2px 0" }}>
+                    {alert.type === "error" ? "⚠" : "✅"} {alert.message}
+                    <button onClick={() => setAlert({ type:"", message:"" })} style={{ marginLeft:"auto", background:"none", border:"none", cursor:"pointer", color:"inherit", fontWeight:800 }}>✕</button>
+                  </div>
+                )}
 
-              <div className="em-modal-body">
-                <p style={{ color: "#64748b", margin: 0 }}>
-                  Parsed <strong>{importRows.length}</strong> rows. Preview below.
-                </p>
+                <div className="em-table-card" style={{ overflowX:"auto", margin:"14px 2px 0" }}>
+                  <div style={{ padding:"12px 16px", borderBottom:"1px solid var(--gray-100)", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      <div style={{ width:8, height:8, borderRadius:"50%", background: loading ? "var(--amber-500)" : "var(--green-500)", boxShadow:`0 0 8px ${loading ? "rgba(245,158,11,0.6)" : "rgba(34,197,94,0.6)"}`, animation: loading ? "pulse 1s ease infinite" : "none" }} />
+                      <span style={{ fontSize:13, fontWeight:700, color:"var(--gray-700)", fontFamily:"Outfit,sans-serif" }}>
+                        {loading ? "Loading…" : `${filteredRows.length} of ${totalEmployees} employees`}
+                      </span>
+                    </div>
+                    <span style={{ fontSize:11, color:"var(--gray-400)", fontFamily:"Outfit,sans-serif" }}>Page {currentPage} of {totalPages}</span>
+                  </div>
 
-                <div style={{ maxHeight: 320, overflow: "auto", border: "1px solid #e5e7eb", borderRadius: 12 }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr style={{ background: "#eff6ff" }}>
-                        <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 12 }}>Code</th>
-                        <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 12 }}>Name</th>
-                        <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 12 }}>Email</th>
-                        <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 12 }}>Department</th>
-                        <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 12 }}>Branch</th>
-                        <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 12 }}>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {importRows.slice(0, 10).map((row, idx) => (
-                        <tr key={idx}>
-                          <td style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", fontSize: 13 }}>{row.employee_code || "—"}</td>
-                          <td style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", fontSize: 13 }}>{row.full_name || "—"}</td>
-                          <td style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", fontSize: 13 }}>{row.email || "—"}</td>
-                          <td style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", fontSize: 13 }}>{row.department || "—"}</td>
-                          <td style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", fontSize: 13 }}>{row.branch || "—"}</td>
-                          <td style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", fontSize: 13 }}>{row.status || "active"}</td>
+                  {loading ? (
+                    <div className="em-empty"><Spinner size={36} /><p style={{ color:"var(--gray-500)", fontSize:14, margin:0 }}>Loading employees…</p></div>
+                  ) : filteredRows.length === 0 ? (
+                    <div className="em-empty">
+                      <div style={{ fontSize:52 }}>👥</div>
+                      <p style={{ color:"var(--gray-700)", fontWeight:700, fontSize:15, margin:0, fontFamily:"Outfit,sans-serif" }}>No employees found</p>
+                      <p style={{ color:"var(--gray-400)", fontSize:12, margin:0 }}>{activeFiltersCount > 0 ? "Try adjusting your filters" : "Add an employee or import from Excel"}</p>
+                      {activeFiltersCount > 0
+                        ? <button className="em-btn em-btn-white" onClick={clearFilters}>Clear Filters</button>
+                        : <button className="em-btn em-btn-success" onClick={openCreate}>+ Add First Employee</button>}
+                    </div>
+                  ) : (
+                    <table className="em-table">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Code</th>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Department</th>
+                          <th>Designation</th>
+                          <th>Phone</th>
+                          <th>Branch</th>
+                          <th>Status</th>
+                          <th>Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {pagedRows.map((row, idx) => (
+                          <tr key={row.id}>
+                            <td style={{ color:"var(--gray-400)", fontSize:11, fontWeight:700 }}>{(currentPage - 1) * pageSize + idx + 1}</td>
+                            <td>
+                              <span style={{ fontFamily:"Outfit,sans-serif", fontWeight:700, fontSize:12, background:"var(--blue-50)", color:"var(--blue-700)", padding:"2px 8px", borderRadius:6, border:"1px solid var(--blue-100)" }}>
+                                {row.employee_code || "—"}
+                              </span>
+                            </td>
+                            <td>
+                              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                                <div style={{ width:36, height:36, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", color:"white", fontWeight:800, fontSize:14, flexShrink:0, background:avatarColor(row.full_name) }}>
+                                  {(row.full_name || "?").charAt(0).toUpperCase()}
+                                </div>
+                                <span style={{ fontWeight:700, color:"var(--gray-900)", fontSize:13, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:160 }}>
+                                  {row.full_name || "—"}
+                                </span>
+                              </div>
+                            </td>
+                            <td style={{ color:"var(--gray-600)", fontSize:12 }}>{row.email || "—"}</td>
+                            <td>{row.department || "—"}</td>
+                            <td>{row.designation || "—"}</td>
+                            <td>{row.phone || "—"}</td>
+                            <td>
+                              {row.branch
+                                ? <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 9px", borderRadius:6, fontSize:11, fontWeight:700, fontFamily:"Outfit,sans-serif", background:"var(--amber-50)", color:"var(--amber-600)", border:"1px solid var(--amber-100)" }}>🏢 {row.branch}</span>
+                                : "—"}
+                            </td>
+                            <td><StatusBadge status={row.status} /></td>
+                            <td>
+                              <div style={{ display:"flex", gap:6 }}>
+                                <button className="em-btn em-btn-sky-outline em-btn-sm" onClick={() => openEdit(row)}>✏️ Edit</button>
+                                <button className="em-btn em-btn-rose-outline em-btn-sm" onClick={() => deleteEmployee(row.id)}>🗑 Del</button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                {filteredRows.length > 0 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(p) => setCurrentPage(p)}
+                    pageSize={pageSize}
+                    onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+                    totalItems={filteredRows.length}
+                  />
+                )}
+              </div>
+            </main>
+          </div>
+
+          {/* ══════════ ADD / EDIT MODAL ══════════ */}
+          {modalOpen && (
+            <div className="em-modal-overlay" onClick={(e) => e.target === e.currentTarget && closeModal()}>
+              <div className="em-modal-panel">
+                <div className="em-modal-header" style={{ background: editing ? "linear-gradient(135deg,#f0f9ff,#dbeafe)" : NL_GRADIENT_90 }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:14 }}>
+                    <div>
+                      <div style={{ fontSize:10, fontWeight:700, color: editing ? "var(--gray-400)" : "rgba(255,255,255,0.6)", letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:6, fontFamily:"Outfit,sans-serif" }}>
+                        {editing ? "Edit Employee" : "Create Employee"}
+                      </div>
+                      <div style={{ fontFamily:"Outfit,sans-serif", fontWeight:800, fontSize:"clamp(1.1rem,3vw,1.4rem)", color: editing ? "var(--gray-900)" : "white", letterSpacing:"-0.02em" }}>
+                        {editing ? `Edit: ${editing.full_name}` : "Add Employee to Master"}
+                      </div>
+                    </div>
+                    <button onClick={closeModal} className="em-btn em-btn-sm" style={{ background: editing ? "var(--gray-100)" : "rgba(255,255,255,0.15)", border: editing ? "1.5px solid var(--gray-200)" : "1.5px solid rgba(255,255,255,0.25)", color: editing ? "var(--gray-600)" : "white", width:36, height:36, padding:0, justifyContent:"center" }}>✕</button>
+                  </div>
+                </div>
+
+                <div className="em-modal-body">
+                  <div className="em-form-block">
+                    <div className="em-form-block-header" style={{ background:"linear-gradient(135deg,#eff6ff,#dbeafe)" }}>
+                      <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#2563eb,#6366f1)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>👤</div>
+                      <div>
+                        <div style={{ fontFamily:"Outfit,sans-serif", fontWeight:800, fontSize:13, color:"#1e3a8a" }}>Employee Details</div>
+                        <div style={{ fontSize:11, color:"#60a5fa" }}>Core identity and office information</div>
+                      </div>
+                    </div>
+                    <div className="em-form-block-body">
+                      <div className="em-form-grid-2">
+                        {[
+                          { label:"Employee Code *", key:"employee_code", placeholder:"EMP001" },
+                          { label:"Full Name *",     key:"full_name",     placeholder:"Ram Sharma" },
+                          { label:"Email",           key:"email",         placeholder:"name@nepallife.com.np" },
+                          { label:"Department",      key:"department",    placeholder:"IT" },
+                          { label:"Designation",     key:"designation",   placeholder:"Officer" },
+                          { label:"Phone",           key:"phone",         placeholder:"9800000001" },
+                          { label:"Branch",          key:"branch",        placeholder:"Kathmandu" },
+                        ].map(({ label, key, placeholder }) => (
+                          <div key={key}>
+                            <label className="em-label">{label}</label>
+                            <input className="em-input" placeholder={placeholder} value={form[key]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
+                          </div>
+                        ))}
+                        <div>
+                          <label className="em-label">Status</label>
+                          <select className="em-select" value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="em-modal-footer">
+                  <button className="em-btn em-btn-white" onClick={closeModal}>Cancel</button>
+                  <button className="em-btn" onClick={saveEmployee} disabled={saving}
+                    style={{ background: editing ? "linear-gradient(135deg,var(--sky-600),var(--blue-600))" : NL_GRADIENT, color:"white", boxShadow: editing ? "0 2px 12px rgba(2,132,199,0.3)" : "0 2px 12px rgba(11,92,171,0.3)" }}>
+                    {saving ? "Saving…" : editing ? "✔ Update Employee" : "✔ Create Employee"}
+                  </button>
                 </div>
               </div>
+            </div>
+          )}
 
-              <div className="em-modal-footer">
-                <button className="em-btn em-btn-white" onClick={() => setImportModalOpen(false)} disabled={importing}>
-                  Cancel
-                </button>
-                <button className="em-btn em-btn-success" onClick={handleImport} disabled={importing || importRows.length === 0}>
-                  {importing ? "Importing..." : "Import Now"}
-                </button>
+          {/* ══════════ IMPORT MODAL ══════════ */}
+          {importModalOpen && (
+            <div className="em-modal-overlay" onClick={(e) => e.target === e.currentTarget && !importing && setImportModalOpen(false)}>
+              <div className="em-modal-panel" style={{ maxWidth:960 }}>
+                <div className="em-modal-header" style={{ background:NL_GRADIENT_90 }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                    <div>
+                      <div style={{ fontSize:10, fontWeight:700, color:"rgba(255,255,255,0.6)", letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:6, fontFamily:"Outfit,sans-serif" }}>Excel Import</div>
+                      <div style={{ fontFamily:"Outfit,sans-serif", fontWeight:800, fontSize:"1.2rem", color:"white" }}>
+                        📤 Import Employees — {importRows.length} rows parsed
+                      </div>
+                    </div>
+                    <button onClick={() => !importing && setImportModalOpen(false)} className="em-btn em-btn-sm"
+                      style={{ background:"rgba(255,255,255,0.15)", border:"1.5px solid rgba(255,255,255,0.25)", color:"white", width:36, height:36, padding:0, justifyContent:"center" }}>✕</button>
+                  </div>
+                </div>
+
+                <div className="em-modal-body">
+                  {/* Summary after import result */}
+                  {importResult && (
+                    <div className="im-summary">
+                      <div className="im-summary-card total"><div className="val">{importResult.total}</div><div className="lbl">Total</div></div>
+                      <div className="im-summary-card ok">  <div className="val">{importResult.inserted}</div><div className="lbl">Inserted</div></div>
+                      <div className="im-summary-card warn"><div className="val">{importResult.updated}</div><div className="lbl">Updated</div></div>
+                      <div className="im-summary-card err"> <div className="val">{importResult.failed}</div><div className="lbl">Failed</div></div>
+                    </div>
+                  )}
+
+                  {!importResult && (
+                    <div style={{ background:"var(--blue-50)", border:"1.5px solid var(--blue-200)", borderRadius:10, padding:"10px 14px", fontSize:12.5, color:"var(--blue-700)", fontWeight:600 }}>
+                      ℹ️ Existing employees with the same <strong>Employee Code</strong> will be <strong>updated</strong>. New codes will be inserted. Missing codes are auto-generated.
+                    </div>
+                  )}
+
+                  {!importResult && detectedCols.length > 0 && (
+                    <div style={{ background:"var(--gray-50)", border:"1.5px solid var(--gray-200)", borderRadius:10, padding:"10px 14px" }}>
+                      <div style={{ fontSize:11, fontWeight:700, color:"var(--gray-500)", marginBottom:5, fontFamily:"Outfit,sans-serif", textTransform:"uppercase", letterSpacing:"0.06em" }}>
+                        Columns detected in your file ({detectedCols.length})
+                      </div>
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+                        {detectedCols.map((col) => (
+                          <span key={col} style={{ display:"inline-flex", padding:"2px 8px", borderRadius:6, fontSize:11, fontWeight:600, background:"var(--blue-50)", color:"var(--blue-700)", border:"1px solid var(--blue-200)", fontFamily:"Outfit,sans-serif" }}>
+                            {col}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error list */}
+                  {importResult?.errors?.length > 0 && (
+                    <div style={{ background:"var(--red-50)", border:"1.5px solid var(--red-100)", borderRadius:10, padding:"10px 14px" }}>
+                      <div style={{ fontSize:12, fontWeight:700, color:"var(--red-600)", marginBottom:6, fontFamily:"Outfit,sans-serif" }}>⚠ Errors ({importResult.errors.length})</div>
+                      <ul style={{ margin:0, paddingLeft:18, fontSize:12, color:"var(--red-600)" }}>
+                        {importResult.errors.map((e, i) => <li key={i}>{e}</li>)}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Preview table */}
+                  <div>
+                    <div style={{ fontSize:12, fontWeight:700, color:"var(--gray-500)", marginBottom:6, fontFamily:"Outfit,sans-serif" }}>
+                      Preview {importRows.length > 10 ? `(first 10 of ${importRows.length})` : `(${importRows.length} rows)`}
+                    </div>
+                    <div style={{ maxHeight:280, overflow:"auto", border:"1px solid var(--gray-200)", borderRadius:10 }}>
+                      <table className="im-preview-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Phone</th>
+                            <th>Branch</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {importRows.slice(0, 10).map((row, idx) => (
+                            <tr key={idx}>
+                              <td style={{ color:"var(--gray-400)", fontWeight:700 }}>{idx + 1}</td>
+                              <td><strong>{row.employee_code || "—"}</strong></td>
+                              <td>{row.full_name || "—"}</td>
+                              <td style={{ color:"var(--gray-500)" }}>{row.email || "—"}</td>
+                              <td>{row.department || "—"}</td>
+                              <td>{row.designation || "—"}</td>
+                              <td>{row.phone || "—"}</td>
+                              <td>{row.branch || "—"}</td>
+                              <td>
+                                <span style={{ fontWeight:700, fontSize:11, color: row.status === "inactive" ? "var(--gray-600)" : "var(--green-700)" }}>
+                                  {row.status || "active"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="em-modal-footer">
+                  <button className="em-btn em-btn-white" onClick={() => setImportModalOpen(false)} disabled={importing}>Cancel</button>
+                  {!importResult && (
+                    <button className="em-btn em-btn-success" onClick={handleImport} disabled={importing || importRows.length === 0}>
+                      {importing ? <><Spinner size={14} /> Importing…</> : `📤 Import ${importRows.length} Employees`}
+                    </button>
+                  )}
+                  {importResult && importResult.failed > 0 && (
+                    <button className="em-btn em-btn-primary" onClick={() => { setImportResult(null); }}>
+                      ↩ Try Again
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       </SplitSidebarLayout>
       <Footer />
-      </>
+    </>
   );
 }

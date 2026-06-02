@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import Footer from "../components/Layout/Footer";
-import Alert from "../components/common/Alert";
+import Alert from "../components/common/Alert"; 
 import AddAssetModal from "../components/AddModel/AddAssetModal";
 import Pagination from "../components/common/Pagination";
 import AssetTransferHistoryModal from "../components/History/AssetTransferHistoryModal";

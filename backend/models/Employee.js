@@ -1,4 +1,4 @@
-//model/Employee.js
+// models/Employee.js
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 
@@ -21,22 +21,28 @@ const Employee = sequelize.define(
     },
     email: {
       type: DataTypes.STRING,
+      allowNull: true,
       unique: true,
     },
     department: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     designation: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     phone: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     branch: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     status: {
       type: DataTypes.ENUM("active", "inactive"),
+      allowNull: false,
       defaultValue: "active",
     },
   },

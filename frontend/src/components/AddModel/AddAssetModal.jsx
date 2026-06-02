@@ -620,106 +620,209 @@ const SECTION_GROUPS = {
 };
 
 /* ─────────────────────────────────────────────────────
-   EmployeeSelect — searchable dropdown for employee names
+   EmployeeSelect — allows manual typing + dropdown select
 ───────────────────────────────────────────────────── */
 function EmployeeSelect({ employees, value, onChange, disabled }) {
-  const [query, setQuery] = useState("");
-  const [open, setOpen]   = useState(false);
+  const [open, setOpen] = useState(false);
   const wrapRef = React.useRef(null);
+  const inputRef = React.useRef(null);
 
   const names = useMemo(() => {
-    const unique = [
+    return [
       ...new Set(
         safeArray(employees)
-          .map((e) => String(e.full_name || e.name || "").trim())
+          .map((e) => String(e.full_name || e.name || e.userName || "").trim())
           .filter(Boolean)
       ),
     ].sort((a, b) => a.localeCompare(b));
-    return unique;
   }, [employees]);
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    return q ? names.filter((n) => n.toLowerCase().includes(q)) : names;
-  }, [names, query]);
+    const q = String(value || "").toLowerCase().trim();
+
+    if (!q) return names;
+
+    return names.filter((name) => name.toLowerCase().includes(q));
+  }, [names, value]);
 
   useEffect(() => {
     if (!open) return;
+
     const handler = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) {
         setOpen(false);
-        setQuery("");
       }
     };
+
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const handleSelect = (name) => { onChange(name); setQuery(""); setOpen(false); };
-  const handleClear  = (e) => { e.stopPropagation(); onChange(""); setQuery(""); };
+  const handleSelect = (name) => {
+    onChange(name);
+    setOpen(false);
+  };
+
+  const handleClear = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onChange("");
+    setOpen(false);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
 
   return (
     <div ref={wrapRef} style={{ position: "relative" }}>
       <div
         className={`am-emp-trigger${open ? " open" : ""}${disabled ? " disabled" : ""}`}
-        onClick={() => !disabled && setOpen((o) => !o)}
+        onClick={() => {
+          if (disabled) return;
+          inputRef.current?.focus();
+          setOpen(true);
+        }}
+        style={{ padding: "0 8px 0 12px" }}
       >
         {value ? (
-          <>
-            <div className="am-emp-avatar">{value.charAt(0).toUpperCase()}</div>
-            <span style={{ flex: 1, fontSize: 13.5, color: "var(--gray-900)", fontFamily: "'DM Sans',sans-serif", fontWeight: 600 }}>
-              {value}
-            </span>
-          </>
+          <div className="am-emp-avatar">
+            {String(value).charAt(0).toUpperCase()}
+          </div>
         ) : (
-          <span style={{ flex: 1, fontSize: 13.5, color: "var(--gray-400)", fontFamily: "'DM Sans',sans-serif" }}>
-            {names.length === 0 ? "No employees loaded" : "— Select employee —"}
-          </span>
+          <span style={{ color: "var(--gray-400)", fontSize: 14 }}>👤</span>
         )}
+
+        <input
+          ref={inputRef}
+          type="text"
+          value={value || ""}
+          disabled={disabled}
+          onFocus={() => setOpen(true)}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setOpen(true);
+          }}
+          placeholder={
+            names.length === 0
+              ? "Type assigned user name"
+              : "Type name or select employee"
+          }
+          style={{
+            flex: 1,
+            minWidth: 0,
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            color: "var(--gray-900)",
+            fontFamily: "'DM Sans',sans-serif",
+            fontSize: 13.5,
+            fontWeight: value ? 600 : 400,
+            height: 36,
+          }}
+        />
+
         {value && !disabled && (
-          <button type="button" onClick={handleClear}
-            style={{ background:"none",border:"none",cursor:"pointer",color:"var(--gray-400)",fontSize:16,lineHeight:1,padding:"2px 4px",borderRadius:4,display:"flex",alignItems:"center" }}>
+          <button
+            type="button"
+            onClick={handleClear}
+            title="Clear"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--gray-400)",
+              fontSize: 16,
+              lineHeight: 1,
+              padding: "2px 4px",
+              borderRadius: 4,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
             ×
           </button>
         )}
-        <span style={{ color:"var(--gray-400)",fontSize:11,lineHeight:1,flexShrink:0,transition:"transform 0.2s ease",transform:open?"rotate(180deg)":"rotate(0deg)" }}>▼</span>
+
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen((prev) => !prev);
+            setTimeout(() => inputRef.current?.focus(), 0);
+          }}
+          title="Show employee list"
+          style={{
+            background: "none",
+            border: "none",
+            cursor: disabled ? "not-allowed" : "pointer",
+            color: "var(--gray-400)",
+            fontSize: 11,
+            lineHeight: 1,
+            padding: "2px 4px",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s ease",
+          }}
+        >
+          ▼
+        </button>
       </div>
 
       {open && !disabled && (
         <div className="am-emp-dropdown">
-          <input type="text" autoFocus className="am-emp-search" value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={`Search among ${names.length} employees…`}
-            onClick={(e) => e.stopPropagation()}
-          />
-          <ul className="am-emp-list" style={{ listStyle:"none",margin:0,padding:"4px 0" }}>
+          <ul className="am-emp-list" style={{ listStyle: "none", margin: 0, padding: "4px 0" }}>
             {filtered.length === 0 ? (
               <li className="am-emp-empty">
-                {query ? `No match for "${query}"` : "No employees available"}
+                {value
+                  ? `No dropdown match. "${value}" will be saved as typed.`
+                  : "No employees available"}
               </li>
             ) : (
               filtered.map((name) => (
-                <li key={name} className={`am-emp-item${name === value ? " selected" : ""}`}
-                  onClick={() => handleSelect(name)}>
-                  <div className="am-emp-avatar">{name.charAt(0).toUpperCase()}</div>
+                <li
+                  key={name}
+                  className={`am-emp-item${name === value ? " selected" : ""}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleSelect(name);
+                  }}
+                >
+                  <div className="am-emp-avatar">
+                    {name.charAt(0).toUpperCase()}
+                  </div>
                   <span style={{ flex: 1 }}>{name}</span>
-                  {name === value && <span style={{ fontSize:12,color:"var(--blue-600)",fontWeight:800 }}>✓</span>}
+                  {name === value && (
+                    <span style={{ fontSize: 12, color: "var(--blue-600)", fontWeight: 800 }}>
+                      ✓
+                    </span>
+                  )}
                 </li>
               ))
             )}
           </ul>
-          {names.length > 0 && (
-            <div style={{ padding:"6px 13px",borderTop:"1px solid var(--gray-100)",fontSize:10,color:"var(--gray-400)",fontFamily:"'Outfit',sans-serif",display:"flex",alignItems:"center",justifyContent:"space-between" }}>
-              <span>{filtered.length} of {names.length} employees</span>
-              <span>↑↓ browse · click to select</span>
-            </div>
-          )}
+
+          <div
+            style={{
+              padding: "6px 13px",
+              borderTop: "1px solid var(--gray-100)",
+              fontSize: 10,
+              color: "var(--gray-400)",
+              fontFamily: "'Outfit',sans-serif",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+            }}
+          >
+            <span>
+              {filtered.length} of {names.length} employees
+            </span>
+            <span>Type custom or select from list</span>
+          </div>
         </div>
       )}
     </div>
   );
 }
-
 /* ═══════════════════════════════════════════════════
    MAIN COMPONENT
 ═══════════════════════════════════════════════════ */
