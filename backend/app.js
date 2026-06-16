@@ -9,50 +9,72 @@ const adminUserRoutes = require("./routes/adminUserRoutes");
 const { errorHandler } = require("./middleware/errorMiddleware");
 const userImportRoutes = require("./routes/userImportRoutes");
 const backupRoutes = require("./routes/backupRoutes");
-const assetTrackingRoutes = require("./routes/assetTrackingRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
+const assetTrackingRoutes = require("./routes/assetTrackingRoutes");
 
 const app = express();
 
-// Disable ETag so GET /api/employees does not return 304 cached response
-app.disable("etag");
-
 // Security headers
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
+);
+
 app.disable("x-powered-by");
 
 // CORS
 const allowedOrigins = [
   process.env.CLIENT_URL,
   process.env.CLIENT_URL_VITE,
+
+  // Current frontend URL
+  "http://192.168.0.244:3000",
+
+  // Other local/network frontend ports
+  "http://192.168.0.244:3001",
+
+  // Local development
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   "http://localhost:3001",
   "http://127.0.0.1:3001",
 ].filter(Boolean);
 
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (allowedOrigins.includes(origin)) return cb(null, true);
-      if (origin.startsWith("vscode-webview://")) return cb(null, true);
-      return cb(new Error("Not allowed by CORS: " + origin));
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "Cache-Control",
-      "Pragma",
-    ],
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return cb(null, true);
+    }
+
+    if (origin.startsWith("vscode-webview://")) {
+      return cb(null, true);
+    }
+
+    return cb(new Error("Not allowed by CORS: " + origin));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Cache-Control",
+    "Pragma",
+    "Expires",
+  ],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+
+// Preflight support
+app.options("*", cors(corsOptions));
 
 // Body parser
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
 // Logs
 if (process.env.NODE_ENV !== "production") {
@@ -62,21 +84,12 @@ if (process.env.NODE_ENV !== "production") {
 // Serve uploaded files publicly
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Rate limit auth only
+// Rate limit for auth only
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "production" ? 100 : 5000,
   standardHeaders: true,
   legacyHeaders: false,
-});
-
-// No-cache middleware for employee endpoints
-app.use("/api/employees", (req, res, next) => {
-  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-  res.set("Pragma", "no-cache");
-  res.set("Expires", "0");
-  res.set("Surrogate-Control", "no-store");
-  next();
 });
 
 // Routes
@@ -88,9 +101,21 @@ app.use("/api/service-stations", require("./routes/serviceStationRoutes"));
 app.use("/api/requests", require("./routes/requestRoutes"));
 app.use("/api/support", require("./routes/supportRoutes"));
 app.use("/api", require("./routes/assetMetaRoutes"));
+
 app.use("/api/employees", employeeRoutes);
 app.use("/api/asset-tracking", assetTrackingRoutes);
+
+// Asset transfer routes
+// Main existing route:
+// POST /api/assets/transfer
+// GET  /api/assets/transfer-history
 app.use("/api/assets", require("./routes/assetTransferRoutes"));
+
+// Optional alias route:
+// POST /api/asset-transfers/transfer
+// GET  /api/asset-transfers/transfer-history
+app.use("/api/asset-transfers", require("./routes/assetTransferRoutes"));
+
 app.use("/api/maintenance", require("./routes/assetMaintenanceRoutes"));
 app.use("/api/assets", require("./routes/assetImportRoutes"));
 app.use("/api/asset-history", require("./routes/assetHistoryRoutes"));

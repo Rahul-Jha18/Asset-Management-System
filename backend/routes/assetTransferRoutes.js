@@ -1,19 +1,22 @@
 const express = require("express");
 const router = express.Router();
 
-const { protect } = require("../middleware/authMiddleware");
-const { adminOrSubadmin } = require("../middleware/adminMiddleware");
 const assetTransferController = require("../controllers/assetTransferController");
+const { protect } = require("../middleware/authMiddleware");
 
-router.post(
-  "/transfer",
+// POST /api/assets/transfer
+router.post("/transfer", protect, assetTransferController.transferAsset);
+
+// GET /api/assets/transfer-history?assetId=27&section=cctv&limit=10&offset=0
+router.get(
+  "/transfer-history",
   protect,
-  adminOrSubadmin,
-  assetTransferController.transferAsset
+  assetTransferController.getAssetTransferHistory
 );
 
+// Optional alias if frontend later uses /api/assets/history
 router.get(
-  "/asset-transfers/history",
+  "/history",
   protect,
   assetTransferController.getAssetTransferHistory
 );

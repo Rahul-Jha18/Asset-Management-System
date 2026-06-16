@@ -29,6 +29,7 @@ export default function AssetTransferHistoryModal({
 
   const fmt = (d) => {
     if (!d) return "—";
+
     try {
       return new Date(d).toLocaleString(undefined, {
         year: "numeric",
@@ -44,44 +45,47 @@ export default function AssetTransferHistoryModal({
 
   const fetchBranches = useCallback(async () => {
     if (!token) return;
+
     try {
       const res = await api.get("/api/branches", {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setBranches(res?.data?.data || res?.data || []);
     } catch {
       // non-fatal
     }
   }, [token]);
 
-    const fetchHistory = useCallback(async () => {
-      if (!token || !assetId || !section) return;
+  const fetchHistory = useCallback(async () => {
+    if (!token || !assetId || !section) return;
 
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const offset = (page - 1) * PAGE_SIZE;
+    try {
+      const offset = (page - 1) * PAGE_SIZE;
 
-        const res = await api.get(
-          `/api/assets/transfer-history?assetId=${assetId}&section=${encodeURIComponent(
-            section
-          )}&limit=${PAGE_SIZE}&offset=${offset}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+      const res = await api.get(
+        `/api/assets/transfer-history?assetId=${assetId}&section=${encodeURIComponent(
+          section
+        )}&limit=${PAGE_SIZE}&offset=${offset}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        const data = res?.data?.data || [];
-        setHistory(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Failed to load history"
-        );
-      } finally {
-        setLoading(false);
-      }
-    }, [token, assetId, section, page]);
+      const data = res?.data?.data?.transfers || res?.data?.data || [];
+      setHistory(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load transfer history"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [token, assetId, section, page]);
+
   useEffect(() => {
     if (isOpen) {
       setPage(1);
@@ -100,6 +104,7 @@ export default function AssetTransferHistoryModal({
     const onKeyDown = (e) => {
       if (e.key === "Escape" && isOpen) onClose();
     };
+
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
@@ -125,12 +130,13 @@ export default function AssetTransferHistoryModal({
     switch: "bg-lime-50 text-lime-700 border-lime-200",
     connectivity: "bg-blue-50 text-blue-700 border-blue-200",
     ups: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    inverter: "bg-orange-50 text-orange-700 border-orange-200",   // ── NEW ──
+    inverter: "bg-orange-50 text-orange-700 border-orange-200",
     extra_monitor: "bg-purple-50 text-purple-700 border-purple-200",
     default: "bg-slate-50 text-slate-700 border-slate-200",
   };
 
-  const secPill = sectionColour[String(section || "").toLowerCase()] || sectionColour.default;
+  const secPill =
+    sectionColour[String(section || "").toLowerCase()] || sectionColour.default;
 
   return (
     <div
@@ -148,7 +154,12 @@ export default function AssetTransferHistoryModal({
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-11 h-11 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-6 h-6 text-amber-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -157,8 +168,11 @@ export default function AssetTransferHistoryModal({
                     />
                   </svg>
                 </div>
+
                 <div>
-                  <h2 className="text-xl font-black tracking-tight">Transfer History</h2>
+                  <h2 className="text-xl font-black tracking-tight">
+                    Transfer History
+                  </h2>
                   <p className="text-slate-400 text-xs font-medium mt-0.5">
                     Branch, user, and combined transfer log
                   </p>
@@ -173,19 +187,24 @@ export default function AssetTransferHistoryModal({
                   </span>
                 </span>
 
-                <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${secPill}`}>
+                <span
+                  className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${secPill}`}
+                >
                   {section || "—"}
                 </span>
 
                 {branchId ? (
                   <span className="inline-flex items-center rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-bold text-slate-300">
                     Current Branch:&nbsp;
-                    <span className="text-white ml-1">{branchName(branchId)}</span>
+                    <span className="text-white ml-1">
+                      {branchName(branchId)}
+                    </span>
                   </span>
                 ) : null}
 
                 <span className="inline-flex items-center rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-bold text-slate-300">
-                  {history.length} transfer{history.length !== 1 ? "s" : ""} found
+                  {history.length} transfer
+                  {history.length !== 1 ? "s" : ""} found
                 </span>
               </div>
             </div>
@@ -194,8 +213,18 @@ export default function AssetTransferHistoryModal({
               onClick={onClose}
               className="flex-shrink-0 w-10 h-10 rounded-2xl bg-white/10 border border-white/20 hover:bg-rose-500/80 hover:border-rose-400 flex items-center justify-center transition-all duration-200 active:scale-95"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -220,7 +249,12 @@ export default function AssetTransferHistoryModal({
           {!loading && !error && history.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
               <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center">
-                <svg className="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-10 h-10 text-slate-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -230,7 +264,9 @@ export default function AssetTransferHistoryModal({
                 </svg>
               </div>
               <div>
-                <p className="text-slate-700 font-bold text-lg">No transfers recorded</p>
+                <p className="text-slate-700 font-bold text-lg">
+                  No transfers recorded
+                </p>
                 <p className="text-slate-400 text-sm mt-1">
                   This asset has no saved transfer activity
                 </p>
@@ -247,56 +283,100 @@ export default function AssetTransferHistoryModal({
                   const globalIdx = (page - 1) * PAGE_SIZE + idx + 1;
 
                   const fromBranchId =
-                    record.fromBranchId ?? record.from_branch_id ?? record.fromBranch;
+                    record.fromBranchId ??
+                    record.from_branch_id ??
+                    record.fromBranch;
+
                   const toBranchId =
-                    record.toBranchId ?? record.to_branch_id ?? record.toBranch;
+                    record.toBranchId ??
+                    record.to_branch_id ??
+                    record.toBranch;
 
-                  const from = branchName(fromBranchId);
-                  const to = branchName(toBranchId);
+                  const from =
+                    record.fromBranchName ??
+                    record.from_branch_name ??
+                    record.fromBranch?.name ??
+                    record.from_branch?.name ??
+                    branchName(fromBranchId);
 
-                  const transferType = String(record.transferType || "branch").toLowerCase();
+                  const to =
+                    record.toBranchName ??
+                    record.to_branch_name ??
+                    record.toBranch?.name ??
+                    record.to_branch?.name ??
+                    branchName(toBranchId);
+
+                  const transferType = String(
+                    record.transferType || record.transfer_type || "branch"
+                  ).toLowerCase();
+
                   const by =
                     record.transferredBy ??
                     record.transferred_by ??
                     record.changedByName ??
+                    record.changed_by_name ??
                     "—";
 
                   const date = fmt(
-                    record.createdAt ?? record.created_at ?? record.transferredAt
+                    record.createdAt ??
+                      record.created_at ??
+                      record.transferredAt ??
+                      record.transferred_at
                   );
 
                   const reason =
-                    record.reason ?? record.remarks ?? record.description ?? null;
+                    record.reason ??
+                    record.remarks ??
+                    record.description ??
+                    null;
 
                   const fromUser =
                     record.fromUserName ??
                     record.from_user_name ??
+                    record.fromUser?.name ??
                     record.fromUser ??
                     "—";
 
                   const toUser =
                     record.toUserName ??
                     record.to_user_name ??
+                    record.toUser?.name ??
                     record.toUser ??
                     "—";
 
+                  const rowAssetCode =
+                    record.assetCode ??
+                    record.asset_code ??
+                    record.assetId ??
+                    record.asset_id ??
+                    assetCode ??
+                    assetId ??
+                    "—";
+
                   return (
-                    <div key={record.id ?? idx} className="flex gap-4 items-start group">
+                    <div
+                      key={record.id ?? record.transferId ?? idx}
+                      className="flex gap-4 items-start group"
+                    >
                       <div className="relative flex-shrink-0 mt-1">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 border-4 border-white shadow-md shadow-amber-200 flex items-center justify-center z-10 relative group-hover:scale-110 transition-transform duration-200">
-                          <span className="text-white text-[10px] font-black">{globalIdx}</span>
+                          <span className="text-white text-[10px] font-black">
+                            {globalIdx}
+                          </span>
                         </div>
                       </div>
 
                       <div className="flex-1 rounded-2xl border-2 border-slate-100 bg-white shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 overflow-hidden">
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex-wrap gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[11px] font-black text-amber-700 uppercase tracking-wider">
                               Transfer
                             </span>
 
-                            <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold ${secPill}`}>
-                              {section}
+                            <span
+                              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold ${secPill}`}
+                            >
+                              {record.section || section}
                             </span>
 
                             <span className="inline-flex items-center rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-1 text-[11px] font-bold text-indigo-700 uppercase">
@@ -304,28 +384,47 @@ export default function AssetTransferHistoryModal({
                             </span>
                           </div>
 
-                          <span className="text-[11px] text-slate-400 font-semibold">{date}</span>
+                          <span className="text-[11px] text-slate-400 font-semibold">
+                            {date}
+                          </span>
                         </div>
 
                         <div className="px-5 py-4 space-y-4">
-                          {(transferType === "branch" || transferType === "both") && (
+                          <div>
+                            <span className="text-xs text-slate-500">
+                              Asset Code:
+                            </span>
+                            <span className="ml-2 font-bold text-indigo-700">
+                              {rowAssetCode}
+                            </span>
+                          </div>
+
+                          {(transferType === "branch" ||
+                            transferType === "both") && (
                             <div className="flex items-center gap-3 flex-wrap">
                               <div className="flex-1 min-w-[120px] rounded-xl border-2 border-rose-100 bg-rose-50 px-4 py-3">
                                 <div className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">
                                   From Branch
                                 </div>
-                                <div className="text-sm font-black text-rose-700 leading-tight">{from}</div>
-                                {fromBranchId !== null && fromBranchId !== undefined && fromBranchId !== "" && (
-                                  <div className="text-[10px] text-rose-400 font-semibold mt-0.5">
-                                    <span className="text-rose-500 ml-1">ID: {fromBranchId}</span>
-                                  </div>
-                                )}
+                                <div className="text-sm font-black text-rose-700 leading-tight">
+                                  {from}
+                                </div>
                               </div>
 
                               <div className="flex-shrink-0 flex flex-col items-center gap-1">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shadow-md">
-                                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                  <svg
+                                    className="w-4 h-4 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2.5}
+                                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                    />
                                   </svg>
                                 </div>
                               </div>
@@ -334,29 +433,39 @@ export default function AssetTransferHistoryModal({
                                 <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">
                                   To Branch
                                 </div>
-                                <div className="text-sm font-black text-emerald-700 leading-tight">{to}</div>
-                                {toBranchId !== null && toBranchId !== undefined && toBranchId !== "" && (
-                                  <div className="text-[10px] text-emerald-500 font-semibold mt-0.5">
-                                    <span className="text-emerald-400 ml-1">ID: {toBranchId}</span>
-                                  </div>
-                                )}
+                                <div className="text-sm font-black text-emerald-700 leading-tight">
+                                  {to}
+                                </div>
                               </div>
                             </div>
                           )}
 
-                          {(transferType === "user" || transferType === "both") && (
+                          {(transferType === "user" ||
+                            transferType === "both") && (
                             <div className="flex items-center gap-3 flex-wrap">
                               <div className="flex-1 min-w-[120px] rounded-xl border-2 border-violet-100 bg-violet-50 px-4 py-3">
                                 <div className="text-[10px] font-black text-violet-500 uppercase tracking-widest mb-1">
                                   From User
                                 </div>
-                                <div className="text-sm font-black text-violet-700 leading-tight">{fromUser || "—"}</div>
+                                <div className="text-sm font-black text-violet-700 leading-tight">
+                                  {fromUser || "—"}
+                                </div>
                               </div>
 
                               <div className="flex-shrink-0 flex flex-col items-center gap-1">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-700 to-violet-900 flex items-center justify-center shadow-md">
-                                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                  <svg
+                                    className="w-4 h-4 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2.5}
+                                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                    />
                                   </svg>
                                 </div>
                               </div>
@@ -365,7 +474,9 @@ export default function AssetTransferHistoryModal({
                                 <div className="text-[10px] font-black text-sky-500 uppercase tracking-widest mb-1">
                                   To User
                                 </div>
-                                <div className="text-sm font-black text-sky-700 leading-tight">{toUser || "—"}</div>
+                                <div className="text-sm font-black text-sky-700 leading-tight">
+                                  {toUser || "—"}
+                                </div>
                               </div>
                             </div>
                           )}
@@ -373,12 +484,25 @@ export default function AssetTransferHistoryModal({
                           {by && by !== "—" && (
                             <div className="mt-3 flex items-center gap-2">
                               <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                <svg
+                                  className="w-3.5 h-3.5 text-slate-500"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                  />
                                 </svg>
                               </div>
                               <span className="text-xs text-slate-500">
-                                Transferred by <span className="font-bold text-slate-700">{by}</span>
+                                Transferred by{" "}
+                                <span className="font-bold text-slate-700">
+                                  {by}
+                                </span>
                               </span>
                             </div>
                           )}
@@ -388,7 +512,9 @@ export default function AssetTransferHistoryModal({
                               <div className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">
                                 Reason / Remarks
                               </div>
-                              <p className="text-xs text-blue-800 leading-relaxed">{reason}</p>
+                              <p className="text-xs text-blue-800 leading-relaxed">
+                                {reason}
+                              </p>
                             </div>
                           )}
                         </div>
@@ -426,8 +552,10 @@ export default function AssetTransferHistoryModal({
 
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-400 font-semibold">
-              {history.length} record{history.length !== 1 ? "s" : ""} on this page
+              {history.length} record{history.length !== 1 ? "s" : ""} on this
+              page
             </span>
+
             <button
               onClick={onClose}
               className="px-6 py-2.5 bg-gradient-to-r from-slate-800 to-slate-900 text-white text-sm font-bold rounded-xl hover:from-slate-900 hover:to-black shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"

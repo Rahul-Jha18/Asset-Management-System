@@ -13,22 +13,70 @@ const sectionConfigMap = {
   ipphone: { model: () => db.BranchIpPhone, pk: "id", userField: "assigned_user" },
   cctv: { model: () => db.BranchCctv, pk: "cctv_id", userField: null },
   server: { model: () => db.BranchServer, pk: "id", userField: null },
-  firewall_router: { model: () => db.BranchFirewallRouter, pk: "id", userField: null },
+  firewall_router: {
+    model: () => db.BranchFirewallRouter,
+    pk: "id",
+    userField: null,
+  },
   switch: { model: () => db.BranchSwitch, pk: "id", userField: "assigned_user" },
-  extra_monitor: { model: () => db.BranchExtraMonitor, pk: "id", userField: "assigned_user" },
-  connectivity: { model: () => db.BranchConnectivity, pk: "id", userField: null },
+  extra_monitor: {
+    model: () => db.BranchExtraMonitor,
+    pk: "id",
+    userField: "assigned_user",
+  },
+  connectivity: {
+    model: () => db.BranchConnectivity,
+    pk: "id",
+    userField: null,
+  },
   ups: { model: () => db.BranchUps, pk: "id", userField: "assigned_user" },
   inverter: { model: () => db.Inverter, pk: "id", userField: "assigned_user" },
 
-  application_software: { model: () => db.BranchApplicationSoftware, pk: "id", userField: "assigned_to" },
-  office_software: { model: () => db.BranchOfficeSoftware, pk: "id", userField: "assigned_to" },
-  utility_software: { model: () => db.BranchUtilitySoftware, pk: "id", userField: null },
-  security_software: { model: () => db.BranchSecuritySoftware, pk: "id", userField: null },
-  security_software_installed: { model: () => db.BranchSecuritySoftwareInstalled, pk: "id", userField: null },
-  services: { model: () => db.BranchServices, pk: "id", userField: null },
-  licenses: { model: () => db.BranchLicenses, pk: "id", userField: "assigned_to" },
-  windows_os: { model: () => db.BranchWindowsOS, pk: "id", userField: null },
-  windows_servers: { model: () => db.BranchWindowsServers, pk: "id", userField: null },
+  application_software: {
+    model: () => db.BranchApplicationSoftware,
+    pk: "id",
+    userField: "assigned_to",
+  },
+  office_software: {
+    model: () => db.BranchOfficeSoftware,
+    pk: "id",
+    userField: "assigned_to",
+  },
+  utility_software: {
+    model: () => db.BranchUtilitySoftware,
+    pk: "id",
+    userField: null,
+  },
+  security_software: {
+    model: () => db.BranchSecuritySoftware,
+    pk: "id",
+    userField: null,
+  },
+  security_software_installed: {
+    model: () => db.BranchSecuritySoftwareInstalled,
+    pk: "id",
+    userField: null,
+  },
+  services: {
+    model: () => db.BranchServices,
+    pk: "id",
+    userField: null,
+  },
+  licenses: {
+    model: () => db.BranchLicenses,
+    pk: "id",
+    userField: "assigned_to",
+  },
+  windows_os: {
+    model: () => db.BranchWindowsOS,
+    pk: "id",
+    userField: null,
+  },
+  windows_servers: {
+    model: () => db.BranchWindowsServers,
+    pk: "id",
+    userField: null,
+  },
 };
 
 const allowedSections = new Set(Object.keys(sectionConfigMap));
@@ -36,13 +84,43 @@ const allowedSections = new Set(Object.keys(sectionConfigMap));
 const toNullableInt = (value) => {
   if (value === null || value === undefined || value === "") return null;
 
-  // IMPORTANT: reject names like "Rahul Jha"
-  if (typeof value === "string" && value.trim() !== "" && !/^\d+$/.test(value.trim())) {
+  if (
+    typeof value === "string" &&
+    value.trim() !== "" &&
+    !/^\d+$/.test(value.trim())
+  ) {
     return null;
   }
 
   const n = Number(value);
   return Number.isInteger(n) ? n : null;
+};
+
+const getPlainBranchName = (branch) => {
+  if (!branch) return null;
+  const plain = typeof branch.toJSON === "function" ? branch.toJSON() : branch;
+  return plain.name || plain.branchName || plain.branch_name || null;
+};
+
+const getBranchNameMap = async (branchIds) => {
+  const ids = [
+    ...new Set(
+      branchIds
+        .filter((id) => id !== null && id !== undefined && id !== "")
+        .map((id) => Number(id))
+        .filter((id) => Number.isFinite(id))
+    ),
+  ];
+
+  if (!ids.length || !db.Branch) return new Map();
+
+  const branches = await db.Branch.findAll({
+    where: { id: ids },
+    attributes: ["id", "name"],
+    raw: true,
+  });
+
+  return new Map(branches.map((b) => [Number(b.id), b.name]));
 };
 
 exports.transferAsset = asyncHandler(async (req, res) => {
@@ -92,11 +170,21 @@ exports.transferAsset = asyncHandler(async (req, res) => {
     return sendError(res, "assetId and fromBranchId must be valid numbers", 400);
   }
 
-  if ((transferType === "branch" || transferType === "both") && !Number.isFinite(targetBranchId)) {
-    return sendError(res, "toBranchId must be a valid number for branch/both transfer", 400);
+  if (
+    (transferType === "branch" || transferType === "both") &&
+    !Number.isFinite(targetBranchId)
+  ) {
+    return sendError(
+      res,
+      "toBranchId must be a valid number for branch/both transfer",
+      400
+    );
   }
 
-  if ((transferType === "branch" || transferType === "both") && fromId === targetBranchId) {
+  if (
+    (transferType === "branch" || transferType === "both") &&
+    fromId === targetBranchId
+  ) {
     return sendError(res, "Target branch must be different", 400);
   }
 
@@ -106,14 +194,29 @@ exports.transferAsset = asyncHandler(async (req, res) => {
   const normalizedFromUserName = String(fromUserName ?? "").trim() || null;
   let normalizedToUserName = String(toUserName ?? "").trim() || null;
 
-  // If frontend accidentally sends name inside toUserId, move it to toUserName
-  if (!normalizedToUserId && typeof toUserId === "string" && toUserId.trim() && !normalizedToUserName) {
+  if (
+    !normalizedToUserId &&
+    typeof toUserId === "string" &&
+    toUserId.trim() &&
+    !normalizedToUserName
+  ) {
     normalizedToUserName = toUserId.trim();
   }
 
-  if ((transferType === "user" || transferType === "both") && !normalizedToUserId && !normalizedToUserName) {
-    return sendError(res, "toUserId or toUserName is required for user/both transfer", 400);
+  if (
+    (transferType === "user" || transferType === "both") &&
+    !normalizedToUserId &&
+    !normalizedToUserName
+  ) {
+    return sendError(
+      res,
+      "toUserId or toUserName is required for user/both transfer",
+      400
+    );
   }
+
+  let fromBranchName = null;
+  let toBranchName = null;
 
   if (db.Branch && (transferType === "branch" || transferType === "both")) {
     const [fromBranch, toBranch] = await Promise.all([
@@ -123,6 +226,15 @@ exports.transferAsset = asyncHandler(async (req, res) => {
 
     if (!fromBranch) return sendError(res, "Source branch not found", 404);
     if (!toBranch) return sendError(res, "Target branch not found", 404);
+
+    fromBranchName = getPlainBranchName(fromBranch);
+    toBranchName = getPlainBranchName(toBranch);
+  } else if (db.Branch && transferType === "user") {
+    const branch = await db.Branch.findByPk(fromId);
+    if (branch) {
+      fromBranchName = getPlainBranchName(branch);
+      toBranchName = fromBranchName;
+    }
   }
 
   const whereClause = {
@@ -133,7 +245,11 @@ exports.transferAsset = asyncHandler(async (req, res) => {
   const asset = await Model.findOne({ where: whereClause });
 
   if (!asset) {
-    return sendError(res, `Asset not found in source branch for section "${key}"`, 404);
+    return sendError(
+      res,
+      `Asset not found in source branch for section "${key}"`,
+      404
+    );
   }
 
   const oldData = asset.toJSON();
@@ -161,10 +277,14 @@ exports.transferAsset = asyncHandler(async (req, res) => {
     const assetCode =
       asset.assetId ||
       asset.assetCode ||
+      oldData.assetId ||
+      oldData.assetCode ||
       `${key.toUpperCase()}-${aId}`;
 
+    let createdTransfer = null;
+
     if (db.AssetTransfer) {
-      await db.AssetTransfer.create(
+      createdTransfer = await db.AssetTransfer.create(
         {
           assetCode,
           section: key,
@@ -200,8 +320,20 @@ exports.transferAsset = asyncHandler(async (req, res) => {
 
     await logAssetChange(fromId, aId, key, oldData, newData, user, "TRANSFER", t);
 
-    if ((transferType === "branch" || transferType === "both") && fromId !== targetBranchId) {
-      await logAssetChange(targetBranchId, aId, key, oldData, newData, user, "TRANSFER", t);
+    if (
+      (transferType === "branch" || transferType === "both") &&
+      fromId !== targetBranchId
+    ) {
+      await logAssetChange(
+        targetBranchId,
+        aId,
+        key,
+        oldData,
+        newData,
+        user,
+        "TRANSFER",
+        t
+      );
     }
 
     await t.commit();
@@ -212,13 +344,19 @@ exports.transferAsset = asyncHandler(async (req, res) => {
         section: key,
         assetCode,
         transferType,
+        transferRecord: createdTransfer,
         transferredAsset: asset,
+
         fromBranchId: fromId,
         toBranchId: transferType === "user" ? fromId : targetBranchId,
+        fromBranchName,
+        toBranchName,
+
         fromUserId: normalizedFromUserId,
         fromUserName:
           normalizedFromUserName ||
           (userField ? oldData[userField] || null : null),
+
         toUserId: normalizedToUserId,
         toUserName:
           normalizedToUserName ||
@@ -233,7 +371,13 @@ exports.transferAsset = asyncHandler(async (req, res) => {
 });
 
 exports.getAssetTransferHistory = asyncHandler(async (req, res) => {
-  const { assetCode, section, assetId } = req.query;
+  const {
+    assetCode,
+    section,
+    assetId,
+    limit = 10,
+    offset = 0,
+  } = req.query;
 
   if (!db.AssetTransfer) {
     return sendError(res, "AssetTransfer model not found", 500);
@@ -243,12 +387,54 @@ exports.getAssetTransferHistory = asyncHandler(async (req, res) => {
 
   if (assetCode) where.assetCode = assetCode;
   if (section) where.section = String(section).trim().toLowerCase();
-  if (assetId && !Number.isNaN(Number(assetId))) where.assetId = Number(assetId);
+  if (assetId && !Number.isNaN(Number(assetId))) {
+    where.assetId = Number(assetId);
+  }
+
+  if (!assetCode && !assetId) {
+    return sendError(res, "assetId or assetCode is required", 400);
+  }
+
+  const safeLimit = Math.min(Number(limit) || 10, 100);
+  const safeOffset = Math.max(Number(offset) || 0, 0);
 
   const rows = await db.AssetTransfer.findAll({
     where,
     order: [["createdAt", "DESC"]],
+    limit: safeLimit,
+    offset: safeOffset,
+    raw: true,
   });
 
-  return sendSuccess(res, rows, "Asset transfer history fetched successfully");
+  const branchMap = await getBranchNameMap(
+    rows.flatMap((row) => [row.fromBranchId, row.toBranchId])
+  );
+
+  const transfers = rows.map((row) => ({
+    ...row,
+
+    fromBranchName:
+      row.fromBranchId !== null && row.fromBranchId !== undefined
+        ? branchMap.get(Number(row.fromBranchId)) || null
+        : null,
+
+    toBranchName:
+      row.toBranchId !== null && row.toBranchId !== undefined
+        ? branchMap.get(Number(row.toBranchId)) || null
+        : null,
+
+    assetCode: row.assetCode || row.assetId,
+    transferType: row.transferType || "branch",
+  }));
+
+  return sendSuccess(
+    res,
+    {
+      transfers,
+      count: transfers.length,
+      limit: safeLimit,
+      offset: safeOffset,
+    },
+    "Asset transfer history fetched successfully"
+  );
 });

@@ -32,6 +32,14 @@ const AssetTransfer = sequelize.define(
   {
     tableName: "asset_transfers",
     timestamps: true,
+    indexes: [
+      { fields: ["assetId"] },
+      { fields: ["assetCode"] },
+      { fields: ["section"] },
+      { fields: ["fromBranchId"] },
+      { fields: ["toBranchId"] },
+      { fields: ["createdAt"] },
+    ],
   }
 );
 
