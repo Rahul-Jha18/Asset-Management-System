@@ -922,5 +922,4 @@ const SplitSidebarLayout = ({
     </>
   );
 };
-
 export default SplitSidebarLayout;
