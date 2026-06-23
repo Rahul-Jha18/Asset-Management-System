@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
+import Logo from "../../assets/nepallife.png"
 
 /* ─────────────────────────────────────────────────────────────
    STYLES
@@ -16,11 +17,11 @@ ${FONTS}
   --nb2:  #1474F3;
   --nr:   #E11D2E;
   --nsur: #0d1117;
-  --nnav: rgba(8,14,28,0.85);
+  --nnav: rgba(40, 64, 90, 0.94);
   --nbor: rgba(255,255,255,0.07);
   --nw78: rgba(255,255,255,0.78);
   --ngr:  linear-gradient(135deg,#0B5CAB 0%,#1474F3 55%,#E11D2E 100%);
-  --ngb:  linear-gradient(135deg,#0B5CAB,#1474F3);
+  --ngb:  linear-gradient(135deg,rgba(3, 17, 44, 0.88),rgba(2, 13, 34, 0.94));
 }
 
 /* NAV BAR */
@@ -32,13 +33,74 @@ ${FONTS}
 .nb-in{max-width:1320px;margin:0 auto;height:100%;padding:0 20px;display:flex;align-items:center;gap:14px;}
 
 /* LOGO */
-.nb-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;user-select:none;}
-.nb-mark{width:34px;height:34px;border-radius:9px;background:var(--ngr);display:flex;align-items:center;
-  justify-content:center;font-family:'Syne',sans-serif;font-weight:900;font-size:12px;color:#fff;flex-shrink:0;
-  box-shadow:0 0 0 1.5px rgba(255,255,255,0.12),0 4px 14px rgba(0,0,0,0.4);}
-.nb-name{font-family:'Syne',sans-serif;font-weight:900;font-size:16px;letter-spacing:-.025em;color:#fff;}
-.nb-name .r{color:var(--nr);}
-.nb-sp{flex:1;}
+.nb-logo{
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  gap:10px;   
+  padding:6px 10px;
+  text-decoration:none;
+  flex-shrink:0;
+  user-select:none;
+  background:rgba(197, 193, 193, 0.16);
+  border-radius:12px;
+
+  box-shadow:
+    0 0 0 1px rgba(10,76,149,0.08),
+    0 4px 14px rgba(0,0,0,0.12);
+}
+
+.nb-mark{
+  width:34px;
+  height:34px;
+  border-radius:9px;
+
+  background:linear-gradient(
+    135deg,
+    #0a4c95 0%,
+    #0d5cb6 100%
+  );
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-family:'Syne',sans-serif;
+  font-weight:900;
+  font-size:12px;
+  color:#fff;
+  flex-shrink:0;
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.25),
+    0 4px 14px rgba(10,76,149,0.25);
+}
+
+.nb-name{
+  display:flex;
+  flex-direction: column;
+  font-family:'Syne',sans-serif;
+  font-size:10px;
+  letter-spacing:-0.025em;
+  color:rgb(255, 255, 255);
+}
+
+.nb-name .r{
+  font-size:16px;
+  font-weight: 900;
+  color:#d71920; /* LIFE red */
+}
+
+.nb-name strong{
+  font-size:16px;
+  color:#0a4c95 !important; /* NEPAL blue */
+}
+
+.nb-sp{
+  flex:1;
+}
+
+
 
 /* DESKTOP LINKS */
 .nb-links{display:flex;align-items:center;gap:2px;}
@@ -624,18 +686,7 @@ export default function Nav() {
 
           {/* Logo */}
           <Link to="/" className="nb-logo">
-                    <img
-                      src="https://play-lh.googleusercontent.com/zW5KMgLpmTvg0TA4xYIztb5HedXa6mqbAflXHBnNWix5kKetiqtR1ZOqNghuBtleiJkN"
-                      alt="Logo"
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 8,
-                        objectFit: "cover",
-                        boxShadow: "0 2px 10px rgba(0,0,0,0.4)",
-                      }}
-                    />            
-                    <span className="nb-name">Asset<span className="r">IMS</span></span>
+            <span className="nb-name"><span className="r"><strong>NEPAL</strong>LIFE</span> Asset Management System</span>
           </Link>
 
           <div className="nb-sp" />

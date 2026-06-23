@@ -108,6 +108,7 @@ const SplitSidebarLayout = ({
 
   const [isMobile, setIsMobile] = useState(getInitialMobile);
   const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const onResize = () => {
       const mobile = window.innerWidth <= 768;
@@ -238,22 +239,25 @@ const SplitSidebarLayout = ({
         }
 
         .sl-logo {
-          width: 46px;
-          height: 46px;
-          min-width: 46px;
+          width: 45px;
+          height: 40px;
           border-radius: 14px;
-          background: linear-gradient(135deg, #fafafa, #9dd6fc);
+          background: #e7e7e7f1;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #fff;
-          font-size: 14px;
+          color: #08489c;
+          font-size: 18px;
           font-weight: 900;
+          border: 1px solid rgba(160, 155, 155, 0.55);
           font-family: Syne, sans-serif;
-          box-shadow: 0 10px 24px rgba(20,116,243,0.28);
+          box-shadow: 0px 12px 20px rgba(21, 216, 250, 0.31);
           user-select: none;
         }
-
+        .sl-logo span{
+          font-size: 18px;
+          color: red;
+        }
         .sl-brand {
           min-width: 0;
           overflow: hidden;
@@ -679,7 +683,6 @@ const SplitSidebarLayout = ({
           border-radius: 24px;
           box-shadow: 0 10px 28px rgba(15,23,42,0.06);
           overflow: hidden;
-          padding: 2px;
           margin: 0 16px 16px;
         }
 
@@ -816,18 +819,8 @@ const SplitSidebarLayout = ({
               <div className="sl-inner">
                 <div className="sl-head">
                   <Link to="/" onClick={() => isMobile && setMenuOpen(false)}>
-                    <div className="sl-logo">
-                      <img
-                        src="https://play-lh.googleusercontent.com/zW5KMgLpmTvg0TA4xYIztb5HedXa6mqbAflXHBnNWix5kKetiqtR1ZOqNghuBtleiJkN"
-                        alt="Logo"
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: 8,
-                          objectFit: "cover",
-                          boxShadow: "0 2px 10px rgba(0,0,0,0.4)",
-                        }}
-                      />
+                    <div className="sl-logo">N
+                      <span className="r">L</span>
                     </div>
                   </Link>
 
@@ -843,7 +836,6 @@ const SplitSidebarLayout = ({
                         </p>
                       </div>
                     </div>
-                    <div className="sl-brand-sub">{brand.subtext}</div>
                   </div>
 
                   {isMobile && (
