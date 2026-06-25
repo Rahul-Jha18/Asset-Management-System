@@ -52,6 +52,25 @@ const DEFAULT_ICONS = {
   ),
 };
 
+
+function normalizeDisplayRole(role) {
+  return String(role || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]/g, "_");
+}
+
+function formatDisplayRole(role) {
+  const value = normalizeDisplayRole(role);
+
+  if (value === "admin") return "Administrator";
+  if (value === "subadmin" || value === "sub_admin") return "Sub Admin";
+  if (value === "corp_user" || value === "corpuser") return "Corporate User";
+  if (value === "support") return "Support";
+
+  return "User";
+}
+
 function resolveIcon(item) {
   if (item.icon) return item.icon;
   const key = Object.keys(DEFAULT_ICONS).find(
@@ -136,7 +155,7 @@ const SplitSidebarLayout = ({
     };
   }, [location.pathname]);
 
-  const userRole = user?.role?.name || user?.role || "User";
+  const userRole = formatDisplayRole(user?.role?.name || user?.role);
   const userName = user?.full_name || user?.name || "Authenticated User";
   const userDepartment = user?.department?.name || user?.departmentName || "";
   const userInitials = userName
@@ -536,7 +555,7 @@ const SplitSidebarLayout = ({
           color: var(--sb-muted);
           font-size: 10.5px;
           margin-top: 2px;
-          text-transform: capitalize;
+          text-transform: none;
           font-weight: 500;
         }
 
@@ -887,7 +906,7 @@ const SplitSidebarLayout = ({
                         <div className="sl-user-info">
                           <div className="sl-user-name">{userName}</div>
                           <div className="sl-user-role">
-                            {String(userRole).replace("_", " ")}
+                            {userRole}
                           </div>
                           {userDepartment && (
                             <div className="sl-user-dept">{userDepartment}</div>

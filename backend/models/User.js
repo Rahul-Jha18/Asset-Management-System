@@ -1,7 +1,6 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 
-
 const User = sequelize.define(
   "User",
   {
@@ -28,7 +27,7 @@ const User = sequelize.define(
     },
 
     role: {
-      type: DataTypes.ENUM("admin", "subadmin", "user"),
+      type: DataTypes.ENUM("admin", "subadmin", "user", "corp_user"),
       allowNull: false,
       defaultValue: "user",
     },

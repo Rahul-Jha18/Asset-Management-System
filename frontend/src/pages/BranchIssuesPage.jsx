@@ -341,7 +341,8 @@ export default function BranchIssuesPage() {
   const navItems = getIssueTrackerNavItems(user);
 
   const role = String(user?.role || "").toLowerCase().replace(/[\s_-]/g, "");
-  const canAct = ["admin", "approver", "headoffice", "corpuser", "corp_user", "support"].includes(role);
+  const canAct = ["admin", "approver", "headoffice", "corpuser", "support"].includes(role);
+  const canDelete = role === "admin";
 
   const [issues, setIssues] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -552,6 +553,8 @@ export default function BranchIssuesPage() {
               issues={issues}
               loading={loading}
               canAct={canAct}
+              canDelete={canDelete}
+              currentUser={user}
               onRowClick={(issueId) => navigate(`/branch-issues/${issueId}`)}
               onRefresh={load}
               page={page}

@@ -13,6 +13,7 @@ const initials = (name = "") =>
 
 const formatDate = (date) => {
   if (!date) return "—";
+
   return new Date(date).toLocaleDateString("en-NP", {
     year: "numeric",
     month: "short",
@@ -24,6 +25,8 @@ export default function IssueTable({
   issues = [],
   loading = false,
   canAct = false,
+  canDelete = false,
+  currentUser,
   onRowClick,
   onRefresh,
   page = 1,
@@ -34,6 +37,21 @@ export default function IssueTable({
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * rowsPerPage;
   const currentRows = issues.slice(start, start + rowsPerPage);
+
+  const canDeleteIssue = (issue) => {
+    if (issue.status !== "Open") return false;
+
+    const role = String(currentUser?.role || "")
+      .toLowerCase()
+      .replace(/[\s_-]/g, "");
+
+    // corp_user can change status and reply, but cannot delete.
+    if (role === "corpuser") return false;
+
+    if (canDelete || role === "admin") return true;
+
+    return String(issue.reporter_user_id || "") === String(currentUser?.id || "");
+  };
 
   const handleDelete = async (e, issue) => {
     e.stopPropagation();
@@ -137,7 +155,7 @@ export default function IssueTable({
                           View
                         </button>
 
-                        {issue.status === "Open" && (
+                        {canDeleteIssue(issue) && (
                           <button
                             type="button"
                             className="it-table-delete"

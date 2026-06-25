@@ -13,25 +13,48 @@ const { sendMail } = require("../utils/mailer");
 const generateOtp = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
+const normalizeRole = (role) => {
+  const value = String(role || "").trim().toLowerCase();
+
+  if (value === "admin") return "admin";
+
+  if (value === "subadmin" || value === "sub_admin" || value === "sub-admin") {
+    return "subadmin";
+  }
+
+  if (value === "corp_user" || value === "corpuser" || value === "corp-user" || value === "corp user") {
+    return "corp_user";
+  }
+
+  if (value === "user") return "user";
+
+  return "user";
+};
+
 /* ===========================
    REGISTER USER
 =========================== */
 exports.registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, is_admin = 0 } = req.body || {};
+  const { name, email, password, is_admin = 0, role } = req.body || {};
 
   const { isValid, errors } = validate.registerInput(name, email, password);
   if (!isValid) return sendError(res, "Validation failed", 400, errors);
 
-  const exists = await User.findOne({ where: { email } });
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+
+  const exists = await User.findOne({ where: { email: normalizedEmail } });
   if (exists) return sendError(res, "User already exists", 409);
+
+  const normalizedRole = is_admin ? "admin" : normalizeRole(role);
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = await User.create({
-    name,
-    email,
+    name: String(name).trim(),
+    email: normalizedEmail,
     password: hashedPassword,
-    is_admin: !!is_admin,
+    role: normalizedRole,
+    is_admin: normalizedRole === "admin",
   });
 
   return sendSuccess(
@@ -49,7 +72,6 @@ exports.registerUser = asyncHandler(async (req, res) => {
   );
 });
 
-
 /* ===========================
    FORGOT PASSWORD (EMAIL OTP)
 =========================== */
@@ -57,29 +79,28 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body || {};
   if (!email) return sendError(res, "Email is required", 400);
 
-  const user = await User.findOne({ where: { email } });
+  const normalizedEmail = String(email).trim().toLowerCase();
 
-  // Always return same message (security)
+  const user = await User.findOne({ where: { email: normalizedEmail } });
+
   if (!user) {
     return sendSuccess(res, {}, "If email exists, OTP has been sent.");
   }
 
   const otp = generateOtp();
 
-  // Hash OTP before saving
   const hashedOtp = crypto
     .createHash("sha256")
     .update(otp)
     .digest("hex");
 
-  const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expires = new Date(Date.now() + 10 * 60 * 1000);
 
   await user.update({
     reset_otp: hashedOtp,
     reset_otp_expires: expires,
   });
 
-  // Send OTP to USER EMAIL
   await sendMail({
     to: user.email,
     subject: "Password Reset OTP – Project AMS",
@@ -98,6 +119,7 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
 
   return sendSuccess(res, {}, "If email exists, OTP has been sent.");
 });
+
 /* ===========================
    LOGIN USER
 =========================== */
@@ -107,26 +129,29 @@ exports.loginUser = asyncHandler(async (req, res) => {
   const { isValid, errors } = validate.loginInput(email, password);
   if (!isValid) return sendError(res, "Validation failed", 400, errors);
 
-  const user = await User.findOne({ where: { email } });
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+
+  const user = await User.findOne({ where: { email: normalizedEmail } });
   if (!user) return sendError(res, "Invalid email or password", 401);
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return sendError(res, "Invalid email or password", 401);
 
-      return sendSuccess(
-      res,
-      {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        service_station_id: user.service_station_id || null,
-        img_url: user.img_url,
-        token: generateToken(user.id, user.role),
-      },
-      "Login successful"
-    );
+  return sendSuccess(
+    res,
+    {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      service_station_id: user.service_station_id || null,
+      img_url: user.img_url,
+      token: generateToken(user.id, user.role),
+    },
+    "Login successful"
+  );
 });
+
 /* ===========================
    RESET PASSWORD
 =========================== */
@@ -137,7 +162,9 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     return sendError(res, "Email, OTP and newPassword are required", 400);
   }
 
-  const user = await User.findOne({ where: { email } });
+  const normalizedEmail = String(email).trim().toLowerCase();
+
+  const user = await User.findOne({ where: { email: normalizedEmail } });
   if (!user) return sendError(res, "Invalid OTP", 400);
 
   if (!user.reset_otp || !user.reset_otp_expires) {

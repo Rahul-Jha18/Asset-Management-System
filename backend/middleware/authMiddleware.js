@@ -3,6 +3,12 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/User");
 
+const normalizeRole = (role) =>
+  String(role || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]/g, "_");
+
 exports.protect = asyncHandler(async (req, res, next) => {
   const auth = req.headers.authorization;
 
@@ -29,3 +35,17 @@ exports.protect = asyncHandler(async (req, res, next) => {
     return res.status(401).json({ message: "Not authorized, token failed" });
   }
 });
+
+exports.allowRoles = (...roles) => {
+  const allowedRoles = roles.map(normalizeRole);
+
+  return (req, res, next) => {
+    const userRole = normalizeRole(req.user?.role);
+
+    if (!req.user || !allowedRoles.includes(userRole)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    next();
+  };
+};

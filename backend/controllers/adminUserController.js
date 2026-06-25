@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const db = require("../models");
+
 const User = db.User;
 const ServiceStation = db.ServiceStation;
 
@@ -8,13 +9,21 @@ const normalizeRole = (role) => {
   const value = String(role || "").trim().toLowerCase();
 
   if (value === "admin") return "admin";
+
   if (value === "subadmin" || value === "sub_admin" || value === "sub-admin") {
     return "subadmin";
   }
+
+  if (value === "corp_user" || value === "corpuser" || value === "corp-user" || value === "corp user") {
+    return "corp_user";
+  }
+
   if (value === "user") return "user";
 
   return null;
 };
+
+const allowedRoleMessage = "Invalid role. Allowed: admin, subadmin, corp_user, user";
 
 const isAdminFlagFromRole = (role) => role === "admin";
 
@@ -49,23 +58,27 @@ exports.createUser = asyncHandler(async (req, res) => {
   const normalizedRole = normalizeRole(role);
 
   if (!normalizedRole) {
-    return res.status(400).json({ message: "Invalid role. Allowed: admin, subadmin, user" });
+    return res.status(400).json({ message: allowedRoleMessage });
   }
 
   let serviceStationId = null;
+
   if (service_station_id !== undefined && service_station_id !== null && service_station_id !== "") {
     serviceStationId = Number(service_station_id);
+
     if (Number.isNaN(serviceStationId)) {
       return res.status(400).json({ message: "Invalid service_station_id" });
     }
 
     const station = await ServiceStation.findByPk(serviceStationId);
+
     if (!station) {
       return res.status(400).json({ message: "Invalid service station" });
     }
   }
 
   const exists = await User.findOne({ where: { email: normalizedEmail } });
+
   if (exists) {
     return res.status(409).json({ message: "Email already exists" });
   }
@@ -100,6 +113,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
   const { name, email, role, password, service_station_id } = req.body || {};
 
   const user = await User.findByPk(id);
+
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
@@ -128,7 +142,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
     const normalizedRole = normalizeRole(role);
 
     if (!normalizedRole) {
-      return res.status(400).json({ message: "Invalid role. Allowed: admin, subadmin, user" });
+      return res.status(400).json({ message: allowedRoleMessage });
     }
 
     payload.role = normalizedRole;
@@ -137,17 +151,21 @@ exports.updateUser = asyncHandler(async (req, res) => {
 
   if (service_station_id !== undefined) {
     let serviceStationId = null;
+
     if (service_station_id !== null && service_station_id !== "") {
       serviceStationId = Number(service_station_id);
+
       if (Number.isNaN(serviceStationId)) {
         return res.status(400).json({ message: "Invalid service_station_id" });
       }
 
       const station = await ServiceStation.findByPk(serviceStationId);
+
       if (!station) {
         return res.status(400).json({ message: "Invalid service station" });
       }
     }
+
     payload.service_station_id = serviceStationId;
   }
 
@@ -179,10 +197,12 @@ exports.deleteUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findByPk(id);
+
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
 
   await user.destroy();
+
   res.json({ message: "User deleted" });
 });

@@ -5,13 +5,25 @@ const fs = require("fs");
 const crypto = require("crypto");
 const multer = require("multer");
 
-const {
-  BranchIssue,
-  BranchIssueCategory,
-  BranchIssueAttachment,
-  BranchIssueMessage,
-  BranchIssueActivityLog,
-} = require("../models/BranchIssue");
+const branchIssueModels = require("../models/BranchIssue");
+
+const BranchIssue = branchIssueModels.BranchIssue;
+const BranchIssueCategory = branchIssueModels.BranchIssueCategory;
+const BranchIssueAttachment = branchIssueModels.BranchIssueAttachment;
+const BranchIssueMessage = branchIssueModels.BranchIssueMessage;
+const BranchIssueActivityLog = branchIssueModels.BranchIssueActivityLog;
+
+if (
+  !BranchIssue ||
+  !BranchIssueCategory ||
+  !BranchIssueAttachment ||
+  !BranchIssueMessage ||
+  !BranchIssueActivityLog
+) {
+  throw new Error(
+    "BranchIssue models are not loaded correctly. Check backend/models/BranchIssue.js exports."
+  );
+}
 
 /* ─────────────────────────────────────────────────────────────
    HELPERS
@@ -23,18 +35,43 @@ const normalizeRole = (role) =>
 
 const isApprover = (user) => {
   const role = normalizeRole(user?.role);
-  return ["admin", "approver", "headoffice"].includes(role);
+
+  // corp_user becomes corpuser after normalizeRole()
+  return ["admin", "approver", "headoffice", "corpuser"].includes(role);
 };
+
+const canDeleteIssue = (user, issue) => {
+  const role = normalizeRole(user?.role);
+  const isOwner = String(issue?.reporter_user_id || "") === String(user?.id || "");
+
+  // corp_user can view all, change status, reply, and add internal note.
+  // corp_user cannot delete.
+  if (role === "corpuser") return false;
+
+  if (role === "admin") return true;
+
+  return isOwner;
+};
+
+const getUserBranchId = (user) =>
+  user?.branch_id ??
+  user?.service_station_id ??
+  null;
 
 const branchScope = (user) => {
   if (isApprover(user)) return {};
-  return { reporter_branch_id: user?.branch_id ?? null };
+
+  return {
+    reporter_branch_id: getUserBranchId(user),
+  };
 };
 
 const canAccessIssue = (user, issue) => {
   if (!user || !issue) return false;
+
   if (isApprover(user)) return true;
-  return String(user?.branch_id || "") === String(issue?.reporter_branch_id || "");
+
+  return String(getUserBranchId(user) || "") === String(issue?.reporter_branch_id || "");
 };
 
 const generateTicketNo = async () => {
@@ -96,9 +133,12 @@ const fileFilter = (_req, file, cb) => {
     "image/jpg",
     "image/png",
     "image/gif",
+    "image/webp",
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ];
 
   if (!allowed.includes(file.mimetype)) {
@@ -223,6 +263,7 @@ exports.getIssue = asyncHandler(async (req, res) => {
 
   const attachments = attachmentsRaw.map((a) => {
     const json = a.toJSON();
+
     return {
       ...json,
       url: getUploadPublicUrl(json.storage_path),
@@ -275,7 +316,10 @@ exports.createIssue = asyncHandler(async (req, res) => {
     priority: finalPriority,
     status: "Open",
     reporter_user_id: req.user?.id || null,
-    reporter_branch_id: req.user?.branch_id ?? reporter_branch_id ?? null,
+    reporter_branch_id:
+      getUserBranchId(req.user) ??
+      reporter_branch_id ??
+      null,
     reporter_name: req.user?.name ?? reporter_name ?? null,
     reporter_email: req.user?.email ?? reporter_email ?? null,
     due_at: null,
@@ -491,9 +535,7 @@ exports.deleteIssue = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Issue not found" });
   }
 
-  const isOwner = String(issue.reporter_user_id || "") === String(req.user?.id || "");
-
-  if (!isOwner && !isApprover(req.user)) {
+  if (!canDeleteIssue(req.user, issue)) {
     return res.status(403).json({
       message: "Not authorised to delete this issue",
     });

@@ -42,7 +42,7 @@ const CSS = `
   radial-gradient(circle at top left, rgba(20,116,243,.10), transparent 28%),
   radial-gradient(circle at top right, rgba(232,25,44,.07), transparent 24%),
   var(--it-bg);
-  height:calc(100vh - 36px);max-height:calc(100vh - 36px);overflow-y:auto;overflow-x:hidden;brder-radius: 10px;color:var(--it-text);padding:10px 12px ;scrollbar-width:thin;scrollbar-color:#bfdbfe transparent}
+  height:calc(100vh - 36px);max-height:calc(100vh - 36px);overflow-y:auto;overflow-x:hidden;border-radius: 10px;color:var(--it-text);padding:10px 12px ;scrollbar-width:thin;scrollbar-color:#bfdbfe transparent}
 .it-page::-webkit-scrollbar{width:6px}
 .it-page::-webkit-scrollbar-track{background:transparent}
 .it-page::-webkit-scrollbar-thumb{background:#bfdbfe;border-radius:999px}
@@ -347,7 +347,8 @@ export default function BranchIssueDetailPage() {
   const navItems = getIssueTrackerNavItems(user);
 
   const role = String(user?.role || "").toLowerCase().replace(/[\s_-]/g, "");
-  const canAct = ["admin", "approver", "headoffice", "corpuser", "corp_user", "support"].includes(role);
+  const canAct = ["admin", "approver", "headoffice", "corpuser", "support"].includes(role);
+  const canDelete = role === "admin";
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);

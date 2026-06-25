@@ -357,13 +357,72 @@ function Avatar({ name, src, size = 36 }) {
 /* ─────────────────────────────────────────────────────────────
    ROLE CHIP
 ───────────────────────────────────────────────────────────── */
-function RoleChip({ isAdmin, isSubAdmin }) {
-  if (!isAdmin && !isSubAdmin) return null;
+function normalizeRole(role) {
+  return String(role || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]/g, "_");
+}
+
+function formatRole(role, isAdmin, isSubAdmin) {
+  const value = normalizeRole(role);
+
+  if (isAdmin || value === "admin") return "Administrator";
+  if (isSubAdmin || value === "subadmin" || value === "sub_admin") return "Sub-Admin";
+  if (value === "corp_user" || value === "corpuser") return "Corporate User";
+  if (value === "support") return "Support";
+
+  return "User";
+}
+
+function roleChipStyle(role, isAdmin, isSubAdmin) {
+  const value = normalizeRole(role);
+
+  if (isAdmin || value === "admin") {
+    return {
+      background: "rgba(20,116,243,0.14)",
+      color: "#60a5fa",
+      border: "1px solid rgba(20,116,243,0.25)",
+    };
+  }
+
+  if (isSubAdmin || value === "subadmin" || value === "sub_admin") {
+    return {
+      background: "rgba(16,185,129,0.12)",
+      color: "#34d399",
+      border: "1px solid rgba(16,185,129,0.20)",
+    };
+  }
+
+  if (value === "corp_user" || value === "corpuser") {
+    return {
+      background: "rgba(168,85,247,0.13)",
+      color: "#c084fc",
+      border: "1px solid rgba(168,85,247,0.24)",
+    };
+  }
+
+  return {
+    background: "rgba(148,163,184,0.10)",
+    color: "#cbd5e1",
+    border: "1px solid rgba(148,163,184,0.18)",
+  };
+}
+
+function RoleChip({ role, isAdmin, isSubAdmin, compact = false }) {
+  const label = formatRole(role, isAdmin, isSubAdmin);
+
+  if (!label) return null;
+
   return (
-    <span className="nb-role" style={isAdmin
-      ? { background: "rgba(20,116,243,0.14)", color: "#60a5fa", border: "1px solid rgba(20,116,243,0.25)" }
-      : { background: "rgba(16,185,129,0.12)", color: "#34d399", border: "1px solid rgba(16,185,129,0.20)" }}>
-      {isAdmin ? "Administrator" : "Sub-Admin"}
+    <span
+      className="nb-role"
+      style={{
+        ...roleChipStyle(role, isAdmin, isSubAdmin),
+        ...(compact ? { marginTop: 0 } : {}),
+      }}
+    >
+      {label}
     </span>
   );
 }
@@ -445,7 +504,7 @@ function ProfileModal({ user, isAdmin, isSubAdmin, token, onClose, onImgUpdate }
   const FIELDS = [
     { label: "Full Name",  val: user?.name  || "—", icon: D.user,   bg: "rgba(20,116,243,0.12)", col: "#60a5fa" },
     { label: "Email",      val: user?.email || "—", icon: D.email,  bg: "rgba(20,116,243,0.12)", col: "#60a5fa" },
-    { label: "Role",       val: isAdmin ? "Administrator" : isSubAdmin ? "Sub-Admin" : "User", icon: D.shield, bg: "rgba(34,197,94,0.10)", col: "#4ade80" },
+    { label: "Role",       val: formatRole(user?.role, isAdmin, isSubAdmin), icon: D.shield, bg: "rgba(34,197,94,0.10)", col: "#4ade80" },
     { label: "Last Login", val: "Today, 9:42 AM",   icon: D.clock,  bg: "rgba(245,158,11,0.12)", col: "#fbbf24" },
   ];
 
@@ -486,7 +545,7 @@ function ProfileModal({ user, isAdmin, isSubAdmin, token, onClose, onImgUpdate }
             </div>
             <div className="p-sname">{user?.name || "User"}</div>
             <div className="p-semail">{user?.email}</div>
-            <RoleChip isAdmin={isAdmin} isSubAdmin={isSubAdmin} />
+            <RoleChip role={user?.role} isAdmin={isAdmin} isSubAdmin={isSubAdmin} />
           </div>
 
           <div className="p-tabs">
@@ -732,7 +791,7 @@ export default function Nav() {
                         <div className="nb-dinfo">
                           <div className="nb-dname">{user.name || "User"}</div>
                           <div className="nb-demail">{user.email}</div>
-                          <RoleChip isAdmin={isAdmin} isSubAdmin={isSubAdmin} />
+                          <RoleChip role={user?.role} isAdmin={isAdmin} isSubAdmin={isSubAdmin} />
                         </div>
                       </div>
 
@@ -785,7 +844,7 @@ export default function Nav() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="nb-druname">{user.name || "User"}</div>
               <div className="nb-dremail">{user.email}</div>
-              <RoleChip isAdmin={isAdmin} isSubAdmin={isSubAdmin} />
+              <RoleChip role={user?.role} isAdmin={isAdmin} isSubAdmin={isSubAdmin} />
             </div>
             <Ic d={D.arrow} size={14} />
           </div>
