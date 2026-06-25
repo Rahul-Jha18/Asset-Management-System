@@ -10,6 +10,7 @@ const { errorHandler } = require("./middleware/errorMiddleware");
 const userImportRoutes = require("./routes/userImportRoutes");
 const backupRoutes = require("./routes/backupRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
+const branchIssueRoutes = require("./routes/branchIssueRoutes");
 const assetTrackingRoutes = require("./routes/assetTrackingRoutes");
 
 const app = express();
@@ -101,6 +102,7 @@ app.use("/api/service-stations", require("./routes/serviceStationRoutes"));
 app.use("/api/requests", require("./routes/requestRoutes"));
 app.use("/api/support", require("./routes/supportRoutes"));
 app.use("/api", require("./routes/assetMetaRoutes"));
+app.use("/api/v1/branch-issues", branchIssueRoutes);
 
 app.use("/api/employees", employeeRoutes);
 app.use("/api/asset-tracking", assetTrackingRoutes);
