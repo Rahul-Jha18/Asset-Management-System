@@ -328,8 +328,6 @@ const getIssueTrackerNavItems = (user) => {
     { label: "Asset Master", path: "/branch-assets-report", icon: makeIcon(NAV_ICONS.assets) },
     { label: "Issue Tracker", path: "/branch-issues", icon: makeIcon(NAV_ICONS.issue) },
     { label: "Requests", path: "/requests", icon: makeIcon(NAV_ICONS.requests), show: canRequests },
-    { label: "Help & Support", path: "/support", icon: makeIcon(NAV_ICONS.support) },
-    { label: "Admin Expiry", path: "/admin/expiry", icon: makeIcon(NAV_ICONS.expiry), show: isAdmin },
     { label: "Users", path: "/admin/users", icon: makeIcon(NAV_ICONS.users), show: isAdmin },
   ].filter((item) => item.show !== false);
 };

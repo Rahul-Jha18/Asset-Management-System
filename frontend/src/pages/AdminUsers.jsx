@@ -153,6 +153,8 @@ const PAGE_STYLES = `
   .au-role-pill-sub.sel     { background:var(--violet-700);border-color:var(--violet-700);color:white; box-shadow:0 2px 8px rgba(109,40,217,0.3); }
   .au-role-pill-user    { background:var(--green-50);  border-color:var(--green-200);  color:var(--green-700);  }
   .au-role-pill-user.sel    { background:var(--green-600); border-color:var(--green-600); color:white; box-shadow:0 2px 8px rgba(22,163,74,0.3); }
+  .au-role-pill-corp    { background:var(--sky-50);    border-color:var(--sky-200);    color:var(--sky-700);    }
+  .au-role-pill-corp.sel    { background:var(--sky-700);   border-color:var(--sky-700);   color:white; box-shadow:0 2px 8px rgba(3,105,161,0.3); }
 
   .au-input, .au-select {
     width:100%; background:#ffffff; border:1.5px solid #cbd5e1;
@@ -226,6 +228,7 @@ const PAGE_STYLES = `
   .au-badge-gray   { background:var(--gray-100);  color:var(--gray-600);   border:1px solid var(--gray-200);   }
   .au-badge-rose   { background:var(--rose-50);   color:var(--rose-600);   border:1px solid var(--rose-200);   }
   .au-badge-violet { background:var(--violet-50); color:var(--violet-700); border:1px solid var(--violet-200); }
+  .au-badge-sky    { background:var(--sky-50);    color:var(--sky-700);    border:1px solid var(--sky-200);    }
   .au-badge-amber  { background:var(--amber-50);  color:var(--amber-600);  border:1px solid var(--amber-100); }
 
   .au-user-avatar {
@@ -300,10 +303,16 @@ const avatarColor = (name) =>
   AVATAR_COLORS[(name || "?").charCodeAt(0) % AVATAR_COLORS.length];
 
 const normalizeRole = (r) => {
-  const v = String(r || "").trim().toLowerCase();
+  const v = String(r || "").trim().toLowerCase().replace(/[\s-]/g, "_");
   if (v === "admin") return "admin";
-  if (v === "subadmin" || v === "sub_admin" || v === "sub-admin") return "subadmin";
+  if (v === "subadmin" || v === "sub_admin") return "subadmin";
+  if (v === "corp_user" || v === "corpuser") return "corp_user";
   return "user";
+};
+
+const roleNeedsStation = (role) => {
+  const r = normalizeRole(role);
+  return r === "subadmin" || r === "corp_user";
 };
 
 const buildPayload = (form, editing = false) => {
@@ -317,7 +326,7 @@ const buildPayload = (form, editing = false) => {
     payload.password = form.password;
   }
 
-  if (normalizeRole(form.role) === "subadmin") {
+  if (roleNeedsStation(form.role)) {
     payload.service_station_id = form.service_station_id ? Number(form.service_station_id) : null;
   } else {
     payload.service_station_id = null;
@@ -348,6 +357,16 @@ const RoleBadge = ({ role }) => {
       </span>
     );
   }
+  if (r === "corp_user") {
+    return (
+      <span
+        className="au-badge au-badge-sky"
+        style={{ textTransform: "uppercase", letterSpacing: "0.06em" }}
+      >
+        🏢 Corporate User
+      </span>
+    );
+  }
   return (
     <span
       className="au-badge au-badge-green"
@@ -373,6 +392,7 @@ const D = {
   branch:   "M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75",
   assets:   "M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375",
   requests: "M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z",
+  issue: "M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M9 12.75 11.25 15 15 9.75",
   help:     "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z",
   graph:    "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z",
   users:    "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
@@ -398,7 +418,7 @@ function Ic({ d, size = 14 }) {
 }
 
 /* ── Hero ──────────────────────────────────────────────────────── */
-function NepalLifeHero({ totalUsers, adminCount, subAdminCount, userCount }) {
+function NepalLifeHero({ totalUsers, adminCount, subAdminCount, corpUserCount, userCount }) {
   return (
     <div className="au-hero-wrap">
       <div className="au-hero-inner">
@@ -464,6 +484,12 @@ function NepalLifeHero({ totalUsers, adminCount, subAdminCount, userCount }) {
                 border: "var(--violet-200)",
               },
               {
+                label: `${corpUserCount} Corporate`,
+                bg: "rgba(3,105,161,0.08)",
+                color: "var(--sky-700)",
+                border: "var(--sky-200)",
+              },
+              {
                 label: `${userCount} Users`,
                 bg: "rgba(22,163,74,0.08)",
                 color: "var(--green-700)",
@@ -503,13 +529,13 @@ function NepalLifeHero({ totalUsers, adminCount, subAdminCount, userCount }) {
 export default function AdminUsers() {
   const navigate = useNavigate();
   const { token, isAdmin, isSubAdmin, user } = useAuth();
-  const roleLabel = isAdmin ? "ADMIN" : isSubAdmin ? "SUB ADMIN" : "USER";
+  const roleLabel = isAdmin ? "ADMIN" : isSubAdmin ? "SUB ADMIN" : user?.isCorpUser ? "CORPORATE USER" : "USER";
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [q, setQ] = useState("");
-  const [roleFilter, setRoleFilter] = useState(""); // "admin" | "subadmin" | "user" | ""
+  const [roleFilter, setRoleFilter] = useState(""); // "admin" | "subadmin" | "corp_user" | "user" | ""
   const [menuOpen, setMenuOpen] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [showPanel, setShowPanel] = useState("");
@@ -580,6 +606,7 @@ export default function AdminUsers() {
   const totalUsers = rows.length;
   const adminCount = rows.filter((u) => normalizeRole(u.role) === "admin").length;
   const subAdminCount = rows.filter((u) => normalizeRole(u.role) === "subadmin").length;
+  const corpUserCount = rows.filter((u) => normalizeRole(u.role) === "corp_user").length;
   const userCount = rows.filter((u) => normalizeRole(u.role) === "user").length;
 
   const filtered = useMemo(() => {
@@ -757,16 +784,14 @@ export default function AdminUsers() {
         <path strokeLinecap="round" strokeLinejoin="round" d={d} />
       </svg>
     );
- const navItems = [
+  const navItems = [
     { label: "Analytics",      path: "/assetdashboard",       icon: makeIcon(D.graph) },
     { label: "Branches",       path: "/branches",             icon: makeIcon(D.branch) },
     { label: "Asset Master",   path: "/branch-assets-report", icon: makeIcon(D.assets) },
+    { label: "Issue Tracker", path: "/branch-issues",         icon: makeIcon(D.issue) },
     { label: "Requests",       path: "/requests",             icon: makeIcon(D.requests), show: isAdmin || isSubAdmin },
     { label: "Users",          path: "/admin/users",          icon: makeIcon(D.users),    show: isAdmin },
-    { label: "Asset Tracking", path: "/asset-tracking",       icon: makeIcon(D.radar) },
-    { label: "Help & Support", path: "/support",              icon: makeIcon(D.help) },
   ].filter(i => i.show !== false);
-
   if (!isAdmin) {
     return (
       <>
@@ -819,6 +844,7 @@ export default function AdminUsers() {
     rolePillDef("", `All (${totalUsers})`, "au-role-pill-all", totalUsers),
     rolePillDef("admin", `Admin (${adminCount})`, "au-role-pill-admin", adminCount),
     rolePillDef("subadmin", `Sub Admin (${subAdminCount})`, "au-role-pill-sub", subAdminCount),
+    rolePillDef("corp_user", `Corporate (${corpUserCount})`, "au-role-pill-corp", corpUserCount),
     rolePillDef("user", `User (${userCount})`, "au-role-pill-user", userCount),
   ];
   return (
@@ -958,6 +984,7 @@ export default function AdminUsers() {
                 totalUsers={totalUsers}
                 adminCount={adminCount}
                 subAdminCount={subAdminCount}
+                corpUserCount={corpUserCount}
                 userCount={userCount}
               />
             </div>
@@ -1002,6 +1029,7 @@ export default function AdminUsers() {
                     <option value="">All Roles</option>
                     <option value="admin">Admin ({adminCount})</option>
                     <option value="subadmin">Sub Admin ({subAdminCount})</option>
+                    <option value="corp_user">Corporate User ({corpUserCount})</option>
                     <option value="user">User ({userCount})</option>
                   </select>
                 </div>
@@ -1393,17 +1421,18 @@ export default function AdminUsers() {
                           setForm((f) => ({
                             ...f,
                             role: roleValue,
-                            service_station_id: roleValue === "subadmin" ? f.service_station_id : "",
+                            service_station_id: roleNeedsStation(roleValue) ? f.service_station_id : "",
                           }));
                         }}
                       >
                         <option value="user">User</option>
+                        <option value="corp_user">Corporate User</option>
                         <option value="subadmin">Sub Admin</option>
                         <option value="admin">Admin</option>
                       </select>
                     </div>
 
-                    {normalizeRole(form.role) === "subadmin" && (
+                    {roleNeedsStation(form.role) && (
                       <div>
                         <label className="au-label">Assigned Station</label>
                         <select
@@ -1455,6 +1484,8 @@ export default function AdminUsers() {
                           ? "Full system access"
                           : normalizeRole(form.role) === "subadmin"
                           ? "Sub admin access"
+                          : normalizeRole(form.role) === "corp_user"
+                          ? "Corporate issue approver access with assigned station"
                           : "Standard user access"}
                       </div>
                     </div>

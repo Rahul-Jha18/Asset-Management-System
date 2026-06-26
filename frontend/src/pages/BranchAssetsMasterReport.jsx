@@ -287,6 +287,45 @@ const makeIcon = (d) => (
 const safeArray = v => (!v ? [] : Array.isArray(v) ? v : [v]);
 const show = v => (v === null || v === undefined || v === "" || v === "—" ? "N/A" : String(v));
 
+const normalizeRoleForScope = (role) =>
+  String(role || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]/g, "_");
+
+const getUserStationId = (user) =>
+  user?.service_station_id ??
+  user?.serviceStationId ??
+  user?.branch_id ??
+  user?.branchId ??
+  user?.station_id ??
+  user?.stationId ??
+  user?.service_station?.id ??
+  user?.serviceStation?.id ??
+  user?.branch?.id ??
+  null;
+
+const branchMatchesUserStation = (branch, user) => {
+  const stationId = getUserStationId(user);
+
+  if (stationId === null || stationId === undefined || stationId === "") {
+    return false;
+  }
+
+  const branchIds = [
+    branch?.service_station_id,
+    branch?.serviceStationId,
+    branch?.service_station?.id,
+    branch?.serviceStation?.id,
+    branch?.station_id,
+    branch?.stationId,
+    branch?.id,
+  ];
+
+  return branchIds.some((value) => String(value || "") === String(stationId));
+};
+
+
 // ── ADDED: display-friendly section name (qr_desktop_computer → QR Monitor) ──
 const displaySectionName = (section) => {
   const s = String(section || "").toLowerCase();
@@ -875,25 +914,27 @@ function InactiveAssetsSection({rows,onViewAsset}) {
 }
 
 function Ic({d,size=15}){return(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round"><path d={d}/></svg>);}
-const D={
-  branch:"M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75",
-  assets:"M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375",
-  requests:"M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z",
-  help:"M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z",
-  graph:"M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z",
-  users:"M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
-  radar:"M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
-  scan:"M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
+const D = {
+  branch:   "M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75",
+  assets:   "M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375",
+  requests: "M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z",
+  issue: "M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M9 12.75 11.25 15 15 9.75",
+  help:     "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z",
+  graph:    "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z",
+  users:    "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
+  radar:    "M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
+  scan:     "M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
 };
 
 /* ════════════════════════════════
    MAIN COMPONENT
 ════════════════════════════════ */
 export default function BranchAssetsMasterReport() {
-  const {token,isAdmin,isSubAdmin,user} = useAuth();
+  const {token,isAdmin,isSubAdmin,isCorpUser,user} = useAuth();
+  const canManageAssets = isAdmin || isSubAdmin;
   const canEdit  = isAdmin;
-  const canEdit1 = isAdmin || isSubAdmin;
-  const canDelete = isAdmin || isSubAdmin;
+  const canEdit1 = canManageAssets;
+  const canDelete = canManageAssets;
   const currentUserName = user?.name||user?.email||"Unknown User";
   const navigate  = useNavigate();
   const location  = useLocation();
@@ -911,7 +952,8 @@ export default function BranchAssetsMasterReport() {
   const [menuOpen,setMenuOpen]   = useState(false);
   const [copyToast,setCopyToast] = useState("");
   const [detailTab,setDetailTab] = useState("info");
-  const roleLabel = isAdmin?"ADMIN":isSubAdmin?"SUB ADMIN":"USER";
+  const userRole = normalizeRoleForScope(user?.role);
+  const roleLabel = isAdmin?"ADMIN":isSubAdmin?"SUB ADMIN":(isCorpUser||userRole==="corp_user")?"CORPORATE USER":"USER";
   const [employees,setEmployees]           = useState([]);
   const [employeesLoading,setEmployeesLoading] = useState(false);
 
@@ -1015,16 +1057,28 @@ export default function BranchAssetsMasterReport() {
   const normalizeText=(v)=>String(v??"").trim().toLowerCase();
   const roleFilteredBranches=useMemo(()=>{
     if (!user) return [];
+
+    const role = normalizeRoleForScope(user?.role);
+    const isCorporateUser = isCorpUser || role === "corp_user" || role === "corpuser";
+
     if (isAdmin) return branches||[];
-    if (isSubAdmin) return(branches||[]).filter(b=>String(b?.service_station_id??b?.serviceStationId??b?.service_station?.id??"")===String(user?.service_station_id??""));
+
+    if (isSubAdmin || isCorporateUser) {
+      return (branches||[]).filter(b => branchMatchesUserStation(b, user));
+    }
+
     return(branches||[]).filter(b=>normalizeText(b?.name)===normalizeText(user?.name));
-  },[branches,user,isAdmin,isSubAdmin]);
+  },[branches,user,isAdmin,isSubAdmin,isCorpUser]);
 
   const branchOptions=useMemo(()=>(roleFilteredBranches||[]).map(b=>({id:b.id,name:b.name})).sort((a,c)=>(a.name||"").localeCompare(c.name||"")),[roleFilteredBranches]);
   const getBranchNameById=useCallback(bid=>{const id=Number(bid);return roleFilteredBranches.find(b=>Number(b.id)===id)?.name||"";},[roleFilteredBranches]);
   const activeBranchName=useMemo(()=>branchFilter?getBranchNameById(branchFilter):"",[branchFilter,getBranchNameById]);
 
   const handleAddAssetSubmit=useCallback(async({branchId,section,payload})=>{
+    if (!canManageAssets) {
+      setAlert({type:"error",title:"Add Asset",message:"You do not have permission to add assets."});
+      return;
+    }
     if (!token) return;
     const cfg=sectionRouteMap[String(section||"").toLowerCase()];
     if (!cfg?.plural){setAlert({type:"error",title:"Add Asset",message:`No route for section: ${section}`});return;}
@@ -1036,7 +1090,7 @@ export default function BranchAssetsMasterReport() {
       await fetchAll();
     } catch(err){setAlert({type:"error",title:"Add Asset Failed",message:err?.response?.data?.message||err?.message||"Failed"});}
     finally{setAddSaving(false);}
-  },[token,fetchAll]);
+  },[token,fetchAll,canManageAssets]);
 
   const reportRows=useMemo(()=>sortByDeviceId(toReportRows(roleFilteredBranches,subCatMap,groupMap)),[roleFilteredBranches,subCatMap,groupMap]);
 
@@ -1129,7 +1183,7 @@ export default function BranchAssetsMasterReport() {
 
   const buildFinalRemarks=()=>`Last updated by ${currentUserName}: ${String(newRemark??"").trim()}`;
   const getRouteCfg=section=>sectionRouteMap[String(section??"").toLowerCase()]||null;
-  const canTransfer=useMemo(()=>{const cfg=getRouteCfg(detailRow?.section);return cfg?.type==="multi";},[detailRow]);
+  const canTransfer=useMemo(()=>{const cfg=getRouteCfg(detailRow?.section);return canManageAssets && cfg?.type==="multi";},[detailRow,canManageAssets]);
   const getBranchIdFromRow=()=>detailRow?.branchId??detailRow?.details?.branchId??null;
   const getRowIdFromRow=()=>{
     if(!detailRow)return null;
@@ -1229,6 +1283,10 @@ export default function BranchAssetsMasterReport() {
   };
 
   const handleTransfer=async()=>{
+    if (!canManageAssets) {
+      setAlert({type:"error",title:"Transfer",message:"You do not have permission to transfer assets."});
+      return;
+    }
     if(!token||!detailRow)return;
     const cfg=getRouteCfg(detailRow.section);
     if(!cfg||cfg.type!=="multi"){setAlert({type:"error",title:"Transfer",message:"Only multi assets can be transferred."});return;}
@@ -1316,15 +1374,14 @@ export default function BranchAssetsMasterReport() {
 
   const detailPairs=useMemo(()=>{if(!detailRow)return[];return buildDetailPairs(detailRow.section,detailRow.details,detailRow);},[detailRow]);
 
-  const navItems=[
-    {label:"Analytics",     path:"/assetdashboard",       icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>},
-    {label:"Branches",      path:"/branches",             icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75"/></svg>},
-    {label:"Asset Master",  path:"/branch-assets-report", icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375"/></svg>},
-    {label:"Requests",      path:"/requests",             icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"/></svg>, show:isAdmin||isSubAdmin},
-    {label:"Users",         path:"/admin/users",          icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>, show:isAdmin},
-    {label:"Asset Tracking",path:"/asset-tracking",       icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>},
-    {label:"Help & Support", path:"/support",             icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/></svg>},
-  ].filter(i=>i.show!==false);
+   const navItems = [
+    { label: "Analytics",      path: "/assetdashboard",       icon: makeIcon(D.graph) },
+    { label: "Branches",       path: "/branches",             icon: makeIcon(D.branch) },
+    { label: "Asset Master",   path: "/branch-assets-report", icon: makeIcon(D.assets) },
+    { label: "Issue Tracker", path: "/branch-issues",         icon: makeIcon(D.issue) },
+    { label: "Requests",       path: "/requests",             icon: makeIcon(D.requests), show: isAdmin || isSubAdmin },
+    { label: "Users",          path: "/admin/users",          icon: makeIcon(D.users),    show: isAdmin },
+  ].filter(i => i.show !== false);
 
   const clearFilters=()=>{setSearch("");setBranchFilter("");setGroupFilter("");setSubCatFilter("");setSectionFilter("");setStatusFilter("");setAssignedUserFilter("");setCurrentPage(1);fetchSubCats("");setTotalInfo({count:0,branch:"All Branches",group:"All Categories",subCategory:"All Sub Categories"});closeDetail();setSortField("assetId");setSortDir("asc");};
 

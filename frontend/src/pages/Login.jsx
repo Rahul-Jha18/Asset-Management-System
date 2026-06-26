@@ -99,7 +99,9 @@ const LOGIN_STYLES = `
     gap:28px; text-align:center; max-width:340px;
   }
   .lg-logo {
-    width:100px; height:100px;
+    width:100px;  min-height: 70px; 
+     background: rgb(255, 255, 255);
+    border-radius:8px; padding: 4px 6px;
     filter:drop-shadow(0 12px 32px rgba(11,92,171,0.55)) drop-shadow(0 2px 8px rgba(0,0,0,0.4));
     animation:floaty 5s ease-in-out infinite;
   }

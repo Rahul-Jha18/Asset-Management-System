@@ -857,6 +857,63 @@ const makeIcon = (d) => (
 /* ─── Helpers ─── */
 const safeArray = (v) => (!v ? [] : Array.isArray(v) ? v : [v]);
 
+const normalizeRoleForScope = (role) =>
+  String(role || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]/g, "_");
+
+const canViewAllBranches = (user) => {
+  const role = normalizeRoleForScope(user?.role);
+
+  return ["admin", "subadmin", "corp_user", "corpuser"].includes(role);
+};
+
+const getUserStationId = (user) =>
+  user?.service_station_id ??
+  user?.serviceStationId ??
+  user?.branch_id ??
+  user?.branchId ??
+  user?.station_id ??
+  user?.stationId ??
+  user?.service_station?.id ??
+  user?.serviceStation?.id ??
+  user?.branch?.id ??
+  null;
+
+const branchBelongsToUserStation = (branch, user) => {
+  const userStationId = getUserStationId(user);
+
+  if (userStationId === null || userStationId === undefined || userStationId === "") {
+    return false;
+  }
+
+  const branchIds = [
+    branch?.id,
+    branch?.branch_id,
+    branch?.branchId,
+    branch?.service_station_id,
+    branch?.serviceStationId,
+    branch?.station_id,
+    branch?.stationId,
+    branch?.service_station?.id,
+    branch?.serviceStation?.id,
+  ];
+
+  return branchIds.some((value) => String(value || "") === String(userStationId));
+};
+
+const scopeBranchesForUser = (branches, user) => {
+  const list = Array.isArray(branches) ? branches : [];
+
+  if (canViewAllBranches(user)) {
+    return list;
+  }
+
+  return list.filter((branch) => branchBelongsToUserStation(branch, user));
+};
+
+
 const guessBrand = (model) => {
   if (!model) return "";
   const s = String(model).trim();
@@ -1312,6 +1369,7 @@ const D = {
   branch:   "M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75",
   assets:   "M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375",
   requests: "M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z",
+  issue: "M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M9 12.75 11.25 15 15 9.75",
   help:     "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z",
   graph:    "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z",
   users:    "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
@@ -1320,9 +1378,21 @@ const D = {
 };
 
 export default function AssetDashboard() {
-  const { token, user, isAdmin, isSubAdmin } = useAuth();
+  const { token, user, isAdmin, isSubAdmin, isCorpUser } = useAuth();
   const navigate = useNavigate();
-  const roleLabel = isAdmin ? "ADMIN" : isSubAdmin ? "SUB ADMIN" : "USER";
+
+  const role = normalizeRoleForScope(user?.role);
+  const canSeeAllBranches = canViewAllBranches(user);
+  const currentUserStationId = getUserStationId(user);
+
+  const roleLabel =
+    isAdmin || role === "admin"
+      ? "ADMIN"
+      : isSubAdmin || role === "subadmin"
+      ? "SUB ADMIN"
+      : isCorpUser || role === "corp_user"
+      ? "CORPORATE USER"
+      : "USER";
 
   const [loading, setLoading] = useState(true);
   const [branches, setBranches] = useState([]);
@@ -1364,8 +1434,12 @@ export default function AssetDashboard() {
     const res = await api.get("/api/branches/with-assets/all", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    setBranches(Array.isArray(res?.data?.data ?? res?.data) ? res.data.data ?? res.data : []);
-  }, [token]);
+    const allBranches = Array.isArray(res?.data?.data ?? res?.data)
+      ? res.data.data ?? res.data
+      : [];
+
+    setBranches(scopeBranchesForUser(allBranches, user));
+  }, [token, user]);
 
   const fetchGroups = useCallback(async () => {
     if (!token) return;
@@ -1552,14 +1626,13 @@ export default function AssetDashboard() {
     [subCats, groupFilter]
   );
 
-  const navItems = [
+    const navItems = [
     { label: "Analytics",      path: "/assetdashboard",       icon: makeIcon(D.graph) },
     { label: "Branches",       path: "/branches",             icon: makeIcon(D.branch) },
     { label: "Asset Master",   path: "/branch-assets-report", icon: makeIcon(D.assets) },
+    { label: "Issue Tracker", path: "/branch-issues",         icon: makeIcon(D.issue) },
     { label: "Requests",       path: "/requests",             icon: makeIcon(D.requests), show: isAdmin || isSubAdmin },
     { label: "Users",          path: "/admin/users",          icon: makeIcon(D.users),    show: isAdmin },
-    { label: "Asset Tracking", path: "/asset-tracking",       icon: makeIcon(D.radar) },
-    { label: "Help & Support", path: "/support",              icon: makeIcon(D.help) },
   ].filter(i => i.show !== false);
 
   if (!token) {
@@ -1624,6 +1697,47 @@ export default function AssetDashboard() {
     );
   }
 
+  if (!canSeeAllBranches && !currentUserStationId) {
+    return (
+      <>
+        <style>{FONTS + STYLES}</style>
+        <SplitSidebarLayout navItems={navItems} user={user}>
+          <div
+            style={{
+              minHeight: "70vh",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#f9fafb",
+              fontFamily: "DM Sans,sans-serif",
+              padding: 24,
+            }}
+          >
+            <div style={{ textAlign: "center", maxWidth: 460 }}>
+              <div style={{ fontSize: "3rem", marginBottom: 16 }}>🏢</div>
+              <h2
+                style={{
+                  fontFamily: "Syne,sans-serif",
+                  fontSize: "1.4rem",
+                  fontWeight: 800,
+                  color: NL_RED,
+                  margin: 0,
+                }}
+              >
+                Branch / Station not assigned
+              </h2>
+              <p style={{ color: "#64748b", lineHeight: 1.7 }}>
+                This user account does not have a service station assigned. Please assign
+                service_station_id in Admin Users to view branch asset dashboard data.
+              </p>
+            </div>
+          </div>
+        </SplitSidebarLayout>
+        <Footer />
+      </>
+    );
+  }
+
   const maxSection = sectionCounts[0]?.[1] || 1;
 
   return (
@@ -1659,6 +1773,7 @@ export default function AssetDashboard() {
                   }}
                 >
                   {totalAll.toLocaleString()} assets · {branches.length} branches · {sectionCounts.length} sections
+                  {!canSeeAllBranches && currentUserStationId ? ` · Station ${currentUserStationId}` : ""}
                 </div>
               </div>
 
@@ -1714,6 +1829,12 @@ export default function AssetDashboard() {
                   <span className="ad-chip" style={{ background: NL_GRADIENT, color: "white", border: "none" }}>
                     {totalFiltered.toLocaleString()} Visible
                   </span>
+
+                  {!canSeeAllBranches && currentUserStationId && (
+                    <span className="ad-chip" style={{ borderColor: "#bfdbfe", color: NL_BLUE, background: "#eff6ff" }}>
+                      Station {currentUserStationId}
+                    </span>
+                  )}
 
                   {(branchFilter?.value || groupFilter?.value || subCatFilter?.value) && (
                     <button

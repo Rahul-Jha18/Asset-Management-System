@@ -21,7 +21,16 @@ exports.protect = asyncHandler(async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findByPk(decoded.id, {
-      attributes: ["id", "name", "email", "role", "is_admin", "service_station_id"],
+      attributes: [
+        "id",
+        "sql_user_id",
+        "name",
+        "email",
+        "role",
+        "is_admin",
+        "service_station_id",
+        "img_url",
+      ],
     });
 
     if (!user) {
