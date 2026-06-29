@@ -167,18 +167,19 @@ const CSS = `
 .it-back{border:none;background:rgba(255,255,255,.72);border:1.5px solid var(--it-line);border-radius:999px;padding:9px 13px;color:var(--it-blue);font-family:'Outfit',sans-serif;font-weight:900;cursor:pointer;display:flex;align-items:center;gap:7px}
 .it-detail-layout{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:18px}
 .it-detail-stack{display:flex;flex-direction:column;gap:16px}
-.it-detail-card{background:rgba(255,255,255,.96);border:1.5px solid var(--it-line);border-radius:16px;box-shadow:var(--it-shadow);overflow:hidden}
+.it-detail-card-pr{background:rgba(163, 207, 249, 0.28); padding:2px; }
+.it-detail-card{margin-top: 10px; background:rgba(255, 255, 255, 0);border:1.5px solid var(--it-line);border-radius:16px;box-shadow:var(--it-shadow);overflow:hidden}
 .it-detail-header{padding: 10px 20px;background:var(--it-blue);color:white}
 .it-detail-header small{font-family:'Outfit',sans-serif;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.68);font-weight:850;font-size:10px}
 .it-detail-header h2{margin:6px 0 0;font-family:'Outfit',sans-serif;letter-spacing:-.035em;font-size:1.42rem}
 .it-detail-body{padding:18px}
 .it-meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-.it-meta{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:11px}
+.it-meta{background:#f8fafc;border:1px solid rgba(109, 138, 165, 0.61);border-radius:14px;padding:11px}
 .it-meta small{display:block;font-family:'Outfit',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;font-weight:900;font-size:9.5px;margin-bottom:5px}
 .it-meta strong{font-size:13px;color:#334155}
-.it-section-title{font-family:'Outfit',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-size:11px;font-weight:900;margin:16px 0 10px}
-.it-text-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px;color:#334155;font-size:13.5px;line-height:1.68;white-space:pre-wrap}
-.it-card-subhead{padding:15px 17px;background:linear-gradient(to right,#f8fafc,#f5f3ff);border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.it-section-title{font-family:'Outfit',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:rgba(9, 68, 123, 0.76);font-size:11px;font-weight:900;margin:16px 0 10px}
+.it-text-box{background:#f8fafc;border:1px solid rgba(109, 138, 165, 0.61);border-radius:14px;padding:14px;color:rgba(49, 54, 58, 0.81);font-size:13.5px;line-height:1.68;white-space:pre-wrap}
+.it-card-subhead{padding:15px 17px;background: var(--it-blue);border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .it-card-subhead h3{margin:0;font-family:'Outfit',sans-serif;font-size:15px}
 .it-card-subhead span{font-size:12px;color:#64748b}
 .it-card-pad{padding:16px}
@@ -333,9 +334,8 @@ const getIssueTrackerNavItems = (user) => {
     { label: "Asset Master", path: "/branch-assets-report", icon: makeIcon(NAV_ICONS.assets) },
     { label: "Issue Tracker", path: "/branch-issues", icon: makeIcon(NAV_ICONS.issue) },
     { label: "Requests", path: "/requests", icon: makeIcon(NAV_ICONS.requests), show: canRequests },
-    { label: "Help & Support", path: "/support", icon: makeIcon(NAV_ICONS.support) },
-    { label: "Admin Expiry", path: "/admin/expiry", icon: makeIcon(NAV_ICONS.expiry), show: isAdmin },
     { label: "Users", path: "/admin/users", icon: makeIcon(NAV_ICONS.users), show: isAdmin },
+    // { label: "Help & Support", path: "/support", icon: makeIcon(NAV_ICONS.support) },
   ].filter((item) => item.show !== false);
 };
 
@@ -544,6 +544,7 @@ export default function BranchIssueDetailPage() {
 
             <div className="it-detail-layout">
               <div className="it-detail-stack">
+                <div className="it-detail-card-pr">
                 <div className="it-detail-card">
                   <div className="it-detail-header">
                     <small>{issue.category?.name || "Issue"}</small>
@@ -617,7 +618,8 @@ export default function BranchIssueDetailPage() {
                     />
                   </div>
                 </div>
-
+                </div>
+                
                 <div className="it-detail-card">
                   <div className="it-card-subhead">
                     <h3>📋 Activity Timeline</h3>
