@@ -7,12 +7,9 @@
 <img width="1583" height="762" alt="image" src="https://github.com/user-attachments/assets/11f4204e-42c2-4886-acac-356d76236c5e" />
 <img width="1593" height="778" alt="image" src="https://github.com/user-attachments/assets/d4a4e039-32ed-4a69-9a80-a4550a5d5cc7" />
 
-
-
 #User Side : Sub,it help request and can view data , Not allowed to make changes.
-<img width="1340" height="634" alt="image" src="https://github.com/user-attachments/assets/6ae819f3-7bc7-4776-9348-cb4d596cf164" />
-<img width="1341" height="660" alt="image" src="https://github.com/user-attachments/assets/77b3a78a-400c-4f5c-97c8-10a6515abae3" />
-
+<img width="1578" height="764" alt="image" src="https://github.com/user-attachments/assets/8c7aa712-77a7-486a-9ab0-c7da70eb0212" />
+<img width="1578" height="753" alt="image" src="https://github.com/user-attachments/assets/7298e55d-db9a-47d8-b6d7-852f7fe041e6" />
 # Sub-Admin have all access and authority as main admin except delete amd User control 
 #[images are same as Admin just no delete btn].
 
