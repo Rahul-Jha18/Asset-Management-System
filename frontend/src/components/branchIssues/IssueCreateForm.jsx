@@ -7,13 +7,24 @@ import {
 const formatBytes = (bytes) => {
   const value = Number(bytes || 0);
   if (!value) return "0 B";
+
   const units = ["B", "KB", "MB", "GB"];
-  const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
+  const index = Math.min(
+    Math.floor(Math.log(value) / Math.log(1024)),
+    units.length - 1
+  );
+
   const size = value / Math.pow(1024, index);
   return `${size.toFixed(index === 0 || size >= 10 ? 0 : 1)} ${units[index]}`;
 };
 
-export default function IssueCreateForm({ user, categories = [], onSuccess, onCancel }) {
+export default function IssueCreateForm({
+  user,
+  categories = [],
+  corpUsers = [],
+  onSuccess,
+  onCancel,
+}) {
   const fileRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -22,6 +33,7 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
     expected_outcome: "",
     category_id: "",
     priority: "Medium",
+    assigned_to_user_id: "",
   });
 
   const [files, setFiles] = useState([]);
@@ -32,15 +44,27 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
   };
 
   const addFiles = (incoming) => {
-    const accepted = Array.from(incoming || []).filter((file) => {
-      if (file.size > 10 * 1024 * 1024) {
-        alert(`${file.name} is larger than 10 MB and was skipped.`);
-        return false;
-      }
-      return true;
+    const accepted = Array.from(incoming || []).filter(
+      (file) => file.size <= 10 * 1024 * 1024
+    );
+    setFiles((prev) => [...prev, ...accepted]);
+  };
+
+  const resetForm = () => {
+    setForm({
+      title: "",
+      description: "",
+      expected_outcome: "",
+      category_id: "",
+      priority: "Medium",
+      assigned_to_user_id: "",
     });
 
-    setFiles((prev) => [...prev, ...accepted]);
+    setFiles([]);
+
+    if (fileRef.current) {
+      fileRef.current.value = "";
+    }
   };
 
   const submit = async (e) => {
@@ -54,8 +78,18 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
       return;
     }
 
+    if (!form.category_id) {
+      alert("Please select issue category");
+      return;
+    }
+
     if (!description) {
       alert("Description is required");
+      return;
+    }
+
+    if (!form.assigned_to_user_id) {
+      alert("Please select a Corporate User");
       return;
     }
 
@@ -68,7 +102,12 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
         expected_outcome: form.expected_outcome?.trim() || null,
         category_id: form.category_id || null,
         priority: form.priority || "Medium",
-        reporter_branch_id: user?.branch_id || null,
+        assigned_to_user_id: form.assigned_to_user_id || null,
+        reporter_branch_id:
+          user?.branch_id ||
+          user?.branchId ||
+          user?.service_station_id ||
+          null,
         reporter_name: user?.name || user?.email || null,
         reporter_email: user?.email || null,
       });
@@ -81,14 +120,7 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
         }
       }
 
-      setForm({
-        title: "",
-        description: "",
-        expected_outcome: "",
-        category_id: "",
-        priority: "Medium",
-      });
-      setFiles([]);
+      resetForm();
 
       if (onSuccess) onSuccess(issue);
     } catch (error) {
@@ -116,6 +148,7 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
             value={form.title}
             onChange={(e) => update("title", e.target.value)}
             placeholder="Enter a short, clear title for the issue"
+            disabled={loading}
           />
           <small>Summarize the issue in a few words.</small>
         </div>
@@ -124,7 +157,11 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
           <label>
             Category <span>*</span>
           </label>
-          <select value={form.category_id} onChange={(e) => update("category_id", e.target.value)}>
+          <select
+            value={form.category_id}
+            onChange={(e) => update("category_id", e.target.value)}
+            disabled={loading}
+          >
             <option value="">Select category</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
@@ -138,7 +175,11 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
           <label>
             Priority <span>*</span>
           </label>
-          <select value={form.priority} onChange={(e) => update("priority", e.target.value)}>
+          <select
+            value={form.priority}
+            onChange={(e) => update("priority", e.target.value)}
+            disabled={loading}
+          >
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
             <option value="High">High</option>
@@ -147,10 +188,36 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
         </div>
 
         <div className="it-form-field">
+          <label>
+            Send To Corporate User <span>*</span>
+          </label>
+          <select
+            value={form.assigned_to_user_id}
+            onChange={(e) => update("assigned_to_user_id", e.target.value)}
+            disabled={loading}
+          >
+            <option value="">Select corporate user</option>
+            {corpUsers.map((corpUser) => (
+              <option key={corpUser.id} value={corpUser.id}>
+                {corpUser.name || corpUser.email}
+                {corpUser.email ? ` (${corpUser.email})` : ""}
+              </option>
+            ))}
+          </select>
+          <small>Only users with role Corporate User are shown here.</small>
+        </div>
+
+        <div className="it-form-field it-form-wide">
           <label>Branch</label>
           <input
             disabled
-            value={user?.branch_name || user?.branchName || user?.branch?.name || "Your branch"}
+            value={
+              user?.branch_name ||
+              user?.branchName ||
+              user?.branch?.name ||
+              user?.name ||
+              "Your branch"
+            }
           />
           <small>Automatically set from your login account.</small>
         </div>
@@ -164,6 +231,7 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
             onChange={(e) => update("description", e.target.value)}
             placeholder="Describe the issue in detail. Include steps to reproduce, error messages, and relevant context."
             rows={5}
+            disabled={loading}
           />
           <small>Minimum 10 characters recommended.</small>
         </div>
@@ -175,19 +243,22 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
             onChange={(e) => update("expected_outcome", e.target.value)}
             placeholder="What result do you expect after this issue is solved?"
             rows={4}
+            disabled={loading}
           />
         </div>
       </div>
 
-      <div className="it-form-field it-form-wide">
+      <div className="it-form-field it-form-wide" style={{ marginTop: 16 }}>
         <label>Attachments</label>
         <div
           className="it-dropzone"
-          onClick={() => fileRef.current?.click()}
+          onClick={() => {
+            if (!loading) fileRef.current?.click();
+          }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault();
-            addFiles(e.dataTransfer.files);
+            if (!loading) addFiles(e.dataTransfer.files);
           }}
         >
           <input
@@ -195,12 +266,13 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
             type="file"
             multiple
             hidden
-            accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx"
+            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xlsx"
             onChange={(e) => addFiles(e.target.files)}
+            disabled={loading}
           />
           <div className="it-drop-icon">⇧</div>
           <strong>Drag & drop files here or click to browse</strong>
-          <small>Images, PDF, DOCX, XLSX. Max 10 MB per file.</small>
+          <small>PNG, JPG, PDF, DOC, DOCX, XLSX. Max 10 MB per file.</small>
         </div>
 
         {files.length > 0 && (
@@ -219,7 +291,10 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
                 </div>
                 <button
                   type="button"
-                  onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))}
+                  disabled={loading}
+                  onClick={() =>
+                    setFiles((prev) => prev.filter((_, i) => i !== index))
+                  }
                 >
                   ×
                 </button>
@@ -230,13 +305,24 @@ export default function IssueCreateForm({ user, categories = [], onSuccess, onCa
       </div>
 
       <div className="it-form-footer">
-        <div className="it-private-note">🔒 Visible only to authorized issue handlers.</div>
+        <div className="it-private-note">
+          🔒 Visible only to authorized issue handlers.
+        </div>
 
         <div className="it-form-actions">
-          <button type="button" className="it-btn it-btn-soft" onClick={onCancel}>
+          <button
+            type="button"
+            className="it-btn it-btn-soft"
+            onClick={onCancel}
+            disabled={loading}
+          >
             Cancel
           </button>
-          <button type="submit" className="it-btn it-btn-primary" disabled={loading}>
+          <button
+            type="submit"
+            className="it-btn it-btn-primary"
+            disabled={loading}
+          >
             {loading ? "Submitting..." : "Submit Issue"}
           </button>
         </div>

@@ -1,61 +1,38 @@
 import api from "./api";
 
-/* ─────────────────────────────────────────────────────────────
-   CATEGORIES
-───────────────────────────────────────────────────────────── */
-export const getIssueCategories = () => {
-  return api.get("/api/v1/branch-issues/categories");
-};
+/* Categories */
+export const getIssueCategories = () =>
+  api.get("/api/v1/branch-issues/categories");
 
-/* ─────────────────────────────────────────────────────────────
-   ISSUES
-───────────────────────────────────────────────────────────── */
-export const listBranchIssues = (params = {}) => {
-  return api.get("/api/v1/branch-issues", { params });
-};
+export const getIssueCorpUsers = () =>
+  api.get("/api/v1/branch-issues/corp-users");
 
-export const getBranchIssue = (id) => {
-  return api.get(`/api/v1/branch-issues/${id}`);
-};
+/* Issues */
+export const listBranchIssues = (params = {}) =>
+  api.get("/api/v1/branch-issues", { params });
 
-export const createBranchIssue = (data) => {
-  return api.post("/api/v1/branch-issues", data);
-};
+export const getBranchIssue = (id) =>
+  api.get(`/api/v1/branch-issues/${id}`);
 
-export const deleteBranchIssue = (id) => {
-  return api.delete(`/api/v1/branch-issues/${id}`);
-};
+export const createBranchIssue = (data) =>
+  api.post("/api/v1/branch-issues", data);
 
-/* ─────────────────────────────────────────────────────────────
-   STATUS
-───────────────────────────────────────────────────────────── */
-export const changeBranchIssueStatus = (id, status, remarks = "") => {
-  return api.put(`/api/v1/branch-issues/${id}/status`, {
-    status,
-    remarks,
-  });
-};
+export const deleteBranchIssue = (id) =>
+  api.delete(`/api/v1/branch-issues/${id}`);
 
-/* ─────────────────────────────────────────────────────────────
-   MESSAGES
-───────────────────────────────────────────────────────────── */
-export const addBranchIssueMessage = (id, message, is_internal = false) => {
-  return api.post(`/api/v1/branch-issues/${id}/messages`, {
-    message,
-    is_internal,
-  });
-};
+/* Status  (approver only) */
+export const changeBranchIssueStatus = (id, status, remarks = "") =>
+  api.put(`/api/v1/branch-issues/${id}/status`, { status, remarks });
 
-/* ─────────────────────────────────────────────────────────────
-   ATTACHMENTS
-───────────────────────────────────────────────────────────── */
+/* Chat messages */
+export const addBranchIssueMessage = (id, message, is_internal = false) =>
+  api.post(`/api/v1/branch-issues/${id}/messages`, { message, is_internal });
+
+/* File attachments */
 export const uploadBranchIssueAttachment = (id, file) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  return api.post(`/api/v1/branch-issues/${id}/attachments`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+  const fd = new FormData();
+  fd.append("file", file);
+  return api.post(`/api/v1/branch-issues/${id}/attachments`, fd, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
 };

@@ -9,6 +9,7 @@ import IssueFilterBar from "../components/branchIssues/IssueFilterBar";
 import {
   listBranchIssues,
   getIssueCategories,
+  getIssueCorpUsers,
 } from "../services/branchIssueApi";
 
 const FONTS = `
@@ -344,6 +345,7 @@ export default function BranchIssuesPage() {
 
   const [issues, setIssues] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [corpUsers, setCorpUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
 
@@ -383,6 +385,10 @@ export default function BranchIssuesPage() {
     getIssueCategories()
       .then((res) => setCategories(Array.isArray(res?.data) ? res.data : []))
       .catch(() => setCategories([]));
+
+    getIssueCorpUsers()
+      .then((res) => setCorpUsers(Array.isArray(res?.data) ? res.data : []))
+      .catch(() => setCorpUsers([]));
   }, []);
 
   const stats = useMemo(() => {
@@ -511,6 +517,7 @@ export default function BranchIssuesPage() {
                     <IssueCreateForm
                       user={user}
                       categories={categories}
+                      corpUsers={corpUsers}
                       onCancel={() => setShowCreate(false)}
                       onSuccess={() => {
                         setShowCreate(false);
