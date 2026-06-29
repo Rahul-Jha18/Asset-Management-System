@@ -192,7 +192,7 @@ const SplitSidebarLayout = ({
         }
 
         .sl-root {
-          --sb-open: 274px;
+          --sb-open: 220px;
           --sb-closed: 78px;
           --sb-bg: #0b1120;
           --sb-bg2: #0f1829;
