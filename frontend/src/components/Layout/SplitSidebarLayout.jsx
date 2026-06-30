@@ -1,9 +1,7 @@
 import { NavLink, useLocation, Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-
 const NL_BLUE = "#0B5CAB";
 const NL_RED = "#C8202E";
-
 const DEFAULT_ICONS = {
   dashboard: (
     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -51,15 +49,12 @@ const DEFAULT_ICONS = {
     </svg>
   ),
 };
-
-
 function normalizeDisplayRole(role) {
   return String(role || "")
     .trim()
     .toLowerCase()
     .replace(/[\s-]/g, "_");
 }
-
 function formatDisplayRole(role) {
   const value = normalizeDisplayRole(role);
 
@@ -70,7 +65,6 @@ function formatDisplayRole(role) {
 
   return "User";
 }
-
 function resolveIcon(item) {
   if (item.icon) return item.icon;
   const key = Object.keys(DEFAULT_ICONS).find(
@@ -78,7 +72,6 @@ function resolveIcon(item) {
   );
   return DEFAULT_ICONS[key] || DEFAULT_ICONS.default;
 }
-
 const HamburgerIcon = ({ open }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
     {open ? (
@@ -95,7 +88,6 @@ const HamburgerIcon = ({ open }) => (
     )}
   </svg>
 );
-
 const ChevronIcon = ({ collapsed = false }) => (
   <svg
     width="14"
@@ -110,7 +102,6 @@ const ChevronIcon = ({ collapsed = false }) => (
     <path d="M9 18l6-6-6-6" />
   </svg>
 );
-
 const SplitSidebarLayout = ({
   title,
   subtitle,
@@ -121,9 +112,9 @@ const SplitSidebarLayout = ({
   brand = { initials: "NL", name: "Nepal Life", subtext: "Portal" },
 }) => {
   const location = useLocation();
-
   const getInitialMobile = () =>
     typeof window !== "undefined" && window.innerWidth <= 768;
+
 
   const [isMobile, setIsMobile] = useState(getInitialMobile);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -169,18 +160,15 @@ const SplitSidebarLayout = ({
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap');
-
         * {
           box-sizing: border-box;
         }
-
         html, body, #root {
           margin: 0;
           padding: 0;
           min-height: 100%;
           background: #eef4fb;
         }
-
         .sl-shell {
           min-height: 100vh;
           margin: 0;
@@ -190,7 +178,6 @@ const SplitSidebarLayout = ({
             radial-gradient(circle at 100% 0%, rgba(11,92,171,0.05), transparent 32%),
             linear-gradient(180deg, #f8fafc 0%, #eef4fb 100%);
         }
-
         .sl-root {
           --sb-open: 220px;
           --sb-closed: 78px;
