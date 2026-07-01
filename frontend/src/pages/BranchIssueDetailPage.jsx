@@ -592,7 +592,10 @@ export default function BranchIssueDetailPage() {
                     </div>
 
                     <div className="it-section-title">Issue Description</div>
-                    <div className="it-text-box">{issue.description}</div>
+                    <div
+                      className="it-text-box"
+                      dangerouslySetInnerHTML={{ __html: issue.description || "" }}
+                    />
 
                     {issue.expected_outcome && (
                       <>

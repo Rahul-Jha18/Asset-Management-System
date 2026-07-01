@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import RichTextEditor from "../common/RichTextEditor";
 import {
   createBranchIssue,
   uploadBranchIssueAttachment,
@@ -17,6 +18,11 @@ const formatBytes = (bytes) => {
   const size = value / Math.pow(1024, index);
   return `${size.toFixed(index === 0 || size >= 10 ? 0 : 1)} ${units[index]}`;
 };
+const stripHtnl = (html) => {
+  const div = document.createElement("div");
+  div.innerHtml = html || "";
+  return div.textConetnt || div.innerText || "";
+}
 
 export default function IssueCreateForm({
   user,
@@ -71,7 +77,8 @@ export default function IssueCreateForm({
     e.preventDefault();
 
     const title = form.title.trim();
-    const description = form.description.trim();
+    const description = form.description;
+    const plainDescription = stripHtnl(description).trim();
 
     if (!title) {
       alert("Issue title is required");
@@ -83,8 +90,8 @@ export default function IssueCreateForm({
       return;
     }
 
-    if (!description) {
-      alert("Description is required");
+    if (!plainDescription){
+      alert("Description is Manditory.");
       return;
     }
 
@@ -226,14 +233,15 @@ export default function IssueCreateForm({
           <label>
             Description <span>*</span>
           </label>
-          <textarea
-            value={form.description}
-            onChange={(e) => update("description", e.target.value)}
-            placeholder="Describe the issue in detail. Include steps to reproduce, error messages, and relevant context."
-            rows={5}
-            disabled={loading}
+          <RichTextEditor
+          value ={form.description}
+          disabled={loading}
+          placeholder="Describe the issue in detail. Include any relevant information, steps to reproduce, and screenshots if applicable."
+          onChange={(content) => update("description", content)}
           />
-          <small>Minimum 10 characters recommended.</small>
+          <small>
+            You can use bold, underline, bullets, numbering, table and links.
+          </small>
         </div>
 
         <div className="it-form-field it-form-wide">
