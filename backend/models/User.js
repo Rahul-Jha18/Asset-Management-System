@@ -4,6 +4,11 @@ const { sequelize } = require("../config/db");
 const User = sequelize.define(
   "User",
   {
+    sql_user_id: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -32,8 +37,28 @@ const User = sequelize.define(
       defaultValue: "user",
     },
 
+    br_code: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+
     service_station_id: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    emp_code: {
+      type: DataTypes.STRING(16),
+      allowNull: true,
+    },
+
+    mobile: {
+      type: DataTypes.STRING(32),
+      allowNull: true,
+    },
+
+    designation: {
+      type: DataTypes.STRING(128),
       allowNull: true,
     },
 

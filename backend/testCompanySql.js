@@ -11,7 +11,7 @@ async function test() {
   try {
     const pool = await getCompanySqlPool();
 
-    const result = await pool.request().query(`
+    const connectionResult = await pool.request().query(`
       SELECT 
         @@SERVERNAME AS ServerName,
         DB_NAME() AS CurrentDatabase,
@@ -19,11 +19,39 @@ async function test() {
     `);
 
     console.log("SQL Server connected successfully");
-    console.log(result.recordset);
+    console.log(connectionResult.recordset);
+
+    const userResult = await pool.request().query(`
+      SELECT TOP 10
+        UserId,
+        Name,
+        Email,
+        BrCode,
+        EmpCode,
+        ContactNo,
+        Designation,
+        IsBlocked,
+        BlockForWeb,
+        IsLocked,
+        Is_Resigned,
+        IsSysAdmin,
+        IsCorpAdmin,
+        IsRegionalAdmin,
+        Is_Branch_Manager,
+        Is_Branch_Admin,
+        Is_Sub_Branch_Admin
+      FROM nlicConsolidate.dbo.nlicUsers
+      WHERE Email IS NOT NULL
+        AND LTRIM(RTRIM(Email)) <> ''
+      ORDER BY UserId DESC
+    `);
+
+    console.log("nlicUsers table read successfully");
+    console.table(userResult.recordset);
 
     process.exit(0);
   } catch (err) {
-    console.error("SQL Server connection failed");
+    console.error("SQL Server test failed");
     console.error(err.message);
     process.exit(1);
   }
