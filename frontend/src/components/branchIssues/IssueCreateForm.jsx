@@ -19,11 +19,12 @@ const formatBytes = (bytes) => {
   const size = value / Math.pow(1024, index);
   return `${size.toFixed(index === 0 || size >= 10 ? 0 : 1)} ${units[index]}`;
 };
-const stripHtnl = (html) => {
+
+const stripHtml = (html) => {
   const div = document.createElement("div");
-  div.innerHtml = html || "";
-  return div.textConetnt || div.innerText || "";
-}
+  div.innerHTML = html || "";
+  return div.textContent || div.innerText || "";
+};
 
 export default function IssueCreateForm({
   user,
@@ -46,29 +47,29 @@ export default function IssueCreateForm({
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [branchInfo, setBranchInfo] = useState(null);
-const [branchLoading, setBranchLoading] = useState(false);
+  const [branchLoading, setBranchLoading] = useState(false);
 
-useEffect(() => {
-  const loadBranchName = async () => {
-    if (!user?.br_code) {
-      setBranchInfo(null);
-      return;
-    }
+  useEffect(() => {
+    const loadBranchName = async () => {
+      if (!user?.br_code) {
+        setBranchInfo(null);
+        return;
+      }
 
-    try {
-      setBranchLoading(true);
-      const branch = await getBranchByCode(user.br_code);
-      setBranchInfo(branch || null);
-    } catch (error) {
-      console.error("Failed to load branch name:", error);
-      setBranchInfo(null);
-    } finally {
-      setBranchLoading(false);
-    }
-  };
+      try {
+        setBranchLoading(true);
+        const branch = await getBranchByCode(user.br_code);
+        setBranchInfo(branch || null);
+      } catch (error) {
+        console.error("Failed to load branch name:", error);
+        setBranchInfo(null);
+      } finally {
+        setBranchLoading(false);
+      }
+    };
 
-  loadBranchName();
-}, [user?.br_code]);
+    loadBranchName();
+  }, [user?.br_code]);
 
   const update = (name, value) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -78,6 +79,7 @@ useEffect(() => {
     const accepted = Array.from(incoming || []).filter(
       (file) => file.size <= 10 * 1024 * 1024
     );
+
     setFiles((prev) => [...prev, ...accepted]);
   };
 
@@ -102,8 +104,8 @@ useEffect(() => {
     e.preventDefault();
 
     const title = form.title.trim();
-    const description = form.description;
-    const plainDescription = stripHtnl(description).trim();
+    const description = form.description || "";
+    const plainDescription = stripHtml(description).trim();
 
     if (!title) {
       alert("Issue title is required");
@@ -115,8 +117,8 @@ useEffect(() => {
       return;
     }
 
-    if (!plainDescription){
-      alert("Description is Manditory.");
+    if (!plainDescription) {
+      alert("Description is mandatory.");
       return;
     }
 
@@ -128,21 +130,30 @@ useEffect(() => {
     try {
       setLoading(true);
 
-      const res = await createBranchIssue({
+      const payload = {
         title,
         description,
         expected_outcome: form.expected_outcome?.trim() || null,
-        category_id: form.category_id || null,
+        category_id: form.category_id ? Number(form.category_id) : null,
         priority: form.priority || "Medium",
-        assigned_to_user_id: form.assigned_to_user_id || null,
+        assigned_to_user_id: form.assigned_to_user_id
+          ? Number(form.assigned_to_user_id)
+          : null,
+
         reporter_branch_id:
-          user?.branch_id ||
-          user?.branchId ||
-          user?.service_station_id ||
+          branchInfo?.id ??
+          user?.branch_id ??
+          user?.branchId ??
+          user?.service_station_id ??
           null,
+
         reporter_name: user?.name || user?.email || null,
         reporter_email: user?.email || null,
-      });
+      };
+
+      console.log("CREATE ISSUE PAYLOAD:", payload);
+
+      const res = await createBranchIssue(payload);
 
       const issue = res?.data?.issue;
 
@@ -156,6 +167,11 @@ useEffect(() => {
 
       if (onSuccess) onSuccess(issue);
     } catch (error) {
+      console.log("CREATE ISSUE ERROR:", error?.response?.data);
+      console.log(
+        "CREATE ISSUE ERROR FULL:",
+        JSON.stringify(error?.response?.data, null, 2)
+      );
       alert(error?.response?.data?.message || "Failed to submit issue");
     } finally {
       setLoading(false);
@@ -261,10 +277,10 @@ useEffect(() => {
             Description <span>*</span>
           </label>
           <RichTextEditor
-          value ={form.description}
-          disabled={loading}
-          placeholder="Describe the issue in detail. Include any relevant information, steps to reproduce, and screenshots if applicable."
-          onChange={(content) => update("description", content)}
+            value={form.description}
+            disabled={loading}
+            placeholder="Describe the issue in detail. Include any relevant information, steps to reproduce, and screenshots if applicable."
+            onChange={(content) => update("description", content)}
           />
           <small>
             You can use bold, underline, bullets, numbering, table and links.
@@ -293,7 +309,10 @@ useEffect(() => {
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault();
-            if (!loading) addFiles(e.dataTransfer.files);
+
+            if (!loading) {
+              addFiles(e.dataTransfer.files);
+            }
           }}
         >
           <input
@@ -356,9 +375,13 @@ useEffect(() => {
           <button
             type="submit"
             className="it-btn it-btn-primary"
-            disabled={loading}
+            disabled={loading || branchLoading}
           >
-            {loading ? "Submitting..." : "Submit Issue"}
+            {loading
+              ? "Submitting..."
+              : branchLoading
+              ? "Loading Branch..."
+              : "Submit Issue"}
           </button>
         </div>
       </div>
