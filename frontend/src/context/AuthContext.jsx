@@ -54,6 +54,10 @@ export const AuthProvider = ({ children }) => {
         ...stored,
         role,
         roleLabel: formatRole(role),
+
+        // Important: keep branch code after page refresh
+        br_code: stored.br_code || null,
+
         isAdmin: role === "admin",
         isSubAdmin: role === "subadmin",
         isCorpUser: role === "corp_user",
@@ -124,11 +128,19 @@ export const AuthProvider = ({ children }) => {
 
       const normalizedUser = {
         id: data.id,
+        sql_user_id: data.sql_user_id || null,
         name: data.name,
         email: data.email,
         token: data.token,
         role,
         roleLabel: formatRole(role),
+
+        // Important: this was missing
+        br_code: data.br_code || null,
+
+        emp_code: data.emp_code || null,
+        mobile: data.mobile || null,
+        designation: data.designation || null,
 
         isAdmin: role === "admin",
         isSubAdmin: role === "subadmin",
@@ -136,11 +148,13 @@ export const AuthProvider = ({ children }) => {
         isUser: role === "user",
 
         service_station_id: data.service_station_id || null,
-        branch_id: data.branch_id || data.service_station_id || null,
+        branch_id: data.branch_id || null,
 
         img_url: normalizeImgUrl(data.img_url || null),
         remember,
       };
+
+      console.log("LOGIN NORMALIZED USER:", normalizedUser);
 
       setUser(normalizedUser);
     } catch (err) {

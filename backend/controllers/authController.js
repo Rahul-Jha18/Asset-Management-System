@@ -13,6 +13,9 @@ const { sendMail } = require("../utils/mailer");
 const generateOtp = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
+/* ===========================
+   HELPER: Normalize Role
+=========================== */
 const normalizeRole = (role) => {
   const value = String(role || "").trim().toLowerCase();
 
@@ -22,7 +25,12 @@ const normalizeRole = (role) => {
     return "subadmin";
   }
 
-  if (value === "corp_user" || value === "corpuser" || value === "corp-user" || value === "corp user") {
+  if (
+    value === "corp_user" ||
+    value === "corpuser" ||
+    value === "corp-user" ||
+    value === "corp user"
+  ) {
     return "corp_user";
   }
 
@@ -32,10 +40,46 @@ const normalizeRole = (role) => {
 };
 
 /* ===========================
+   HELPER: Build User Response
+   Important: br_code is included here
+=========================== */
+const buildUserResponse = (user) => ({
+  id: user.id,
+  sql_user_id: user.sql_user_id || null,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  is_admin: user.is_admin,
+
+  // Important for Create Issue form branch name
+  br_code: user.br_code || null,
+
+  service_station_id: user.service_station_id || null,
+  emp_code: user.emp_code || null,
+  mobile: user.mobile || null,
+  designation: user.designation || null,
+  img_url: user.img_url || null,
+  token: generateToken(user.id, user.role),
+});
+
+/* ===========================
    REGISTER USER
 =========================== */
 exports.registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, is_admin = 0, role } = req.body || {};
+  const {
+    name,
+    email,
+    password,
+    is_admin = 0,
+    role,
+    sql_user_id,
+    br_code,
+    service_station_id,
+    emp_code,
+    mobile,
+    designation,
+    img_url,
+  } = req.body || {};
 
   const { isValid, errors } = validate.registerInput(name, email, password);
   if (!isValid) return sendError(res, "Validation failed", 400, errors);
@@ -50,23 +94,28 @@ exports.registerUser = asyncHandler(async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = await User.create({
+    sql_user_id: sql_user_id ? String(sql_user_id).trim() : null,
     name: String(name).trim(),
     email: normalizedEmail,
     password: hashedPassword,
     role: normalizedRole,
     is_admin: normalizedRole === "admin",
+    br_code: br_code ? String(br_code).trim() : null,
+    service_station_id:
+      service_station_id === undefined ||
+      service_station_id === null ||
+      service_station_id === ""
+        ? null
+        : Number(service_station_id),
+    emp_code: emp_code ? String(emp_code).trim() : null,
+    mobile: mobile ? String(mobile).trim() : null,
+    designation: designation ? String(designation).trim() : null,
+    img_url: img_url || null,
   });
 
   return sendSuccess(
     res,
-    {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      service_station_id: user.service_station_id || null,
-      token: generateToken(user.id, user.role),
-    },
+    buildUserResponse(user),
     "User registered successfully",
     201
   );
@@ -77,7 +126,10 @@ exports.registerUser = asyncHandler(async (req, res) => {
 =========================== */
 exports.forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body || {};
-  if (!email) return sendError(res, "Email is required", 400);
+
+  if (!email) {
+    return sendError(res, "Email is required", 400);
+  }
 
   const normalizedEmail = String(email).trim().toLowerCase();
 
@@ -134,22 +186,18 @@ exports.loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ where: { email: normalizedEmail } });
   if (!user) return sendError(res, "Invalid email or password", 401);
 
+  // Debug: check backend terminal after login
+  console.log("LOGIN USER DEBUG:", {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    br_code: user.br_code,
+  });
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return sendError(res, "Invalid email or password", 401);
 
-  return sendSuccess(
-    res,
-    {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      service_station_id: user.service_station_id || null,
-      img_url: user.img_url,
-      token: generateToken(user.id, user.role),
-    },
-    "Login successful"
-  );
+  return sendSuccess(res, buildUserResponse(user), "Login successful");
 });
 
 /* ===========================

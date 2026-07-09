@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import RichTextEditor from "../common/RichTextEditor";
 import {
   createBranchIssue,
   uploadBranchIssueAttachment,
 } from "../../services/branchIssueApi";
+import { getBranchByCode } from "../../services/branchService";
 
 const formatBytes = (bytes) => {
   const value = Number(bytes || 0);
@@ -44,6 +45,30 @@ export default function IssueCreateForm({
 
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [branchInfo, setBranchInfo] = useState(null);
+const [branchLoading, setBranchLoading] = useState(false);
+
+useEffect(() => {
+  const loadBranchName = async () => {
+    if (!user?.br_code) {
+      setBranchInfo(null);
+      return;
+    }
+
+    try {
+      setBranchLoading(true);
+      const branch = await getBranchByCode(user.br_code);
+      setBranchInfo(branch || null);
+    } catch (error) {
+      console.error("Failed to load branch name:", error);
+      setBranchInfo(null);
+    } finally {
+      setBranchLoading(false);
+    }
+  };
+
+  loadBranchName();
+}, [user?.br_code]);
 
   const update = (name, value) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -219,14 +244,16 @@ export default function IssueCreateForm({
           <input
             disabled
             value={
-              user?.branch_name ||
-              user?.branchName ||
-              user?.branch?.name ||
-              user?.name ||
-              "Your branch"
+              branchLoading
+                ? "Loading branch..."
+                : branchInfo?.name
+                ? `${branchInfo.name} (${branchInfo.branch_code})`
+                : user?.br_code
+                ? `Branch code: ${user.br_code}`
+                : "Branch not found"
             }
           />
-          <small>Automatically set from your login account.</small>
+          <small>Automatically loaded using your login branch code.</small>
         </div>
 
         <div className="it-form-field it-form-wide">

@@ -6,4 +6,14 @@ export const getBranches = async () => {
   return res.data?.data || res.data?.rows || [];
 };
 
-export default { getBranches };
+export const getBranchByCode = async (branchCode) => {
+  const branches = await getBranches();
+
+  return branches.find(
+    (branch) =>
+      String(branch.branch_code || "").trim() ===
+      String(branchCode || "").trim()
+  );
+};
+
+export default { getBranches, getBranchByCode };
