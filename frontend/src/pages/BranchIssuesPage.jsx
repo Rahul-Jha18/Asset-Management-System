@@ -38,6 +38,7 @@ const CSS = `
   --it-line-dark:#CBD5E1;
 
   --it-shadow-sm:0 1px 2px rgba(15,23,42,.05);
+  --it-shadow-md: 0 8px 14px rgba(3, 3, 3, 0.28);
   --it-shadow:0 1px 3px rgba(15,23,42,.06),0 8px 20px rgba(15,23,42,.05);
   --it-shadow-lg:0 10px 28px rgba(15,23,42,.10);
   --it-radius:14px;
@@ -163,11 +164,11 @@ const CSS = `
   cursor:pointer;
   position:relative;
   overflow:visible;
-  background:rgba(255,255,255,.94);
+  background:rgba(255, 255, 255, 0.94);
   border:1px solid var(--it-line);
   border-radius:16px;
-  box-shadow:var(--it-shadow-sm);
-  padding:15px;
+  box-shadow:var(--it-shadow-md);
+  padding:10px;
   min-height:100px;
   display:flex;
   align-items:flex-start;
@@ -178,15 +179,15 @@ const CSS = `
 
 .it-kpi:hover{
   transform:translateY(-2px);
-  background:rgba(255,255,255,1);
+  background:rgba(202, 237, 248, 0.29);
   border-color:#CBD5E1;
   box-shadow:var(--it-shadow-lg);
 }
 
 .it-kpi-active{
-  background:#FFFFFF;
-  border-color:var(--it-blue);
-  box-shadow:0 0 0 3px rgba(29,78,216,.10),var(--it-shadow-lg);
+  background: rgba(98, 248, 178, 0.13);
+  border-color: rgba(22, 238, 137, 0.37);
+  box-shadow:0 10px 28px rgba(29, 216, 129, 0.34),var(--it-shadow-lg);
 }
 
 .it-kpi-main{min-width:0;flex:1}
@@ -252,6 +253,22 @@ const CSS = `
   font-size:11px;
   font-weight:850;
   box-shadow:0 6px 14px rgba(220,38,38,.28);
+  animation:it-badge-heartbeat 1.35s ease-in-out infinite,it-badge-blink 1.35s ease-in-out infinite;
+  transform-origin:center;
+}
+
+@keyframes it-badge-heartbeat{
+  0%{transform:scale(1)}
+  14%{transform:scale(1.22)}
+  28%{transform:scale(1)}
+  42%{transform:scale(1.16)}
+  70%{transform:scale(1)}
+  100%{transform:scale(1)}
+}
+
+@keyframes it-badge-blink{
+  0%,100%{opacity:1;box-shadow:0 6px 14px rgba(220,38,38,.28),0 0 0 0 rgba(220,38,38,.42)}
+  50%{opacity:.72;box-shadow:0 6px 14px rgba(220,38,38,.22),0 0 0 8px rgba(220,38,38,0)}
 }
 
 .it-filter-card{
@@ -450,6 +467,229 @@ const CSS = `
   overflow:hidden;
 }
 
+.it-basket-shell{
+  background:#FFFFFF;
+  border:1px solid var(--it-line);
+  border-radius:18px;
+  box-shadow:var(--it-shadow-sm);
+  overflow:hidden;
+}
+
+.it-basket-shell-head{
+  padding:16px 20px;
+  background:#FFFFFF;
+  border-bottom:1px solid var(--it-line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.it-basket-shell-head small{
+  display:block;
+  color:#64748B;
+  font-size:10px;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  font-weight:850;
+  margin-bottom:6px;
+}
+
+.it-basket-shell-head h3{
+  margin:0;
+  font-size:17px;
+  font-weight:850;
+  color:#0F172A;
+  letter-spacing:-.02em;
+}
+
+.it-basket-shell-head p{
+  margin:6px 0 0;
+  color:#64748B;
+  font-size:12.5px;
+}
+
+.it-basket-shell-pill{
+  background:#EFF6FF;
+  color:#1D4ED8;
+  border:1px solid #BFDBFE;
+  border-radius:999px;
+  padding:7px 11px;
+  font-weight:800;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.it-basket-list{
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.it-basket-row{
+  border-radius:14px;
+  border:1px solid #E2E8F0;
+  background:#F8FAFC;
+  overflow:hidden;
+  transition:.18s ease;
+}
+
+.it-basket-row:hover{
+  box-shadow:0 10px 22px rgba(15,23,42,.08);
+  transform:translateY(-1px);
+}
+
+.it-basket-row-open{
+  box-shadow:0 10px 26px rgba(15,23,42,.08);
+}
+
+.it-basket-button{
+  width:100%;
+  border:none;
+  background:transparent;
+  padding:13px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  cursor:pointer;
+  text-align:left;
+  font-family:var(--it-font);
+}
+
+.it-basket-left{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.it-basket-dot2{
+  width:12px;
+  height:12px;
+  border-radius:999px;
+  border:3px solid #FFFFFF;
+  flex-shrink:0;
+  box-shadow:0 0 0 1px rgba(15,23,42,.08);
+}
+
+.it-basket-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.it-basket-title strong{
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.it-basket-sub{
+  display:block;
+  margin-top:3px;
+  color:#64748B;
+  font-size:11.5px;
+  font-weight:650;
+}
+
+.it-basket-right{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-shrink:0;
+}
+
+.it-basket-count-badge{
+  min-width:24px;
+  height:24px;
+  padding:0 8px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#FFFFFF;
+  font-size:11px;
+  font-weight:900;
+}
+
+.it-basket-new-badge{
+  min-width:24px;
+  height:24px;
+  padding:0 8px;
+  border-radius:999px;
+  background:#DC2626;
+  color:#FFFFFF;
+  border:2px solid #FFFFFF;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:900;
+  animation:it-badge-heartbeat 1.35s ease-in-out infinite,it-badge-blink 1.35s ease-in-out infinite;
+  transform-origin:center;
+  box-shadow:0 6px 14px rgba(220,38,38,.28);
+}
+
+.it-basket-arrow{
+  width:24px;
+  height:24px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background: #f74747;
+  border:1px solid #cc1212;
+  color: #ffffff;
+  transition:.18s ease;
+}
+
+.it-basket-row-open .it-basket-arrow{
+  transform:rotate(180deg);
+}
+
+.it-basket-panel{
+  border-top:1px solid rgba(226,232,240,.78);
+  background:#FFFFFF;
+  padding:10px;
+}
+
+.it-basket-panel .it-table-card{
+  border:none;
+  border-radius:12px;
+  box-shadow:none;
+}
+
+.it-basket-green{background:#DCFCE7;border-color:#86EFAC}
+.it-basket-green .it-basket-dot2,.it-basket-green .it-basket-count-badge{background:#16A34A}
+.it-basket-green .it-basket-title strong{color:#047857}
+
+.it-basket-blue{background:#DBEAFE;border-color:#93C5FD}
+.it-basket-blue .it-basket-dot2,.it-basket-blue .it-basket-count-badge{background:#2563EB}
+.it-basket-blue .it-basket-title strong{color:#1D4ED8}
+
+.it-basket-amber{background:#FEF3C7;border-color:#FDBA74}
+.it-basket-amber .it-basket-dot2,.it-basket-amber .it-basket-count-badge{background:#EA580C}
+.it-basket-amber .it-basket-title strong{color:#C2410C}
+
+.it-basket-slate{background:#F1F5F9;border-color:#CBD5E1}
+.it-basket-slate .it-basket-dot2,.it-basket-slate .it-basket-count-badge{background:#64748B}
+.it-basket-slate .it-basket-title strong{color:#334155}
+
+.it-basket-red{background:#FEE2E2;border-color:#FCA5A5}
+.it-basket-red .it-basket-dot2,.it-basket-red .it-basket-count-badge{background:#DC2626}
+.it-basket-red .it-basket-title strong{color:#B91C1C}
+
+.it-basket-purple{background:#F3E8FF;border-color:#D8B4FE}
+.it-basket-purple .it-basket-dot2,.it-basket-purple .it-basket-count-badge{background:#7E22CE}
+.it-basket-purple .it-basket-title strong{color:#6B21A8}
+
 .it-table-head{
   padding:16px 20px;
   background:#FFFFFF;
@@ -596,7 +836,7 @@ export default function BranchIssuesPage() {
   const [page, setPage] = useState(1);
 
   // Stat-card filter — "all" | "new" | "Open" | "UnderReview" | "Closed" | "high"
-  const [activeStat, setActiveStat] = useState("all");
+  const [activeStat, setActiveStat] = useState("");
 
   const rowsPerPage = 10;
 
@@ -709,6 +949,45 @@ export default function BranchIssuesPage() {
       onRemove: () => setCategoryF(""),
     },
   ].filter(Boolean);
+
+  const basketMeta = useMemo(() => {
+    const map = {
+      all: {
+        title: "All Issues Basket",
+        description: "Complete list of visible reports.",
+        tone: "blue",
+      },
+      new: {
+        title: "New Report Basket",
+        description: isCorpUser
+          ? "New open reports assigned to you."
+          : "New open reports available in this view.",
+        tone: "red",
+      },
+      Open: {
+        title: "Open Basket",
+        description: "Reports waiting for action.",
+        tone: "green",
+      },
+      UnderReview: {
+        title: "Under Review Basket",
+        description: "Reports currently being checked or processed.",
+        tone: "amber",
+      },
+      Closed: {
+        title: "Closed Basket",
+        description: "Resolved and closed reports.",
+        tone: "slate",
+      },
+      high: {
+        title: "High / Critical Basket",
+        description: "Priority reports that need faster attention.",
+        tone: "red",
+      },
+    };
+
+    return map[activeStat] || map.all;
+  }, [activeStat, isCorpUser]);
 
   const kpis = [
     {
@@ -902,11 +1181,19 @@ export default function BranchIssuesPage() {
             )}
 
             <IssueTable
-              issues={filteredByStat}
+              issues={issues}
               loading={loading}
               canAct={canAct}
               canDelete={canDelete}
               currentUser={user}
+              activeBasket={activeStat}
+              basketTitle={basketMeta.title}
+              basketDescription={basketMeta.description}
+              basketTone={basketMeta.tone}
+              basketCount={filteredByStat.length}
+              newReportCount={newReportCount}
+              isCorpUser={isCorpUser}
+              onBasketChange={setActiveStat}
               onRowClick={(issueId) => navigate(`/branch-issues/${issueId}`)}
               onRefresh={load}
               page={page}

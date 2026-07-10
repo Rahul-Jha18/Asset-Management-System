@@ -176,7 +176,7 @@ const SplitSidebarLayout = ({
           background: #f8fafc;
         }
         .sl-root {
-          --sb-open: 220px;
+          --sb-open: 260px;
           --sb-closed: 78px;
           --sb-bg: #0f172a;
           --sb-bg2: #111827;
@@ -275,7 +275,7 @@ const SplitSidebarLayout = ({
 
         .sl-brand-name {
           color: #fff;
-          font-size: 14.5px;
+          font-size: 17px !important;
           font-weight: 800;
           font-family: 'Inter', system-ui, sans-serif;
           line-height: 1.1;

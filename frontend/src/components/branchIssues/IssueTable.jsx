@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { deleteBranchIssue } from "../../services/branchIssueApi";
 import IssueStatusBadge from "./IssueStatusBadge";
 import IssuePriorityBadge from "./IssuePriorityBadge";
@@ -11,6 +11,16 @@ const initials = (name = "") =>
     .slice(0, 2)
     .toUpperCase();
 
+const stripHtml = (html = "") => {
+  if (typeof document === "undefined") {
+    return String(html || "").replace(/<[^>]*>/g, "");
+  }
+
+  const div = document.createElement("div");
+  div.innerHTML = html || "";
+  return div.textContent || div.innerText || "";
+};
+
 const formatDate = (date) => {
   if (!date) return "—";
 
@@ -21,74 +31,60 @@ const formatDate = (date) => {
   });
 };
 
-export default function IssueTable({
-  issues = [],
-  loading = false,
-  canAct = false,
-  canDelete = false,
-  currentUser,
+const BASKETS = [
+  {
+    key: "new",
+    title: "New Reports",
+    sub: "New open reports assigned or waiting for action",
+    tone: "red",
+  },
+  {
+    key: "Open",
+    title: "Open",
+    sub: "Reports waiting for action",
+    tone: "green",
+  },
+  {
+    key: "UnderReview",
+    title: "Under Review",
+    sub: "Reports currently being checked",
+    tone: "blue",
+  },
+  {
+    key: "Closed",
+    title: "Closed",
+    sub: "Resolved and closed reports",
+    tone: "slate",
+  },
+  {
+    key: "high",
+    title: "High / Critical",
+    sub: "Priority reports needing faster attention",
+    tone: "amber",
+  },
+];
+
+function MiniIssueTable({
+  rows,
+  canDelete,
   onRowClick,
-  onRefresh,
-  page = 1,
-  rowsPerPage = 10,
+  onDelete,
+  page,
+  rowsPerPage,
   onPageChange,
 }) {
-  const totalPages = Math.max(1, Math.ceil(issues.length / rowsPerPage));
+  const totalPages = Math.max(1, Math.ceil(rows.length / rowsPerPage));
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * rowsPerPage;
-  const currentRows = issues.slice(start, start + rowsPerPage);
-
-  const canDeleteIssue = (issue) => {
-    if (issue.status !== "Open") return false;
-
-    const role = String(currentUser?.role || "")
-      .toLowerCase()
-      .replace(/[\s_-]/g, "");
-
-    // corp_user can change status and reply, but cannot delete.
-    if (role === "corpuser") return false;
-
-    if (canDelete || role === "admin") return true;
-
-    return String(issue.reporter_user_id || "") === String(currentUser?.id || "");
-  };
-
-  const handleDelete = async (e, issue) => {
-    e.stopPropagation();
-
-    if (!window.confirm("Delete this issue? Only open issues can be deleted.")) return;
-
-    try {
-      await deleteBranchIssue(issue.id);
-      if (onRefresh) onRefresh();
-    } catch (error) {
-      alert(error?.response?.data?.message || "Failed to delete issue");
-    }
-  };
+  const currentRows = rows.slice(start, start + rowsPerPage);
 
   return (
     <div className="it-table-card">
-      <div className="it-table-head">
-        <div>
-          <h3>{canAct ? "All Branch Issues" : "My Branch Issues"}</h3>
-          <p>Modern tracker view with clean rows, priority badges, status flow and quick actions.</p>
-        </div>
-
-        <div className="it-table-tools">
-          <span className="it-table-role-pill">{canAct ? "Admin / Corp View" : "Branch View"}</span>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="it-empty-state">
-          <div className="it-spinner" />
-          <strong>Loading issues...</strong>
-        </div>
-      ) : issues.length === 0 ? (
+      {rows.length === 0 ? (
         <div className="it-empty-state">
           <div className="it-empty-icon">📭</div>
-          <strong>No issues found</strong>
-          <span>Try adjusting filters or submit a new issue.</span>
+          <strong>No issues found in this basket</strong>
+          <span>Try another basket or submit a new issue.</span>
         </div>
       ) : (
         <>
@@ -115,8 +111,12 @@ export default function IssueTable({
                     </td>
 
                     <td>
-                      <div className="it-title-cell" title={issue.title}>{issue.title}</div>
-                      <div className="it-desc-cell" title={issue.description}>{issue.description}</div>
+                      <div className="it-title-cell" title={issue.title}>
+                        {issue.title}
+                      </div>
+                      <div className="it-desc-cell" title={stripHtml(issue.description)}>
+                        {stripHtml(issue.description)}
+                      </div>
                     </td>
 
                     <td>
@@ -135,10 +135,17 @@ export default function IssueTable({
 
                     <td>
                       <div className="it-reporter">
-                        <span className="it-avatar">{initials(issue.reporter_name || issue.reporter_email)}</span>
+                        <span className="it-avatar">
+                          {initials(issue.reporter_name || issue.reporter_email)}
+                        </span>
                         <div>
                           <strong>{issue.reporter_name || issue.reporter_email || "—"}</strong>
-                          <small>{issue.branch_name || issue.reporter_branch || issue.reporter_branch_name || ""}</small>
+                          <small>
+                            {issue.branch_name ||
+                              issue.reporter_branch ||
+                              issue.reporter_branch_name ||
+                              ""}
+                          </small>
                         </div>
                       </div>
                     </td>
@@ -155,11 +162,11 @@ export default function IssueTable({
                           View
                         </button>
 
-                        {canDeleteIssue(issue) && (
+                        {canDelete && issue.status === "Open" && (
                           <button
                             type="button"
                             className="it-table-delete"
-                            onClick={(e) => handleDelete(e, issue)}
+                            onClick={(e) => onDelete(e, issue)}
                           >
                             Delete
                           </button>
@@ -174,7 +181,8 @@ export default function IssueTable({
 
           <div className="it-table-footer">
             <span>
-              Showing {start + 1} to {Math.min(start + rowsPerPage, issues.length)} of {issues.length} issues
+              Showing {start + 1} to {Math.min(start + rowsPerPage, rows.length)} of{" "}
+              {rows.length} issues
             </span>
 
             <div className="it-pagination">
@@ -208,6 +216,173 @@ export default function IssueTable({
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+export default function IssueTable({
+  issues = [],
+  loading = false,
+  canAct = false,
+  canDelete = false,
+  currentUser,
+  activeBasket = "all",
+  newReportCount = 0,
+  isCorpUser = false,
+  onBasketChange,
+  onRowClick,
+  onRefresh,
+  page = 1,
+  rowsPerPage = 10,
+  onPageChange,
+}) {
+  const [localOpenBasket, setLocalOpenBasket] = useState(activeBasket || "all");
+  const openBasket = activeBasket || localOpenBasket;
+
+  const basketRows = useMemo(() => {
+    const getRows = (key) => {
+      if (key === "all") return issues;
+
+      if (key === "new") {
+        return issues.filter((issue) => {
+          if (issue.status !== "Open") return false;
+
+          if (isCorpUser) {
+            return String(issue.assigned_to_user_id || "") === String(currentUser?.id || "");
+          }
+
+          return true;
+        });
+      }
+
+      if (key === "high") {
+        return issues.filter((issue) => ["High", "Critical"].includes(issue.priority));
+      }
+
+      return issues.filter((issue) => issue.status === key);
+    };
+
+    return BASKETS.reduce((acc, basket) => {
+      acc[basket.key] = getRows(basket.key);
+      return acc;
+    }, {});
+  }, [issues, isCorpUser, currentUser?.id]);
+
+  const handleBasketClick = (basketKey) => {
+    const nextBasket = openBasket === basketKey ? "all" : basketKey;
+    setLocalOpenBasket(nextBasket);
+
+    if (onBasketChange) {
+      onBasketChange(nextBasket);
+    }
+
+    if (onPageChange) {
+      onPageChange(1);
+    }
+  };
+
+  const handleDelete = async (e, issue) => {
+    e.stopPropagation();
+
+    if (!window.confirm("Delete this issue? Only open issues can be deleted.")) return;
+
+    try {
+      await deleteBranchIssue(issue.id);
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      alert(error?.response?.data?.message || "Failed to delete issue");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="it-basket-shell">
+        <div className="it-empty-state">
+          <div className="it-spinner" />
+          <strong>Loading issues...</strong>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="it-basket-shell">
+      <div className="it-basket-shell-head">
+        <div>
+          <h3>Table Format [Basket]</h3> 
+          <p>Click New Reports, Open, Under Review, Closed, or any basket to open its table.</p>
+        </div>
+
+        <div className="it-table-tools">
+          <span className="it-basket-shell-pill">
+            {BASKETS.length} baskets
+          </span>
+          <span className="it-table-role-pill">
+            {canAct ? "Admin / Corp View" : "Branch View"}
+          </span>
+        </div>
+      </div>
+
+      <div className="it-basket-list">
+        {BASKETS.map((basket) => {
+          const rows = basketRows[basket.key] || [];
+          const isOpen = openBasket === basket.key;
+          const showBlink = basket.key === "new" && Number(newReportCount || rows.length || 0) > 0;
+
+          return (
+            <div
+              className={`it-basket-row it-basket-${basket.tone} ${
+                isOpen ? "it-basket-row-open" : ""
+              }`}
+              key={basket.key}
+            >
+              <button
+                type="button"
+                className="it-basket-button"
+                onClick={() => handleBasketClick(basket.key)}
+              >
+                <div className="it-basket-left">
+                  <span className="it-basket-dot2" />
+                  <span className="it-basket-title">
+                    <strong>{basket.title}</strong>
+                    <span className="it-basket-sub">{basket.sub}</span>
+                  </span>
+                </div>
+
+                <div className="it-basket-right">
+                  {showBlink ? (
+                    <span className="it-basket-new-badge">
+                      {Number(newReportCount || rows.length).toLocaleString()}
+                    </span>
+                  ) : (
+                    <span className="it-basket-count-badge">
+                      {rows.length.toLocaleString()}
+                    </span>
+                  )}
+
+                  <span className="it-basket-arrow">
+                    {isOpen ? "▲" : "▼"}
+                  </span>
+                </div>
+              </button>
+
+              {isOpen && (
+                <div className="it-basket-panel">
+                  <MiniIssueTable
+                    rows={rows}
+                    canDelete={canDelete}
+                    onRowClick={onRowClick}
+                    onDelete={handleDelete}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    onPageChange={onPageChange}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
