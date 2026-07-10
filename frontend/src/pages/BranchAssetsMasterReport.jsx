@@ -16,7 +16,7 @@ import SplitSidebarLayout from "../components/Layout/SplitSidebarLayout";
 
 /* ─── Fonts ─── */
 const FONTS = `
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 `;
 
 const NL_BLUE    = "#0B5CAB";
@@ -55,106 +55,89 @@ const REPORT_STYLES = `
     --text-3xl:clamp(24px,3vw,40px);
   }
 
-  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   @keyframes spin{to{transform:rotate(360deg)}}
-  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
   @keyframes shimmer{from{background-position:-200% 0}to{background-position:200% 0}}
-  @keyframes bounceIn{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
-  @keyframes statCountUp{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
-  @keyframes slideInLeft{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
-  @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes inactivePulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0.08)}}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 
-  .nl-hero-compact{position:relative;background:linear-gradient(135deg,rgba(11,92,171,0.07) 0%,rgba(255,255,255,0.95) 45%,rgba(243,18,37,0.05) 100%);overflow:hidden;border-bottom:1px solid rgba(11,92,171,0.10);}
-  .nl-hero-compact::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 12% 55%,rgba(20,116,243,0.13) 0%,transparent 50%),radial-gradient(ellipse at 88% 35%,rgba(243,18,37,0.09) 0%,transparent 50%);pointer-events:none;}
-  .nl-hero-compact::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(11,92,171,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(11,92,171,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;mask-image:radial-gradient(ellipse at 50% 50%,black 20%,transparent 80%);}
+  .nl-hero-compact{position:relative;background:var(--white);overflow:hidden;border-bottom:1px solid var(--gray-200);}
   .nl-hero-inner-compact{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:var(--space-md);padding:var(--space-md) var(--space-lg);flex-wrap:wrap;}
   .nl-hero-left{flex:1;min-width:240px;}
   .nl-logo-wrap{position:relative;flex-shrink:0;}
-  .nl-logo-compact{width:clamp(56px,7vw,88px);height:auto;display:block;filter:drop-shadow(0 6px 16px rgba(2,32,53,0.22));animation:floaty 5s ease-in-out infinite;}
-  .nl-logo-badge{position:absolute;bottom:-4px;right:-4px;width:clamp(18px,2vw,24px);height:clamp(18px,2vw,24px);border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:clamp(9px,1vw,12px);box-shadow:0 2px 8px rgba(22,163,74,0.4);}
-  .nl-eyebrow{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(11,92,171,0.12),rgba(20,116,243,0.08));border:1px solid rgba(11,92,171,0.18);border-radius:999px;padding:3px 10px;font-size:var(--text-xs);font-weight:800;color:${NL_BLUE};letter-spacing:0.12em;text-transform:uppercase;font-family:Outfit,sans-serif;margin-bottom:var(--space-xs);animation:slideInLeft 0.4s ease both;}
-  .nl-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:${NL_BLUE};animation:pulse 2s ease infinite;}
-  .nl-title-compact{font-family:Syne,sans-serif;font-weight:900;font-size:clamp(1.15rem,2.8vw,1.9rem);letter-spacing:-0.03em;margin:0 0 var(--space-xs) 0;color:#0F172A;line-height:1.1;animation:fadeUp 0.35s ease 0.1s both;}
+  .nl-logo-compact{width:clamp(52px,6vw,76px);height:auto;display:block;}
+  .nl-eyebrow{display:inline-flex;align-items:center;gap:6px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:6px;padding:3px 10px;font-size:var(--text-xs);font-weight:700;color:${NL_BLUE};letter-spacing:0.08em;text-transform:uppercase;font-family:Inter,sans-serif;margin-bottom:var(--space-xs);}
+  .nl-title-compact{font-family:Inter,sans-serif;font-weight:800;font-size:clamp(1.1rem,2.4vw,1.6rem);letter-spacing:-0.01em;margin:0 0 var(--space-xs) 0;color:#0F172A;line-height:1.15;}
   .nl-title-compact .blue{color:${NL_BLUE};} .nl-title-compact .red{color:${NL_RED};}
-  .nl-divider-sm{width:clamp(28px,4vw,44px);height:3px;border-radius:999px;background:linear-gradient(90deg,${NL_BLUE},${NL_RED});margin:var(--space-xs) 0;}
-  .nl-slogan{font-size:var(--text-xs);color:rgba(15,23,42,0.45);font-weight:700;letter-spacing:0.04em;font-family:Outfit,sans-serif;margin-bottom:var(--space-sm);animation:fadeUp 0.35s ease 0.2s both;}
-  .nl-hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(80px,10vw,110px),1fr));gap:clamp(6px,1vw,12px);max-width:560px;animation:fadeUp 0.35s ease 0.25s both;}
-  .nl-stat{display:flex;flex-direction:column;align-items:flex-start;padding:clamp(8px,1.2vw,14px) clamp(10px,1.5vw,18px);border-radius:clamp(8px,1vw,14px);background:rgba(255,255,255,0.85);border:1.5px solid rgba(11,92,171,0.12);box-shadow:0 2px 8px rgba(11,92,171,0.07),inset 0 1px 0 rgba(255,255,255,0.9);transition:all 0.2s ease;animation:statCountUp 0.4s ease both;position:relative;overflow:hidden;}
-  .nl-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--stat-accent,${NL_BLUE});border-radius:0 0 4px 4px;}
-  .nl-stat:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(11,92,171,0.14);}
-  .nl-stat-icon{font-size:clamp(14px,1.5vw,18px);margin-bottom:4px;line-height:1;}
-  .nl-stat-num{font-family:Syne,sans-serif;font-weight:800;font-size:clamp(1.1rem,2.2vw,1.6rem);background:${NL_GRADIENT};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;display:block;}
-  .nl-stat-label{font-size:clamp(8px,0.8vw,10px);font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.12em;margin-top:3px;font-family:Outfit,sans-serif;}
-  .nl-stat-sub{font-size:clamp(8px,0.75vw,9px);color:var(--gray-300);font-family:Outfit,sans-serif;margin-top:1px;}
-  .nl-status-strip{display:flex;align-items:center;gap:clamp(8px,1.5vw,20px);flex-wrap:wrap;padding:clamp(6px,0.8vw,10px) var(--space-lg);background:rgba(15,23,42,0.03);border-top:1px solid rgba(11,92,171,0.08);position:relative;z-index:1;}
-  .nl-status-dot{display:inline-flex;align-items:center;gap:6px;font-size:var(--text-xs);font-weight:700;color:var(--gray-500);font-family:Outfit,sans-serif;}
-  .nl-status-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--dot-color,#22c55e);box-shadow:0 0 0 3px rgba(34,197,94,0.2);animation:pulse 2s ease infinite;flex-shrink:0;}
+  .nl-divider-sm{width:clamp(28px,4vw,44px);height:2px;border-radius:999px;background:${NL_BLUE};margin:var(--space-xs) 0;}
+  .nl-slogan{font-size:var(--text-xs);color:var(--gray-500);font-weight:600;letter-spacing:0.02em;font-family:Inter,sans-serif;margin-bottom:var(--space-sm);}
+  .nl-hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(80px,10vw,110px),1fr));gap:clamp(6px,1vw,12px);max-width:620px;}
+  .nl-stat{display:flex;flex-direction:column;align-items:flex-start;padding:clamp(8px,1.2vw,14px) clamp(10px,1.5vw,18px);border-radius:10px;background:var(--gray-50);border:1px solid var(--gray-200);transition:border-color 0.15s ease;position:relative;overflow:hidden;}
+  .nl-stat:hover{border-color:${NL_BLUE};}
+  .nl-stat-num{font-family:Inter,sans-serif;font-weight:800;font-size:clamp(1.05rem,2vw,1.5rem);color:${NL_BLUE};line-height:1;display:block;}
+  .nl-stat-label{font-size:clamp(8px,0.8vw,10px);font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.1em;margin-top:3px;font-family:Inter,sans-serif;}
+  .nl-stat-sub{font-size:clamp(8px,0.75vw,9px);color:var(--gray-400);font-family:Inter,sans-serif;margin-top:1px;}
+  .nl-status-strip{display:flex;align-items:center;gap:clamp(8px,1.5vw,20px);flex-wrap:wrap;padding:clamp(6px,0.8vw,10px) var(--space-lg);background:var(--gray-50);border-top:1px solid var(--gray-200);position:relative;z-index:1;}
+  .nl-status-dot{display:inline-flex;align-items:center;gap:6px;font-size:var(--text-xs);font-weight:600;color:var(--gray-500);font-family:Inter,sans-serif;}
+  .nl-status-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--dot-color,#16a34a);flex-shrink:0;}
 
-  .inactive-section-header{position:relative;background:linear-gradient(135deg,#1f2937 0%,#111827 50%,#1f2937 100%);border-radius:16px;padding:clamp(14px,1.8vw,20px) clamp(16px,2.2vw,24px);margin-top:14px;cursor:pointer;border:1.5px solid rgba(239,68,68,0.2);box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:all 0.25s ease;overflow:hidden;animation:fadeUp 0.3s ease both;}
-  .inactive-section-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,rgba(239,68,68,0.08) 0%,transparent 60%),radial-gradient(ellipse at 90% 50%,rgba(245,158,11,0.06) 0%,transparent 60%);pointer-events:none;}
-  .inactive-section-header:hover{border-color:rgba(239,68,68,0.4);box-shadow:0 8px 32px rgba(0,0,0,0.2);transform:translateY(-1px);}
-  .inactive-section-header.open{border-radius:16px 16px 0 0;border-bottom-color:transparent;}
-  .inactive-count-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:linear-gradient(135deg,#dc2626,#ef4444);color:white;font-size:var(--text-xs);font-weight:800;font-family:Outfit,sans-serif;box-shadow:0 2px 8px rgba(220,38,38,0.3);}
-  .inactive-count-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.8);animation:pulse 1.5s ease infinite;}
-  .inactive-panel{background:white;border:1.5px solid rgba(239,68,68,0.15);border-top:none;border-radius:0 0 16px 16px;overflow:hidden;animation:slideDown 0.3s ease both;box-shadow:0 12px 32px rgba(0,0,0,0.08);}
+  .inactive-section-header{position:relative;background:var(--gray-800);border-radius:10px;padding:clamp(14px,1.8vw,20px) clamp(16px,2.2vw,24px);margin-top:14px;cursor:pointer;border:1px solid var(--gray-700);transition:border-color 0.2s ease;overflow:hidden;}
+  .inactive-section-header:hover{border-color:var(--red-500);}
+  .inactive-section-header.open{border-radius:10px 10px 0 0;border-bottom-color:transparent;}
+  .inactive-count-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;background:var(--red-600);color:white;font-size:var(--text-xs);font-weight:700;font-family:Inter,sans-serif;}
+  .inactive-panel{background:white;border:1px solid var(--gray-200);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;animation:slideDown 0.2s ease both;}
   .inactive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(250px,28vw,320px),1fr));gap:clamp(10px,1.5vw,16px);padding:clamp(14px,2vw,20px);}
-  .inactive-card{background:white;border:1.5px solid var(--gray-200);border-radius:14px;overflow:hidden;transition:all 0.2s ease;position:relative;animation:fadeUp 0.25s ease both;}
-  .inactive-card:hover{border-color:rgba(239,68,68,0.3);box-shadow:0 8px 24px rgba(239,68,68,0.08);transform:translateY(-2px);}
-  .inactive-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#dc2626,#f59e0b);}
-  .inactive-card-header{padding:clamp(10px,1.3vw,14px) clamp(12px,1.5vw,16px);background:linear-gradient(135deg,#fef2f2,#fff7ed);border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .inactive-card{background:white;border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;transition:border-color 0.15s ease;position:relative;}
+  .inactive-card:hover{border-color:var(--red-300,#fca5a5);}
+  .inactive-card-header{padding:clamp(10px,1.3vw,14px) clamp(12px,1.5vw,16px);background:var(--gray-50);border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .inactive-card-body{padding:clamp(10px,1.3vw,14px) clamp(12px,1.5vw,16px);display:flex;flex-direction:column;gap:7px;}
   .inactive-field{display:flex;flex-direction:column;gap:2px;}
-  .inactive-field-label{font-size:9px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.1em;font-family:Outfit,sans-serif;}
+  .inactive-field-label{font-size:9px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.1em;font-family:Inter,sans-serif;}
   .inactive-field-value{font-size:var(--text-sm);font-weight:600;color:var(--gray-800);}
   .inactive-filter-bar{padding:clamp(10px,1.3vw,14px) clamp(14px,2vw,20px);background:var(--gray-50);border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 
-  .panel-toggle-bar{display:flex;align-items:center;justify-content:space-between;padding:clamp(8px,1vw,12px) clamp(12px,1.5vw,20px);background:white;border:1.5px solid var(--gray-200);border-radius:14px;box-shadow:var(--shadow-sm);gap:clamp(8px,1vw,14px);flex-wrap:wrap;animation:fadeUp .3s ease both;}
-  .toggle-pill{display:inline-flex;align-items:center;gap:6px;padding:clamp(5px,0.6vw,8px) clamp(10px,1.5vw,18px);border-radius:999px;font-size:var(--text-sm);font-weight:700;border:1.5px solid;cursor:pointer;transition:all .18s ease;font-family:Outfit,sans-serif;letter-spacing:.02em;user-select:none;}
-  .toggle-pill.active{background:${NL_BLUE};border-color:${NL_BLUE};color:white;box-shadow:0 4px 14px rgba(11,92,171,0.3);}
+  .panel-toggle-bar{display:flex;align-items:center;justify-content:space-between;padding:clamp(8px,1vw,12px) clamp(12px,1.5vw,20px);background:white;border:1px solid var(--gray-200);border-radius:10px;box-shadow:var(--shadow-sm);gap:clamp(8px,1vw,14px);flex-wrap:wrap;}
+  .toggle-pill{display:inline-flex;align-items:center;gap:6px;padding:clamp(5px,0.6vw,8px) clamp(10px,1.5vw,18px);border-radius:8px;font-size:var(--text-sm);font-weight:600;border:1px solid;cursor:pointer;transition:all .15s ease;font-family:Inter,sans-serif;letter-spacing:.01em;user-select:none;}
+  .toggle-pill.active{background:${NL_BLUE};border-color:${NL_BLUE};color:white;}
   .toggle-pill.inactive{background:white;border-color:var(--gray-200);color:var(--gray-600);}
   .toggle-pill:hover:not(.active){background:var(--blue-50);border-color:var(--blue-200);color:${NL_BLUE};}
-  .collapsible-panel{overflow:hidden;transition:max-height .4s cubic-bezier(0.4,0,0.2,1),opacity .3s ease;max-height:0;opacity:0;}
+  .collapsible-panel{overflow:hidden;transition:max-height .3s ease,opacity .25s ease;max-height:0;opacity:0;}
   .collapsible-panel.open{max-height:800px;opacity:1;}
 
-  .ar-root{font-family:'DM Sans',sans-serif;background:var(--gray-50);max-height:100vh;color:var(--gray-900);}
+  .ar-root{font-family:'Inter',system-ui,sans-serif;background:var(--gray-50);max-height:100vh;color:var(--gray-900);}
   .ar-layout{display:flex;max-height:100vh;}
-  .rpt-sidebar{background:linear-gradient(170deg,#0f172a 0%,#1e3a5f 50%,#0d2137 100%);border-right:1px solid rgba(59,130,246,0.15);box-shadow:6px 0 32px rgba(0,0,0,0.28);position:relative;overflow:hidden;}
-  .rpt-nav-btn{width:100%;text-align:left;padding:10px 14px;border-radius:12px;background:transparent;border:1px solid transparent;color:rgba(255,255,255,0.55);font-size:13.5px;font-weight:500;cursor:pointer;transition:all 0.22s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;}
-  .rpt-nav-btn:hover{background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(34,197,94,0.08));border-color:rgba(59,130,246,0.25);color:#93c5fd;transform:translateX(4px);}
-  .rpt-nav-btn.active{background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(34,197,94,0.12));border-color:rgba(59,130,246,0.4);color:#60a5fa;}
+  .rpt-sidebar{background:#0f172a;border-right:1px solid rgba(255,255,255,0.08);position:relative;overflow:hidden;}
+  .rpt-nav-btn{width:100%;text-align:left;padding:10px 14px;border-radius:8px;background:transparent;border:1px solid transparent;color:rgba(255,255,255,0.6);font-size:13.5px;font-weight:500;cursor:pointer;transition:background 0.15s ease,color 0.15s ease;display:flex;align-items:center;gap:10px;font-family:'Inter',sans-serif;}
+  .rpt-nav-btn:hover{background:rgba(255,255,255,0.06);color:#e2e8f0;}
+  .rpt-nav-btn.active{background:rgba(37,99,235,0.18);border-color:rgba(37,99,235,0.3);color:#93c5fd;}
   .rpt-main{background:#f8fafc;position:relative;}
-  .rpt-label{display:block;font-size:var(--text-xs);font-weight:800;color:#475569;letter-spacing:.10em;text-transform:uppercase;margin-bottom:7px;font-family:"Outfit",sans-serif;}
+  .rpt-label{display:block;font-size:var(--text-xs);font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;font-family:"Inter",sans-serif;}
   .search-wrapper{position:relative;width:100%;}
   .search-wrapper svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none;}
-  .rpt-input,.rpt-select{width:100%;padding:clamp(8px,0.9vw,11px) clamp(10px,1vw,14px);border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;font-size:var(--text-sm);color:#0f172a;outline:none;transition:all .18s ease;box-shadow:0 1px 2px rgba(15,23,42,.04);}
+  .rpt-input,.rpt-select{width:100%;padding:clamp(8px,0.9vw,11px) clamp(10px,1vw,14px);border-radius:8px;border:1px solid #d0d5dd;background:#fff;font-size:var(--text-sm);color:#0f172a;outline:none;transition:border-color .15s ease,box-shadow .15s ease;}
   .rpt-input::placeholder{color:#94a3b8;}
-  .rpt-input:focus,.rpt-select:focus{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+  .rpt-input:focus,.rpt-select:focus{border-color:${NL_BLUE};box-shadow:0 0 0 3px rgba(11,92,171,.10);}
   .rpt-select{cursor:pointer;appearance:none;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:calc(100% - 12px) center;}
-  .filter-panel{position:relative;background:#ffffff;border-radius:0 0 18px 18px;border:1.5px solid #e2e8f0;border-top:none;box-shadow:0 10px 30px rgba(15,23,42,.06);padding:clamp(14px,2vw,22px) clamp(16px,2.5vw,26px);}
-  .active-filter-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:var(--text-xs);font-weight:700;background:${NL_BLUE};color:white;font-family:Outfit,sans-serif;}
+  .filter-panel{position:relative;background:#ffffff;border-radius:0 0 10px 10px;border:1px solid #e2e8f0;border-top:none;box-shadow:var(--shadow-sm);padding:clamp(14px,2vw,22px) clamp(16px,2.5vw,26px);}
+  .active-filter-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:var(--text-xs);font-weight:700;background:${NL_BLUE};color:white;font-family:Inter,sans-serif;}
   .active-filter-chip button{background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;padding:0;font-size:13px;line-height:1;display:flex;align-items:center;}
   .active-filter-chip button:hover{color:white;}
-  .chip{display:inline-flex;align-items:center;padding:5px 11px;border-radius:999px;font-size:var(--text-xs);font-weight:900;font-family:"Outfit",sans-serif;border:1px solid rgba(0,0,0,.06);background:#fff;color:#0f172a;box-shadow:0 1px 2px rgba(15,23,42,.04);white-space:nowrap;}
+  .chip{display:inline-flex;align-items:center;padding:5px 11px;border-radius:6px;font-size:var(--text-xs);font-weight:700;font-family:"Inter",sans-serif;border:1px solid var(--gray-200);background:#fff;color:#0f172a;white-space:nowrap;}
 
   .ar-main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
-  .ar-topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:clamp(8px,1vw,13px) clamp(12px,1.8vw,22px);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:30;box-shadow:var(--shadow-sm);}
+  .ar-topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:clamp(8px,1vw,13px) clamp(12px,1.8vw,22px);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:30;}
   .ar-topbar-left{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
   .ar-topbar-center{text-align:center;flex:1;min-width:140px;}
   .ar-topbar-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-  .ar-page-title{font-family:Syne,sans-serif;font-weight:800;font-size:clamp(1.05rem,2.2vw,1.45rem);color:var(--gray-900);margin:0;letter-spacing:-0.02em;}
+  .ar-page-title{font-family:Inter,sans-serif;font-weight:700;font-size:clamp(1.05rem,2.2vw,1.4rem);color:var(--gray-900);margin:0;letter-spacing:-0.01em;}
   .ar-page-sub{font-size:var(--text-xs);color:var(--gray-400);margin-top:2px;}
   .ar-content{flex:1;padding:clamp(10px,1.5vw,18px) clamp(12px,2vw,22px);overflow-y:auto;}
 
-  .ar-btn{display:inline-flex;align-items:center;gap:5px;padding:clamp(6px,0.7vw,9px) clamp(10px,1.2vw,16px);border-radius:var(--radius);font-weight:600;font-size:var(--text-sm);border:none;cursor:pointer;transition:all 0.18s ease;white-space:nowrap;font-family:'Outfit',sans-serif;letter-spacing:0.01em;line-height:1;}
+  .ar-btn{display:inline-flex;align-items:center;gap:5px;padding:clamp(6px,0.7vw,9px) clamp(10px,1.2vw,16px);border-radius:8px;font-weight:600;font-size:var(--text-sm);border:1px solid transparent;cursor:pointer;transition:background .15s ease,border-color .15s ease;white-space:nowrap;font-family:'Inter',sans-serif;letter-spacing:0.01em;line-height:1;}
   .ar-btn:disabled{opacity:0.5;cursor:not-allowed;}
-  .ar-btn:hover:not(:disabled){transform:translateY(-1px);}
-  .ar-btn:active:not(:disabled){transform:scale(0.98);}
-  .ar-btn-primary{background:${NL_BLUE};color:white;box-shadow:0 2px 8px rgba(11,92,171,0.28);}
+  .ar-btn-primary{background:${NL_BLUE};color:white;}
   .ar-btn-primary:hover:not(:disabled){background:#0a4f96;}
-  .ar-btn-success{background:var(--green-600);color:white;box-shadow:0 2px 8px rgba(22,163,74,0.22);}
+  .ar-btn-success{background:var(--green-600);color:white;}
   .ar-btn-success:hover:not(:disabled){background:var(--green-700);}
   .ar-btn-amber{background:var(--amber-500);color:white;}
   .ar-btn-amber:hover:not(:disabled){background:var(--amber-600);}
@@ -164,100 +147,98 @@ const REPORT_STYLES = `
   .ar-btn-purple:hover:not(:disabled){background:#6d28d9;}
   .ar-btn-teal{background:#0d9488;color:white;}
   .ar-btn-teal:hover:not(:disabled){background:#0f766e;}
-  .ar-btn-white{background:white;border:1.5px solid var(--gray-200);color:var(--gray-700);box-shadow:var(--shadow-sm);}
+  .ar-btn-white{background:white;border-color:var(--gray-200);color:var(--gray-700);}
   .ar-btn-white:hover:not(:disabled){border-color:${NL_BLUE};color:${NL_BLUE};background:#eff6ff;}
-  .ar-btn-ghost{background:transparent;border:1.5px solid var(--gray-200);color:var(--gray-600);}
+  .ar-btn-ghost{background:transparent;border-color:var(--gray-200);color:var(--gray-600);}
   .ar-btn-ghost:hover:not(:disabled){background:var(--gray-100);}
-  .ar-btn-blue-outline{background:#eff6ff;border:1.5px solid #bfdbfe;color:${NL_BLUE};}
+  .ar-btn-blue-outline{background:#eff6ff;border-color:#bfdbfe;color:${NL_BLUE};}
   .ar-btn-blue-outline:hover:not(:disabled){background:#dbeafe;}
-  .ar-btn-green-outline{background:var(--green-50);border:1.5px solid var(--green-200);color:var(--green-700);}
+  .ar-btn-green-outline{background:var(--green-50);border-color:var(--green-200);color:var(--green-700);}
   .ar-btn-sm{padding:clamp(5px,0.55vw,7px) clamp(8px,1vw,13px);font-size:var(--text-xs);}
   .ar-btn-icon{width:clamp(30px,3vw,36px);height:clamp(30px,3vw,36px);padding:0;justify-content:center;}
 
-  .ar-table-card{background:white;border-radius:var(--radius-xl);border:1.5px solid var(--gray-200);box-shadow:var(--shadow);overflow:hidden;animation:fadeUp 0.35s ease both;}
+  .ar-table-card{background:white;border-radius:12px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);overflow:hidden;}
   .ar-table{width:100%;border-collapse:collapse;}
-  .ar-table thead th{padding:clamp(9px,1.1vw,13px) clamp(10px,1.4vw,16px);text-align:left;font-size:var(--text-xs);font-weight:700;color:rgba(255,255,255,0.95);text-transform:uppercase;letter-spacing:0.09em;white-space:nowrap;font-family:'Outfit',sans-serif;cursor:pointer;user-select:none;transition:background 0.12s;}
+  .ar-table thead th{padding:clamp(9px,1.1vw,13px) clamp(10px,1.4vw,16px);text-align:left;font-size:var(--text-xs);font-weight:700;color:rgba(255,255,255,0.95);text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;font-family:'Inter',sans-serif;cursor:pointer;user-select:none;transition:background 0.12s;}
   .ar-table thead th:hover{background:rgba(255,255,255,0.12);}
-  .ar-table tbody tr{border-bottom:1px solid var(--gray-100);transition:background 0.12s;}
+  .ar-table tbody tr{border-bottom:1px solid var(--gray-100);transition:background 0.1s;}
   .ar-table tbody tr:last-child{border-bottom:none;}
   .ar-table tbody tr:hover{background:#eff6ff;}
   .ar-table tbody td{padding:clamp(9px,1vw,12px) clamp(10px,1.4vw,16px);font-size:var(--text-sm);color:var(--gray-700);}
-  .ar-table th,.ar-table td{border-right:0.5px solid rgba(0,0,0,0.08);border-bottom:1px solid #e2e8f0;}
+  .ar-table th,.ar-table td{border-right:1px solid var(--gray-100);border-bottom:1px solid #e2e8f0;}
   .ar-table th:last-child,.ar-table td:last-child{border-right:none;}
   .ar-table tbody tr.inactive-row{background:#fef2f2;}
   .ar-table tbody tr.inactive-row:hover{background:#fee2e2;}
   .ar-table tbody tr.repair-row{background:#fffbeb;}
   .ar-table tbody tr.repair-row:hover{background:#fef3c7;}
 
-  .ar-badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:6px;font-size:var(--text-xs);font-weight:700;font-family:'Outfit',sans-serif;}
+  .ar-badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;font-size:var(--text-xs);font-weight:700;font-family:'Inter',sans-serif;}
   .ar-badge-blue{background:#eff6ff;color:${NL_BLUE};border:1px solid #bfdbfe;}
   .ar-badge-green{background:var(--green-50);color:var(--green-700);border:1px solid var(--green-200);}
   .ar-badge-purple{background:var(--purple-50);color:var(--purple-600);border:1px solid var(--purple-100);}
   .ar-badge-amber{background:var(--amber-50);color:var(--amber-600);border:1px solid var(--amber-100);}
   .ar-badge-red{background:var(--red-50);color:var(--red-600);border:1px solid var(--red-100);}
   .ar-badge-teal{background:var(--teal-50);color:var(--teal-600);border:1px solid var(--teal-100);}
-  .ar-status{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:var(--text-xs);font-weight:700;font-family:'Outfit',sans-serif;border:1.5px solid;}
+  .ar-status{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:var(--text-xs);font-weight:700;font-family:'Inter',sans-serif;border:1px solid;}
   .ar-status::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
   .ar-status-active{color:var(--green-700);border-color:var(--green-200);background:var(--green-50);}
   .ar-status-inactive{color:var(--red-600);border-color:var(--red-100);background:var(--red-50);}
   .ar-status-repair{color:var(--amber-600);border-color:var(--amber-100);background:var(--amber-50);}
   .ar-status-default{color:var(--gray-500);border-color:var(--gray-200);background:var(--gray-50);}
 
-  .ar-detail-overlay{position:fixed;inset:0;z-index:9999;background:rgba(2,8,23,0.72);backdrop-filter:blur(12px);overflow-y:auto;padding:clamp(10px,2vw,20px);animation:fadeIn 0.2s ease;display:flex;align-items:flex-start;justify-content:center;}
-  .ar-detail-panel{max-width:1080px;width:100%;margin:0 auto;background:white;border-radius:20px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.3);animation:bounceIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;border:1.5px solid var(--gray-200);}
+  .ar-detail-overlay{position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.55);overflow-y:auto;padding:clamp(10px,2vw,20px);animation:fadeIn 0.15s ease;display:flex;align-items:flex-start;justify-content:center;}
+  .ar-detail-panel{max-width:1080px;width:100%;margin:0 auto;background:white;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid var(--gray-200);}
   .ar-detail-header{background:${NL_GRADIENT_90};position:relative;padding:clamp(16px,2vw,22px) clamp(18px,2.5vw,26px);overflow:hidden;}
-  .ar-detail-header::after{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;}
-  .detail-tabs{display:flex;gap:2px;background:rgba(0,0,0,0.2);border-radius:12px;padding:4px;margin-top:clamp(10px,1.2vw,15px);}
-  .detail-tab{flex:1;padding:clamp(6px,0.8vw,9px) clamp(8px,1vw,14px);border-radius:9px;font-size:var(--text-xs);font-weight:700;color:rgba(255,255,255,0.6);border:none;background:transparent;cursor:pointer;transition:all .18s ease;font-family:Outfit,sans-serif;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;}
-  .detail-tab:hover{color:rgba(255,255,255,0.88);background:rgba(255,255,255,0.08);}
-  .detail-tab.active{background:white;color:${NL_BLUE};box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+  .detail-tabs{display:flex;gap:2px;background:rgba(0,0,0,0.18);border-radius:9px;padding:4px;margin-top:clamp(10px,1.2vw,15px);}
+  .detail-tab{flex:1;padding:clamp(6px,0.8vw,9px) clamp(8px,1vw,14px);border-radius:7px;font-size:var(--text-xs);font-weight:700;color:rgba(255,255,255,0.65);border:none;background:transparent;cursor:pointer;transition:all .15s ease;font-family:Inter,sans-serif;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .detail-tab:hover{color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.08);}
+  .detail-tab.active{background:white;color:${NL_BLUE};}
   .ar-detail-body{background:var(--gray-50);padding:clamp(16px,2vw,24px);max-height:calc(90vh - 220px);overflow-y:auto;}
-  .ar-info-card{background:white;border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:clamp(12px,1.4vw,18px);position:relative;overflow:hidden;transition:all 0.18s ease;}
-  .ar-info-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:${NL_GRADIENT};}
-  .ar-info-card:hover{box-shadow:var(--shadow-md);border-color:${NL_BLUE}33;transform:translateY(-1px);}
-  .ar-field-item{background:white;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:clamp(9px,1vw,13px) clamp(10px,1.2vw,15px);transition:all 0.15s;position:relative;overflow:hidden;}
-  .ar-field-item:hover{border-color:${NL_BLUE}44;box-shadow:0 2px 8px rgba(11,92,171,0.07);}
+  .ar-info-card{background:white;border:1px solid var(--gray-200);border-radius:10px;padding:clamp(12px,1.4vw,18px);position:relative;overflow:hidden;transition:border-color 0.15s ease;}
+  .ar-info-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:${NL_BLUE};}
+  .ar-info-card:hover{border-color:${NL_BLUE}55;}
+  .ar-field-item{background:white;border:1px solid var(--gray-200);border-radius:8px;padding:clamp(9px,1vw,13px) clamp(10px,1.2vw,15px);transition:border-color 0.15s;position:relative;overflow:hidden;}
+  .ar-field-item:hover{border-color:${NL_BLUE}55;}
   .ar-field-item .copy-btn{position:absolute;top:7px;right:7px;background:none;border:none;cursor:pointer;opacity:0;transition:opacity .15s;font-size:11px;color:var(--gray-400);padding:2px 4px;border-radius:4px;}
   .ar-field-item:hover .copy-btn{opacity:1;}
   .ar-field-item .copy-btn:hover{background:var(--gray-100);color:var(--gray-700);}
 
   .transfer-type-selector{display:flex;gap:8px;margin-bottom:clamp(14px,1.8vw,20px);flex-wrap:wrap;}
-  .transfer-type-btn{flex:1;min-width:120px;padding:clamp(10px,1.3vw,14px) clamp(12px,1.5vw,16px);border-radius:12px;border:2px solid var(--gray-200);background:white;cursor:pointer;transition:all 0.2s ease;font-family:Outfit,sans-serif;font-weight:700;font-size:var(--text-sm);color:var(--gray-600);display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;}
+  .transfer-type-btn{flex:1;min-width:120px;padding:clamp(10px,1.3vw,14px) clamp(12px,1.5vw,16px);border-radius:10px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;transition:all 0.15s ease;font-family:Inter,sans-serif;font-weight:700;font-size:var(--text-sm);color:var(--gray-600);display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;}
   .transfer-type-btn:hover{border-color:var(--purple-300);color:var(--purple-700);background:var(--purple-50);}
-  .transfer-type-btn.selected{border-color:var(--purple-500);background:var(--purple-50);color:var(--purple-700);box-shadow:0 0 0 3px rgba(139,92,246,0.12);}
-  .transfer-type-btn .icon{font-size:20px;}
-  .transfer-type-btn .label{font-size:var(--text-xs);font-weight:800;letter-spacing:0.04em;}
+  .transfer-type-btn.selected{border-color:var(--purple-500);background:var(--purple-50);color:var(--purple-700);}
+  .transfer-type-btn .label{font-size:var(--text-xs);font-weight:800;letter-spacing:0.03em;}
   .transfer-type-btn .desc{font-size:9px;color:var(--gray-400);font-weight:500;}
 
-  .new-user-form{background:var(--green-50);border:1.5px solid var(--green-200);border-radius:12px;padding:clamp(12px,1.5vw,16px);margin-top:10px;animation:slideDown 0.25s ease both;}
-  .ar-action-block{background:white;border-radius:var(--radius-xl);border:1.5px solid;padding:clamp(16px,2vw,22px);margin-bottom:18px;animation:fadeUp 0.25s ease both;}
-  .ar-action-edit{border-color:var(--amber-200);background:linear-gradient(135deg,var(--amber-50),white);}
-  .ar-action-transfer{border-color:var(--purple-100);background:linear-gradient(135deg,var(--purple-50),white);}
-  .ar-modal-overlay{position:fixed;inset:0;z-index:10001;background:rgba(2,8,23,0.85);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:clamp(10px,2vw,18px);overflow-y:auto;}
-  .ar-modal-panel{background:white;border-radius:20px;border:1.5px solid var(--gray-200);box-shadow:0 32px 80px rgba(0,0,0,0.35);overflow:hidden;display:flex;flex-direction:column;max-width:860px;width:100%;max-height:88vh;animation:bounceIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;}
+  .new-user-form{background:var(--green-50);border:1px solid var(--green-200);border-radius:10px;padding:clamp(12px,1.5vw,16px);margin-top:10px;animation:slideDown 0.2s ease both;}
+  .ar-action-block{background:white;border-radius:12px;border:1px solid;padding:clamp(16px,2vw,22px);margin-bottom:18px;}
+  .ar-action-edit{border-color:var(--amber-200);background:white;}
+  .ar-action-transfer{border-color:var(--purple-100);background:white;}
+  .ar-modal-overlay{position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);display:flex;align-items:center;justify-content:center;padding:clamp(10px,2vw,18px);overflow-y:auto;}
+  .ar-modal-panel{background:white;border-radius:14px;border:1px solid var(--gray-200);box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;max-width:860px;width:100%;max-height:88vh;}
   .ar-modal-header{padding:clamp(16px,2vw,22px) clamp(18px,2.5vw,28px);background:${NL_GRADIENT_90};display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:relative;overflow:hidden;}
   .timeline{display:flex;flex-direction:column;gap:0;padding:0 4px;}
   .timeline-item{position:relative;padding-left:32px;padding-bottom:20px;}
-  .timeline-item::before{content:'';position:absolute;left:11px;top:22px;bottom:0;width:2px;background:linear-gradient(to bottom,${NL_BLUE}40,transparent);}
+  .timeline-item::before{content:'';position:absolute;left:11px;top:22px;bottom:0;width:2px;background:var(--gray-200);}
   .timeline-item:last-child::before{display:none;}
-  .timeline-dot{position:absolute;left:0;top:4px;width:24px;height:24px;border-radius:50%;background:${NL_GRADIENT};display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:800;box-shadow:0 2px 8px rgba(11,92,171,0.3);font-family:Outfit,sans-serif;}
-  .timeline-card{background:white;border:1.5px solid var(--gray-200);border-radius:14px;padding:clamp(11px,1.3vw,15px) clamp(12px,1.5vw,17px);transition:all .15s ease;}
-  .timeline-card:hover{border-color:${NL_BLUE}44;box-shadow:0 4px 14px rgba(11,92,171,0.10);}
-  .camera-card{background:white;border:1.5px solid var(--gray-200);border-radius:16px;overflow:hidden;transition:all .18s ease;}
-  .camera-card:hover{box-shadow:0 8px 24px rgba(11,92,171,0.12);transform:translateY(-2px);}
+  .timeline-dot{position:absolute;left:0;top:4px;width:24px;height:24px;border-radius:50%;background:${NL_BLUE};display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:800;font-family:Inter,sans-serif;}
+  .timeline-card{background:white;border:1px solid var(--gray-200);border-radius:10px;padding:clamp(11px,1.3vw,15px) clamp(12px,1.5vw,17px);transition:border-color .15s ease;}
+  .timeline-card:hover{border-color:${NL_BLUE}55;}
+  .camera-card{background:white;border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;transition:border-color .15s ease;}
+  .camera-card:hover{border-color:${NL_BLUE}55;}
   .camera-card-header{padding:clamp(10px,1.2vw,14px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray-100);}
-  .camera-icon{width:36px;height:36px;border-radius:10px;background:${NL_GRADIENT};display:flex;align-items:center;justify-content:center;color:white;font-size:16px;flex-shrink:0;}
+  .camera-icon{width:32px;height:32px;border-radius:8px;background:${NL_BLUE};display:flex;align-items:center;justify-content:center;color:white;font-size:13px;flex-shrink:0;font-weight:700;font-family:Inter,sans-serif;}
   .section-pills{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
-  .section-pill{padding:clamp(3px,0.4vw,5px) clamp(8px,1vw,12px);border-radius:999px;font-size:var(--text-xs);font-weight:700;border:1.5px solid var(--gray-200);background:white;color:var(--gray-600);cursor:pointer;transition:all .15s ease;font-family:Outfit,sans-serif;}
+  .section-pill{padding:clamp(3px,0.4vw,5px) clamp(8px,1vw,12px);border-radius:999px;font-size:var(--text-xs);font-weight:700;border:1px solid var(--gray-200);background:white;color:var(--gray-600);cursor:pointer;transition:all .15s ease;font-family:Inter,sans-serif;}
   .section-pill:hover{border-color:${NL_BLUE}66;color:${NL_BLUE};background:var(--blue-50);}
   .section-pill.active{background:${NL_BLUE};border-color:${NL_BLUE};color:white;}
   .ar-divider{display:flex;align-items:center;gap:10px;margin:clamp(12px,1.5vw,20px) 0 clamp(10px,1.2vw,16px);}
   .ar-divider-line{height:1px;flex:1;background:var(--gray-200);}
-  .ar-divider-text{font-size:var(--text-xs);font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;font-family:'Outfit',sans-serif;}
+  .ar-divider-text{font-size:var(--text-xs);font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;font-family:'Inter',sans-serif;}
   .ar-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(40px,6vw,70px) 20px;gap:12px;text-align:center;}
   .ar-spinner{border-radius:50%;border:2.5px solid var(--gray-200);border-top-color:${NL_BLUE};animation:spin 0.7s linear infinite;}
   .ar-mobile-overlay{position:fixed;inset:0;z-index:49;background:rgba(17,24,39,0.4);}
-  .copy-toast{position:fixed;bottom:clamp(16px,3vw,28px);left:50%;transform:translateX(-50%);background:#0f172a;color:white;padding:8px 18px;border-radius:999px;font-size:12px;font-weight:700;font-family:Outfit,sans-serif;z-index:99999;animation:fadeUp .2s ease,fadeIn .2s ease;box-shadow:0 8px 24px rgba(0,0,0,0.2);}
+  .copy-toast{position:fixed;bottom:clamp(16px,3vw,28px);left:50%;transform:translateX(-50%);background:#0f172a;color:white;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;z-index:99999;animation:fadeIn .2s ease;}
   .skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
   ::-webkit-scrollbar{width:5px;height:5px;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -265,7 +246,7 @@ const REPORT_STYLES = `
   ::-webkit-scrollbar-thumb:hover{background:var(--gray-400);}
 
   /* ── Add-camera form ── */
-  .add-camera-form{background:var(--blue-50);border:1.5px solid var(--blue-200);border-radius:14px;padding:clamp(14px,1.8vw,18px);margin-top:16px;animation:slideDown 0.22s ease both;}
+  .add-camera-form{background:var(--blue-50);border:1px solid var(--blue-200);border-radius:10px;padding:clamp(14px,1.8vw,18px);margin-top:16px;animation:slideDown 0.2s ease both;}
   .add-camera-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px;}
 
   @media(min-width:1600px){.ar-content{padding:20px 28px;}.ar-topbar{padding:14px 28px;}.nl-hero-inner-compact{padding:20px 28px;}.filter-panel{padding:22px 28px;}}
@@ -326,7 +307,7 @@ const branchMatchesUserStation = (branch, user) => {
 };
 
 
-// ── ADDED: display-friendly section name (qr_desktop_computer → QR Monitor) ──
+// ── display-friendly section name (qr_desktop_computer → QR Monitor) ──
 const displaySectionName = (section) => {
   const s = String(section || "").toLowerCase();
   const map = {
@@ -730,15 +711,7 @@ const sectionRouteMap = {
   online_conference_tools:{type:"multi",plural:"online-conference-tools"},
 };
 
-const SECTION_ICONS = {
-  desktop:"🖥",qr_desktop_computer:"🖥️",extra_monitor:"🖥",laptop:"💻",printer:"🖨",scanner:"📠",
-  projector:"📽",panel:"📺",ipphone:"📞",cctv:"📹",server:"🖧",firewall_router:"🔒",
-  connectivity:"🌐",ups:"🔋",inverter:"🔌",switch:"🔀",
-  application_software:"💾",office_software:"📋",utility_software:"🔧",
-  security_software:"🛡",security_software_installed:"🔐",
-  services:"🔩",licenses:"🪪",windows_os:"🪟",windows_servers:"🏗",
-  online_conference_tools:"🎥",
-};
+const SECTION_ICONS = {};
 
 const Spinner = ({size=36,color}) => (
   <div className="ar-spinner" style={{width:size,height:size,borderTopColor:color||NL_BLUE}}/>
@@ -750,27 +723,26 @@ function NepalLifeHeroCompact({totalItems,allSections,totalBranches,activeCount,
   const timeStr=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
   const dateStr=now.toLocaleDateString("en-US",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
   const stats=[
-    {icon:"📦",num:(totalItems||0).toLocaleString(),label:"Total Assets",sub:`across ${totalBranches||0} branches`,accent:NL_BLUE},
-    {icon:"🏢",num:(totalBranches||0).toString(),label:"Branches",sub:"nationwide",accent:"#0d9488"},
-    {icon:"🗂",num:(allSections||0).toString(),label:"Sections",sub:"asset categories",accent:"#7c3aed"},
-    {icon:"✅",num:(activeCount||0).toLocaleString(),label:"Active",sub:"operational assets",accent:"#16a34a"},
-    {icon:"⚠️",num:((inactiveCount||0)+(repairCount||0)).toLocaleString(),label:"Needs Attention",sub:"inactive or repair",accent:"#d97706"},
+    {num:(totalItems||0).toLocaleString(),label:"Total Assets",sub:`across ${totalBranches||0} branches`},
+    {num:(totalBranches||0).toString(),label:"Branches",sub:"nationwide"},
+    {num:(allSections||0).toString(),label:"Sections",sub:"asset categories"},
+    {num:(activeCount||0).toLocaleString(),label:"Active",sub:"operational assets"},
+    {num:((inactiveCount||0)+(repairCount||0)).toLocaleString(),label:"Needs Attention",sub:"inactive or repair"},
   ];
   return (
     <div className="nl-hero-compact">
       <div className="nl-hero-inner-compact">
         <div className="nl-hero-left">
-          <div className="nl-eyebrow"><div className="nl-eyebrow-dot"/>Asset Information Management System</div>
+          <div className="nl-eyebrow">Asset Information Management System</div>
           <h2 className="nl-title-compact">
             <span className="blue">NEPAL</span><span className="red">LIFE</span>{" "}
-            <span style={{color:"rgba(15,23,42,0.62)",fontWeight:800}}>Insurance Co. Ltd.</span>
+            <span style={{color:"var(--gray-500)",fontWeight:700}}>Insurance Co. Ltd.</span>
           </h2>
           <div className="nl-divider-sm"/>
-          <p className="nl-slogan">"किनकी जीवन अमूल्य छ" &nbsp;·&nbsp; Centralized IT Asset Registry</p>
+          <p className="nl-slogan">Centralized IT Asset Registry</p>
           <div className="nl-hero-stats">
             {stats.map((s,i)=>(
-              <div key={i} className="nl-stat" style={{"--stat-accent":s.accent,animationDelay:`${i*0.06}s`}}>
-                <div className="nl-stat-icon">{s.icon}</div>
+              <div key={i} className="nl-stat">
                 <span className="nl-stat-num">{s.num}</span>
                 <span className="nl-stat-label">{s.label}</span>
                 <span className="nl-stat-sub">{s.sub}</span>
@@ -781,21 +753,20 @@ function NepalLifeHeroCompact({totalItems,allSections,totalBranches,activeCount,
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"var(--space-sm)",flexShrink:0}}>
           <div className="nl-logo-wrap">
             <img src={NepalLifeLogo} alt="Nepal Life" className="nl-logo-compact"/>
-            <div className="nl-logo-badge">✓</div>
           </div>
-          <div style={{padding:"clamp(6px,0.8vw,10px) clamp(10px,1.2vw,14px)",background:"rgba(255,255,255,0.85)",borderRadius:"clamp(8px,1vw,12px)",border:"1.5px solid rgba(11,92,171,0.12)",textAlign:"center",fontSize:"var(--text-xs)",boxShadow:"0 2px 8px rgba(11,92,171,0.06)",minWidth:"clamp(80px,10vw,120px)"}}>
-            <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,color:NL_BLUE,fontSize:"clamp(11px,1.1vw,13px)"}}>{timeStr}</div>
+          <div style={{padding:"clamp(6px,0.8vw,10px) clamp(10px,1.2vw,14px)",background:"var(--gray-50)",borderRadius:8,border:"1px solid var(--gray-200)",textAlign:"center",fontSize:"var(--text-xs)",minWidth:"clamp(80px,10vw,120px)"}}>
+            <div style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:NL_BLUE,fontSize:"clamp(11px,1.1vw,13px)"}}>{timeStr}</div>
             <div style={{fontWeight:600,color:"var(--gray-400)",marginTop:2}}>{dateStr}</div>
           </div>
         </div>
       </div>
       <div className="nl-status-strip">
-        <span style={{fontSize:"var(--text-xs)",fontWeight:800,color:"var(--gray-400)",letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"Outfit,sans-serif",flexShrink:0}}>System:</span>
+        <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",letterSpacing:"0.08em",textTransform:"uppercase",fontFamily:"Inter,sans-serif",flexShrink:0}}>System:</span>
         <span className="nl-status-dot">API Connected</span>
         <span className="nl-status-dot" style={{"--dot-color":"#3b82f6"}}>Real-time Sync</span>
         <span className="nl-status-dot" style={{"--dot-color":"#8b5cf6"}}>Multi-Branch View</span>
         <span className="nl-status-dot" style={{"--dot-color":"#f59e0b"}}>Export Ready</span>
-        <div style={{marginLeft:"auto",fontSize:"var(--text-xs)",color:"var(--gray-400)",fontFamily:"Outfit,sans-serif",fontWeight:600}}>v2.8.0 &nbsp;·&nbsp; FY 2081/82</div>
+        <div style={{marginLeft:"auto",fontSize:"var(--text-xs)",color:"var(--gray-400)",fontFamily:"Inter,sans-serif",fontWeight:600}}>v2.8.0 &nbsp;·&nbsp; FY 2081/82</div>
       </div>
     </div>
   );
@@ -831,19 +802,18 @@ function InactiveAssetsSection({rows,onViewAsset}) {
       <div className={`inactive-section-header${open?" open":""}`} onClick={()=>setOpen(o=>!o)}>
         <div style={{position:"relative",zIndex:1,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{width:42,height:42,borderRadius:12,background:"linear-gradient(135deg,rgba(239,68,68,0.15),rgba(245,158,11,0.1))",border:"1.5px solid rgba(239,68,68,0.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>⚠️</div>
             <div>
-              <div style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:"clamp(13px,1.6vw,17px)",color:"white",letterSpacing:"-0.02em",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+              <div style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.6vw,17px)",color:"white",letterSpacing:"-0.01em",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
                 Inactive &amp; Decommissioned Assets
                 <span className="inactive-count-badge">{inactiveRows.length} assets</span>
               </div>
-              <div style={{fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.45)",marginTop:3,fontFamily:"Outfit,sans-serif"}}>Assets marked as Inactive or In Repair — click to expand</div>
+              <div style={{fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.5)",marginTop:3,fontFamily:"Inter,sans-serif"}}>Assets marked as Inactive or In Repair — click to expand</div>
             </div>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-            <span style={{padding:"3px 10px",borderRadius:999,background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.2)",fontSize:"var(--text-xs)",fontWeight:700,color:"#fca5a5",fontFamily:"Outfit,sans-serif"}}>🔴 {inactiveCount} Inactive</span>
-            <span style={{padding:"3px 10px",borderRadius:999,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.2)",fontSize:"var(--text-xs)",fontWeight:700,color:"#fcd34d",fontFamily:"Outfit,sans-serif"}}>🟡 {repairCount} Repair</span>
-            <div style={{width:28,height:28,borderRadius:"50%",background:"rgba(255,255,255,0.1)",border:"1.5px solid rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:12,transition:"transform 0.3s ease",transform:open?"rotate(180deg)":"rotate(0deg)"}}>▼</div>
+            <span style={{padding:"3px 10px",borderRadius:6,background:"rgba(239,68,68,0.16)",border:"1px solid rgba(239,68,68,0.25)",fontSize:"var(--text-xs)",fontWeight:700,color:"#fca5a5",fontFamily:"Inter,sans-serif"}}>{inactiveCount} Inactive</span>
+            <span style={{padding:"3px 10px",borderRadius:6,background:"rgba(245,158,11,0.14)",border:"1px solid rgba(245,158,11,0.22)",fontSize:"var(--text-xs)",fontWeight:700,color:"#fcd34d",fontFamily:"Inter,sans-serif"}}>{repairCount} Repair</span>
+            <div style={{width:26,height:26,borderRadius:6,background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:11,transition:"transform 0.2s ease",transform:open?"rotate(180deg)":"rotate(0deg)"}}>▾</div>
           </div>
         </div>
       </div>
@@ -851,34 +821,32 @@ function InactiveAssetsSection({rows,onViewAsset}) {
         <div className="inactive-panel">
           <div className="inactive-filter-bar">
             <div style={{position:"relative",flex:1,minWidth:180}}>
-              <input type="text" value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search inactive assets…" style={{width:"100%",padding:"8px 36px 8px 12px",borderRadius:10,border:"1.5px solid var(--gray-200)",outline:"none",fontSize:"var(--text-sm)",fontFamily:"DM Sans,sans-serif",background:"white"}}/>
-              <span style={{position:"absolute",right:11,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"var(--gray-400)"}}>🔍</span>
+              <input type="text" value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search inactive assets…" style={{width:"100%",padding:"8px 12px",borderRadius:8,border:"1px solid var(--gray-200)",outline:"none",fontSize:"var(--text-sm)",fontFamily:"Inter,sans-serif",background:"white"}}/>
             </div>
             <select value={sectionFilter} onChange={e=>{setSectionFilter(e.target.value);setPage(1);}} className="rpt-select" style={{width:"auto",minWidth:130}}>
               <option value="">All Sections</option>
-              {sectionOptions.map(s=><option key={s} value={s}>{SECTION_ICONS[s]||""} {displaySectionName(s)}</option>)}
+              {sectionOptions.map(s=><option key={s} value={s}>{displaySectionName(s)}</option>)}
             </select>
             <select value={branchFilter} onChange={e=>{setBranchFilter(e.target.value);setPage(1);}} className="rpt-select" style={{width:"auto",minWidth:150}}>
               <option value="">All Branches</option>
               {branchOptions.map(b=><option key={b} value={b}>{b}</option>)}
             </select>
             {(search||sectionFilter||branchFilter)&&(
-              <button onClick={()=>{setSearch("");setSectionFilter("");setBranchFilter("");setPage(1);}} style={{padding:"7px 12px",borderRadius:9,border:"1.5px solid var(--red-100)",background:"var(--red-50)",color:"var(--red-600)",cursor:"pointer",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Outfit,sans-serif"}}>✕ Clear</button>
+              <button onClick={()=>{setSearch("");setSectionFilter("");setBranchFilter("");setPage(1);}} style={{padding:"7px 12px",borderRadius:8,border:"1px solid var(--red-100)",background:"var(--red-50)",color:"var(--red-600)",cursor:"pointer",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Inter,sans-serif"}}>Clear</button>
             )}
-            <span style={{fontSize:"var(--text-xs)",color:"var(--gray-400)",fontFamily:"Outfit,sans-serif",fontWeight:600,marginLeft:"auto"}}>{filtered.length} of {inactiveRows.length} assets</span>
+            <span style={{fontSize:"var(--text-xs)",color:"var(--gray-400)",fontFamily:"Inter,sans-serif",fontWeight:600,marginLeft:"auto"}}>{filtered.length} of {inactiveRows.length} assets</span>
           </div>
           {paged.length===0?(
-            <div style={{padding:"40px 20px",textAlign:"center",color:"var(--gray-400)"}}><div style={{fontSize:36,marginBottom:10}}>🔍</div><div style={{fontWeight:700,color:"var(--gray-600)"}}>No assets match your filters</div></div>
+            <div style={{padding:"40px 20px",textAlign:"center",color:"var(--gray-400)"}}><div style={{fontWeight:700,color:"var(--gray-600)"}}>No assets match your filters</div></div>
           ):(
             <div className="inactive-grid">
               {paged.map((r,i)=>(
-                <div key={`${r.section}-${r.assetId||i}`} className="inactive-card" style={{animationDelay:`${i*0.03}s`}}>
+                <div key={`${r.section}-${r.assetId||i}`} className="inactive-card">
                   <div className="inactive-card-header">
                     <div style={{display:"flex",alignItems:"center",gap:8,flex:1,minWidth:0}}>
-                      <span style={{fontSize:18,flexShrink:0}}>{SECTION_ICONS[r.section]||"📦"}</span>
                       <div style={{minWidth:0}}>
-                        <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"var(--text-sm)",color:"var(--gray-900)",textTransform:"uppercase"}}>{displaySectionName(r.section)}</div>
-                        <div style={{fontSize:"var(--text-xs)",color:"var(--gray-400)",fontFamily:"Outfit,sans-serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.assetId||"No Code"}</div>
+                        <div style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:"var(--text-sm)",color:"var(--gray-900)",textTransform:"uppercase"}}>{displaySectionName(r.section)}</div>
+                        <div style={{fontSize:"var(--text-xs)",color:"var(--gray-400)",fontFamily:"Inter,sans-serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.assetId||"No Code"}</div>
                       </div>
                     </div>
                     <span className={`ar-status ${r.status==="Inactive"?"ar-status-inactive":"ar-status-repair"}`} style={{flexShrink:0}}>{r.status}</span>
@@ -887,13 +855,13 @@ function InactiveAssetsSection({rows,onViewAsset}) {
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
                       <div className="inactive-field"><span className="inactive-field-label">Branch</span><span className="inactive-field-value" style={{fontSize:11}}>{r.branch||"—"}</span></div>
                       <div className="inactive-field"><span className="inactive-field-label">Sub-Cat</span><span className="inactive-field-value" style={{fontSize:11}}>{r.subCategoryCode||"—"}</span></div>
-                      {r.assignedUser&&(<div className="inactive-field" style={{gridColumn:"1/-1"}}><span className="inactive-field-label">Last Assigned User</span><span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:18,height:18,borderRadius:"50%",background:"linear-gradient(135deg,#6b7280,#4b5563)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:8,fontWeight:800,flexShrink:0}}>{r.assignedUser.charAt(0).toUpperCase()}</span><span className="inactive-field-value" style={{fontSize:11,color:"var(--gray-500)",fontStyle:"italic"}}>{r.assignedUser}</span></span></div>)}
+                      {r.assignedUser&&(<div className="inactive-field" style={{gridColumn:"1/-1"}}><span className="inactive-field-label">Last Assigned User</span><span className="inactive-field-value" style={{fontSize:11,color:"var(--gray-500)",fontStyle:"italic"}}>{r.assignedUser}</span></div>)}
                       {r.brand&&(<div className="inactive-field"><span className="inactive-field-label">Brand / Vendor</span><span className="inactive-field-value" style={{fontSize:11}}>{r.brand}</span></div>)}
                       {r.model&&(<div className="inactive-field"><span className="inactive-field-label">Model</span><span className="inactive-field-value" style={{fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={r.model}>{r.model}</span></div>)}
                     </div>
                     <div style={{marginTop:4,paddingTop:8,borderTop:"1px solid var(--gray-100)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:6}}>
-                      <span style={{fontSize:9,color:"var(--gray-300)",fontFamily:"Outfit,sans-serif"}}>{r.lastUpdated?new Date(r.lastUpdated).toLocaleDateString():"No date"}</span>
-                      <button className="ar-btn ar-btn-sm" style={{padding:"4px 10px",fontSize:10,background:"#1f2937",color:"white",borderRadius:7,border:"none",cursor:"pointer"}} onClick={()=>onViewAsset(r)}>View →</button>
+                      <span style={{fontSize:9,color:"var(--gray-300)",fontFamily:"Inter,sans-serif"}}>{r.lastUpdated?new Date(r.lastUpdated).toLocaleDateString():"No date"}</span>
+                      <button className="ar-btn ar-btn-sm" style={{padding:"4px 10px",fontSize:10,background:"#1f2937",color:"white",borderRadius:6,border:"none",cursor:"pointer"}} onClick={()=>onViewAsset(r)}>View</button>
                     </div>
                   </div>
                 </div>
@@ -902,9 +870,9 @@ function InactiveAssetsSection({rows,onViewAsset}) {
           )}
           {totalPages>1&&(
             <div style={{padding:"12px 20px",borderTop:"1px solid var(--gray-100)",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-              <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1} style={{padding:"6px 12px",borderRadius:8,border:"1.5px solid var(--gray-200)",background:"white",cursor:"pointer",fontSize:11,fontWeight:700,opacity:page===1?0.4:1}}>← Prev</button>
-              <span style={{fontSize:11,fontWeight:700,color:"var(--gray-500)",fontFamily:"Outfit,sans-serif"}}>{page} / {totalPages}</span>
-              <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages} style={{padding:"6px 12px",borderRadius:8,border:"1.5px solid var(--gray-200)",background:"white",cursor:"pointer",fontSize:11,fontWeight:700,opacity:page>=totalPages?0.4:1}}>Next →</button>
+              <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1} style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--gray-200)",background:"white",cursor:"pointer",fontSize:11,fontWeight:700,opacity:page===1?0.4:1}}>Prev</button>
+              <span style={{fontSize:11,fontWeight:700,color:"var(--gray-500)",fontFamily:"Inter,sans-serif"}}>{page} / {totalPages}</span>
+              <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages} style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--gray-200)",background:"white",cursor:"pointer",fontSize:11,fontWeight:700,opacity:page>=totalPages?0.4:1}}>Next</button>
             </div>
           )}
         </div>
@@ -924,6 +892,17 @@ const D = {
   users:    "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
   radar:    "M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   scan:     "M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
+  wrench:   "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L1.5 3l1.5-1.5L7.5 4.5v1.409l4.29 4.29m1.745 1.437l1.745-1.437",
+  history:  "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+  edit:     "M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z",
+  trash:    "M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79a48.11 48.11 0 00-3.478-.397m-12.5 0a48.11 48.11 0 013.478-.397m0 0V4.31c0-1.136.847-2.1 1.98-2.193a48.417 48.417 0 013.08 0c1.132.093 1.98 1.057 1.98 2.193v.397m-7.04 0h7.04",
+  save:     "M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM17 21v-8H7v8M7 3v5h8",
+  close:    "M6 18L18 6M6 6l12 12",
+  download: "M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12",
+  upload:   "M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10",
+  plus:     "M12 4v16m8-8H4",
+  transfer: "M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4m-4 4h16",
+  camera:   "M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.174C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316zM16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z",
 };
 
 /* ════════════════════════════════
@@ -1366,7 +1345,7 @@ export default function BranchAssetsMasterReport() {
       if(newRows.length===0){setAlert({type:"warning",title:"All Duplicates Skipped",message:`All ${skippedRows.length} rows already exist.`});return;}
       const res=await api.post("/api/assets/import",{rows:newRows},{headers:{Authorization:`Bearer ${token}`}});
       const result=res?.data?.data||res?.data||{};
-      setAlert({type:result.failed>0?"warning":"success",title:"Import Complete",message:`✓ Inserted: ${result.inserted||0} | ✓ Updated: ${result.updated||0} | ✗ Failed: ${result.failed||0}${skippedRows.length?` | ⚠ Skipped: ${skippedRows.length}`:""}`});
+      setAlert({type:result.failed>0?"warning":"success",title:"Import Complete",message:`Inserted: ${result.inserted||0} | Updated: ${result.updated||0} | Failed: ${result.failed||0}${skippedRows.length?` | Skipped: ${skippedRows.length}`:""}`});
       await fetchAll();
     } catch(err){setAlert({type:"error",title:"Import Failed",message:err?.response?.data?.message||err?.message||"Import failed"});}
     finally{setImporting(false);}
@@ -1385,18 +1364,34 @@ export default function BranchAssetsMasterReport() {
 
   const clearFilters=()=>{setSearch("");setBranchFilter("");setGroupFilter("");setSubCatFilter("");setSectionFilter("");setStatusFilter("");setAssignedUserFilter("");setCurrentPage(1);fetchSubCats("");setTotalInfo({count:0,branch:"All Branches",group:"All Categories",subCategory:"All Sub Categories"});closeDetail();setSortField("assetId");setSortDir("asc");};
 
+  // Navigate to the Maintenance page for the currently open asset, guarding
+  // against any missing identifiers instead of sending a broken link.
+  const goToMaintenance = () => {
+    const bid = detailRow?.branchId;
+    const cfg = sectionRouteMap[String(detailRow?.section || "").toLowerCase()];
+    const sec = cfg?.plural || detailRow?.section;
+    const aid = detailRow?.details?.id ?? detailRow?.assetId;
+    const sc = detailRow?.subCategoryCode || "";
+    const aidValid = aid !== undefined && aid !== null && String(aid).trim() !== "" && String(aid) !== "N/A" && String(aid) !== "undefined";
+    if (!bid || !sec || !aidValid) {
+      setAlert({ type: "error", title: "Maintenance", message: "This asset is missing a branch, section, or asset identifier, so a maintenance log cannot be opened for it." });
+      return;
+    }
+    navigate(`/maintenance?branchId=${encodeURIComponent(bid)}&section=${encodeURIComponent(sec)}&assetId=${encodeURIComponent(aid)}&subCat=${encodeURIComponent(sc)}`);
+  };
+
   const HeaderMenu=()=>{
     if(!headerMenu)return null;
     return(
       <>
         <div onClick={closeHeaderMenu} style={{position:"fixed",inset:0,zIndex:99999,background:"transparent"}}/>
-        <div style={{position:"fixed",left:headerMenu.x,top:headerMenu.y,zIndex:100000,minWidth:160,background:"white",border:"1.5px solid var(--gray-200)",borderRadius:12,boxShadow:"0 10px 24px rgba(15,23,42,0.12)",padding:8}} onClick={e=>e.stopPropagation()}>
+        <div style={{position:"fixed",left:headerMenu.x,top:headerMenu.y,zIndex:100000,minWidth:160,background:"white",border:"1px solid var(--gray-200)",borderRadius:10,boxShadow:"var(--shadow-md)",padding:8}} onClick={e=>e.stopPropagation()}>
           {headerMenu.type==="sort"&&(
             <>
-              <div style={{fontSize:10,fontWeight:800,letterSpacing:".12em",color:"var(--gray-400)",padding:"6px 8px"}}>SORT BY</div>
+              <div style={{fontSize:10,fontWeight:800,letterSpacing:".1em",color:"var(--gray-400)",padding:"6px 8px"}}>SORT BY</div>
               {getSortOptions(headerMenu.field).map(opt=>(
                 <button key={opt.value} onClick={()=>{handleSortSelect(headerMenu.field,opt.value);closeHeaderMenu();}}
-                  style={{width:"100%",textAlign:"left",padding:"8px 10px",borderRadius:10,border:"none",background:sortField===headerMenu.field&&sortDir===opt.value?"var(--blue-50)":"transparent",cursor:"pointer",fontSize:12,fontWeight:700,color:sortField===headerMenu.field&&sortDir===opt.value?NL_BLUE:"var(--gray-700)"}}
+                  style={{width:"100%",textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:sortField===headerMenu.field&&sortDir===opt.value?"var(--blue-50)":"transparent",cursor:"pointer",fontSize:12,fontWeight:700,color:sortField===headerMenu.field&&sortDir===opt.value?NL_BLUE:"var(--gray-700)"}}
                   onMouseEnter={e=>{if(!(sortField===headerMenu.field&&sortDir===opt.value))e.currentTarget.style.background="var(--gray-50)"}}
                   onMouseLeave={e=>{if(!(sortField===headerMenu.field&&sortDir===opt.value))e.currentTarget.style.background="transparent"}}>
                   {opt.label} {sortField===headerMenu.field&&sortDir===opt.value?"✓":""}
@@ -1404,10 +1399,10 @@ export default function BranchAssetsMasterReport() {
               ))}
               <div style={{height:1,background:"var(--gray-100)",margin:"6px 0"}}/>
               <button onClick={()=>{setSortField("assetId");setSortDir("asc");closeHeaderMenu();}}
-                style={{width:"100%",textAlign:"left",padding:"8px 10px",borderRadius:10,border:"none",background:"transparent",cursor:"pointer",fontSize:12,fontWeight:700,color:"var(--red-600)"}}
+                style={{width:"100%",textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",cursor:"pointer",fontSize:12,fontWeight:700,color:"var(--red-600)"}}
                 onMouseEnter={e=>e.currentTarget.style.background="var(--red-50)"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                ✕ Clear sort
+                Clear sort
               </button>
             </>
           )}
@@ -1435,11 +1430,11 @@ export default function BranchAssetsMasterReport() {
                   {canEdit&&(
                     <div className="ar-topbar-right">
                       <button className="ar-btn ar-btn-blue-outline ar-btn-sm" onClick={onExportCSV}>
-                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        <Ic d={D.download} size={12}/>
                         <span className="btn-label">Export</span>
                       </button>
                       <label className="ar-btn ar-btn-green-outline ar-btn-sm" style={{cursor:"pointer"}}>
-                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/></svg>
+                        <Ic d={D.upload} size={12}/>
                         <span className="btn-label">{importing?"Importing…":"Import"}</span>
                         <input type="file" accept=".xlsx,.xls" style={{display:"none"}} onChange={e=>handleImportExcel(e.target.files?.[0])} disabled={importing}/>
                       </label>
@@ -1447,42 +1442,42 @@ export default function BranchAssetsMasterReport() {
                   )}
                   {canEdit1&&(
                     <button className="ar-btn ar-btn-success ar-btn-sm" onClick={()=>setShowAddModal(true)}>
-                      + <span className="btn-label">Add Asset</span>
+                      <Ic d={D.requests.includes("M12")?D.assets:D.assets} size={12}/> <span className="btn-label">Add Asset</span>
                     </button>
                   )}
                 </div>
               </div>
 
               <div className="ar-content">
-                {alert&&<div style={{marginBottom:10,animation:"fadeUp .25s ease"}}><Alert type={alert.type} title={alert.title} message={alert.message} onClose={()=>setAlert(null)}/></div>}
+                {alert&&<div style={{marginBottom:10}}><Alert type={alert.type} title={alert.title} message={alert.message} onClose={()=>setAlert(null)}/></div>}
 
                 {/* Control Bar */}
                 <div style={{marginBottom:0}}>
                   <div className="panel-toggle-bar">
                     <div style={{display:"flex",alignItems:"center",gap:7}}>
-                      <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.1em",fontFamily:"Outfit,sans-serif",flexShrink:0}}>View:</span>
-                      <button className={`toggle-pill ${showPanel==="hero"?"active":"inactive"}`} onClick={()=>setShowPanel(showPanel==="hero"?"":"hero")}>🏛 Company Info</button>
+                      <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.08em",fontFamily:"Inter,sans-serif",flexShrink:0}}>View:</span>
+                      <button className={`toggle-pill ${showPanel==="hero"?"active":"inactive"}`} onClick={()=>setShowPanel(showPanel==="hero"?"":"hero")}>Company Info</button>
                       <button className={`toggle-pill ${showPanel==="filters"?"active":"inactive"}`}
                         onClick={()=>setShowPanel(showPanel==="filters"?"":"filters")}
                         style={activeFiltersCount>0&&showPanel!=="filters"?{borderColor:"var(--amber-400)",color:"var(--amber-600)",background:"var(--amber-50)"}:{}}>
-                        🔍 Filters
+                        Filters
                         {activeFiltersCount>0&&(<span style={{background:NL_RED,color:"white",borderRadius:"50%",width:16,height:16,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,flexShrink:0}}>{activeFiltersCount}</span>)}
                       </button>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
-                      <span className="chip" style={{background:NL_GRADIENT,color:"white",fontSize:"var(--text-xs)",border:"none"}}>{totalItems.toLocaleString()} Assets</span>
-                      <span className="chip" style={{background:"var(--green-50)",color:"var(--green-700)",border:"1px solid var(--green-200)"}}>✅ {statusCounts.Active} Active</span>
-                      <span className="chip" style={{background:"var(--red-50)",color:"var(--red-600)",border:"1px solid var(--red-100)"}}>⚠ {statusCounts.Inactive+statusCounts.Repair} Issues</span>
-                      {branchFilter&&(<span className="active-filter-chip">🏢 {activeBranchName}<button onClick={()=>{setBranchFilter("");navigate("/branch-assets-report");}}>×</button></span>)}
-                      {sectionFilter&&(<span className="active-filter-chip" style={{background:"var(--purple-600)"}}>{SECTION_ICONS[sectionFilter]||"📦"} {displaySectionName(sectionFilter)}<button onClick={()=>setSectionFilter("")}>×</button></span>)}
-                      {statusFilter&&(<span className="active-filter-chip" style={{background:"var(--green-600)"}}>● {statusFilter}<button onClick={()=>setStatusFilter("")}>×</button></span>)}
-                      {assignedUserFilter&&(<span className="active-filter-chip" style={{background:"#7c3aed"}}>👤 {assignedUserFilter}<button onClick={()=>setAssignedUserFilter("")}>×</button></span>)}
-                      {activeFiltersCount>0&&(<button onClick={clearFilters} style={{padding:"3px 9px",borderRadius:999,fontSize:"var(--text-xs)",fontWeight:700,background:"var(--red-50)",border:"1.5px solid var(--red-100)",color:"var(--red-600)",cursor:"pointer",fontFamily:"Outfit,sans-serif"}}>Clear All</button>)}
+                      <span className="chip" style={{background:NL_BLUE,color:"white",fontSize:"var(--text-xs)",border:"none"}}>{totalItems.toLocaleString()} Assets</span>
+                      <span className="chip" style={{background:"var(--green-50)",color:"var(--green-700)",border:"1px solid var(--green-200)"}}>{statusCounts.Active} Active</span>
+                      <span className="chip" style={{background:"var(--red-50)",color:"var(--red-600)",border:"1px solid var(--red-100)"}}>{statusCounts.Inactive+statusCounts.Repair} Issues</span>
+                      {branchFilter&&(<span className="active-filter-chip">{activeBranchName}<button onClick={()=>{setBranchFilter("");navigate("/branch-assets-report");}}>×</button></span>)}
+                      {sectionFilter&&(<span className="active-filter-chip" style={{background:"var(--purple-600)"}}>{displaySectionName(sectionFilter)}<button onClick={()=>setSectionFilter("")}>×</button></span>)}
+                      {statusFilter&&(<span className="active-filter-chip" style={{background:"var(--green-600)"}}>{statusFilter}<button onClick={()=>setStatusFilter("")}>×</button></span>)}
+                      {assignedUserFilter&&(<span className="active-filter-chip" style={{background:"#7c3aed"}}>{assignedUserFilter}<button onClick={()=>setAssignedUserFilter("")}>×</button></span>)}
+                      {activeFiltersCount>0&&(<button onClick={clearFilters} style={{padding:"3px 9px",borderRadius:6,fontSize:"var(--text-xs)",fontWeight:700,background:"var(--red-50)",border:"1px solid var(--red-100)",color:"var(--red-600)",cursor:"pointer",fontFamily:"Inter,sans-serif"}}>Clear All</button>)}
                     </div>
                   </div>
 
                   <div className={`collapsible-panel${showPanel==="hero"?" open":""}`}>
-                    <div style={{background:"white",border:"1.5px solid #e2e8f0",borderTop:"none",borderRadius:"0 0 18px 18px",overflow:"hidden",boxShadow:"0 8px 24px rgba(15,23,42,.06)"}}>
+                    <div style={{background:"white",border:"1px solid #e2e8f0",borderTop:"none",borderRadius:"0 0 10px 10px",overflow:"hidden",boxShadow:"var(--shadow-sm)"}}>
                       <NepalLifeHeroCompact totalItems={reportRows.length} allSections={allSections.length} totalBranches={branches.length} activeCount={statusCounts.Active} inactiveCount={statusCounts.Inactive} repairCount={statusCounts.Repair}/>
                     </div>
                   </div>
@@ -1491,42 +1486,42 @@ export default function BranchAssetsMasterReport() {
                     <div className="filter-panel">
                       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(clamp(150px,18vw,200px),1fr))",gap:"clamp(10px,1.5vw,16px)",alignItems:"end"}}>
                         <div style={{gridColumn:"span 2",minWidth:0}}>
-                          <label className="rpt-label">🔍 Search Assets</label>
+                          <label className="rpt-label">Search Assets</label>
                           <div className="search-wrapper">
                             <input type="text" placeholder="Search by code, branch, brand, user…" className="rpt-input" value={search} onChange={e=>{setSearch(e.target.value);setCurrentPage(1);}}/>
                             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                           </div>
                         </div>
                         <div>
-                          <label className="rpt-label">🏢 Branch</label>
+                          <label className="rpt-label">Branch</label>
                           <select className="rpt-select" value={branchFilter} onChange={e=>{setBranchFilter(e.target.value);setCurrentPage(1);}}>
                             <option value="">All Branches</option>
                             {branchOptions.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="rpt-label">🗂 Category</label>
+                          <label className="rpt-label">Category</label>
                           <select className="rpt-select" value={groupFilter} onChange={e=>{const gid=e.target.value;setGroupFilter(gid);setSubCatFilter("");setCurrentPage(1);fetchSubCats(gid);}}>
                             <option value="">All Categories</option>
                             {groups.map(g=><option key={g.id} value={g.id}>{g.name} ({g.id})</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="rpt-label">🏷 Sub Category</label>
+                          <label className="rpt-label">Sub Category</label>
                           <select className="rpt-select" value={subCatFilter} onChange={e=>{setSubCatFilter(e.target.value);setCurrentPage(1);}}>
                             <option value="">All Sub Categories</option>
                             {subCats.map(s=><option key={s.code} value={s.code}>{s.name} ({s.code})</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="rpt-label">👤 Assigned User{branchFilter&&<span style={{color:NL_BLUE,fontWeight:600,marginLeft:4}}>(Branch filtered)</span>}</label>
+                          <label className="rpt-label">Assigned User{branchFilter&&<span style={{color:NL_BLUE,fontWeight:600,marginLeft:4}}>(Branch filtered)</span>}</label>
                           <select className="rpt-select" value={assignedUserFilter} onChange={e=>{setAssignedUserFilter(e.target.value);setCurrentPage(1);}}>
                             <option value="">{employeesLoading?"Loading employees...":"All Employees"}</option>
                             {assignedUserOptions.map(name=><option key={name} value={name}>{name}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="rpt-label">● Status</label>
+                          <label className="rpt-label">Status</label>
                           <select value={statusFilter} onChange={e=>{setStatusFilter(e.target.value);setCurrentPage(1);}} className="rpt-select">
                             <option value="">All Statuses</option>
                             <option value="Active">Active</option>
@@ -1536,20 +1531,20 @@ export default function BranchAssetsMasterReport() {
                         </div>
                       </div>
                       {assignedUserFilter&&(
-                        <div style={{marginTop:10,padding:"8px 12px",borderRadius:10,background:"#fef3c7",border:"1.5px solid #fcd34d",fontSize:"var(--text-xs)",color:"#92400e",fontFamily:"Outfit,sans-serif",fontWeight:600}}>
-                          ℹ️ Showing only <strong>active</strong> assets for "{assignedUserFilter}". Inactive/Repair assets are in the <strong>Inactive Assets</strong> section below.
+                        <div style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:"#fef3c7",border:"1px solid #fcd34d",fontSize:"var(--text-xs)",color:"#92400e",fontFamily:"Inter,sans-serif",fontWeight:600}}>
+                          Showing only <strong>active</strong> assets for "{assignedUserFilter}". Inactive/Repair assets are in the <strong>Inactive Assets</strong> section below.
                         </div>
                       )}
                       <div style={{marginTop:"clamp(12px,1.5vw,18px)",paddingTop:"clamp(10px,1.2vw,15px)",borderTop:"1px solid var(--gray-100)",display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:9}}>
                         <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center"}}>
-                          <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:NL_BLUE,letterSpacing:"0.12em",textTransform:"uppercase",fontFamily:"Outfit,sans-serif"}}>Results</span>
-                          <span className="chip" style={{background:NL_GRADIENT,color:"#fff",border:"none"}}>{totalInfo.count.toLocaleString()} Assets</span>
+                          <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:NL_BLUE,letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"Inter,sans-serif"}}>Results</span>
+                          <span className="chip" style={{background:NL_BLUE,color:"#fff",border:"none"}}>{totalInfo.count.toLocaleString()} Assets</span>
                           <span className="chip" style={{background:"#eff6ff",color:NL_BLUE,border:`1px solid ${NL_BLUE}33`}}>{totalInfo.branch}</span>
                           {groupFilter&&<span className="chip" style={{background:"#f5f3ff",color:"#6d28d9",border:"1px solid #ddd6fe"}}>{totalInfo.group}</span>}
                           {subCatFilter&&<span className="chip" style={{background:"#f0fdf4",color:"#15803d",border:"1px solid #bbf7d0"}}>{totalInfo.subCategory}</span>}
                         </div>
-                        <button onClick={clearFilters} style={{display:"inline-flex",height:32,alignItems:"center",justifyContent:"center",borderRadius:9,background:"#0f172a",padding:"0 13px",fontSize:"var(--text-xs)",fontWeight:700,color:"#e2e8f0",border:"none",cursor:"pointer",gap:5}}>
-                          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>Clear
+                        <button onClick={clearFilters} style={{display:"inline-flex",height:32,alignItems:"center",justifyContent:"center",borderRadius:8,background:"#0f172a",padding:"0 13px",fontSize:"var(--text-xs)",fontWeight:700,color:"#e2e8f0",border:"none",cursor:"pointer",gap:5}}>
+                          Clear
                         </button>
                       </div>
                     </div>
@@ -1558,13 +1553,13 @@ export default function BranchAssetsMasterReport() {
 
                 {/* Section Pills */}
                 {allSections.length>0&&(
-                  <div style={{background:"white",border:"1.5px solid var(--gray-200)",borderRadius:13,padding:"clamp(8px,1vw,12px) clamp(12px,1.5vw,16px)",marginTop:9,marginBottom:9,display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",boxShadow:"var(--shadow-sm)"}}>
-                    <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.1em",fontFamily:"Outfit,sans-serif",flexShrink:0}}>Section:</span>
+                  <div style={{background:"white",border:"1px solid var(--gray-200)",borderRadius:10,padding:"clamp(8px,1vw,12px) clamp(12px,1.5vw,16px)",marginTop:9,marginBottom:9,display:"flex",alignItems:"center",gap:7,flexWrap:"wrap"}}>
+                    <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.08em",fontFamily:"Inter,sans-serif",flexShrink:0}}>Section:</span>
                     <div className="section-pills">
                       <button className={`section-pill${!sectionFilter?" active":""}`} onClick={()=>{setSectionFilter("");setCurrentPage(1);}}>All</button>
                       {allSections.map(sec=>(
                         <button key={sec} className={`section-pill${sectionFilter===sec?" active":""}`} onClick={()=>{setSectionFilter(sectionFilter===sec?"":sec);setCurrentPage(1);}}>
-                          {SECTION_ICONS[sec]||""} {displaySectionName(sec)}
+                          {displaySectionName(sec)}
                         </button>
                       ))}
                     </div>
@@ -1573,15 +1568,12 @@ export default function BranchAssetsMasterReport() {
 
                 {/* Active Branch Banner */}
                 {activeBranchName&&(
-                  <div style={{background:NL_GRADIENT_90,borderRadius:13,padding:"clamp(10px,1.2vw,14px) clamp(14px,2vw,20px)",marginBottom:9,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:9}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10}}>
-                      <span style={{fontSize:"clamp(18px,2.5vw,24px)"}}>🏢</span>
-                      <div>
-                        <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"clamp(12px,1.4vw,15px)",color:"white"}}>Viewing: {activeBranchName}</div>
-                        <div style={{fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.7)"}}>{totalItems} assets in this branch</div>
-                      </div>
+                  <div style={{background:NL_GRADIENT_90,borderRadius:10,padding:"clamp(10px,1.2vw,14px) clamp(14px,2vw,20px)",marginBottom:9,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:9}}>
+                    <div>
+                      <div style={{fontFamily:"Inter,sans-serif",fontWeight:700,fontSize:"clamp(12px,1.4vw,15px)",color:"white"}}>Viewing: {activeBranchName}</div>
+                      <div style={{fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.75)"}}>{totalItems} assets in this branch</div>
                     </div>
-                    <button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.2)",border:"1.5px solid rgba(255,255,255,0.35)",color:"white"}} onClick={()=>{setBranchFilter("");navigate("/branch-assets-report");}}>✕ Clear</button>
+                    <button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.2)",border:"1px solid rgba(255,255,255,0.35)",color:"white"}} onClick={()=>{setBranchFilter("");navigate("/branch-assets-report");}}>Clear</button>
                   </div>
                 )}
 
@@ -1616,13 +1608,12 @@ export default function BranchAssetsMasterReport() {
                           const rowClass=r.status==="Inactive"?"inactive-row":r.status==="Repair"?"repair-row":"";
                           return(
                             <tr key={`${r.section}-${r.assetId||"NA"}-${globalIndex}`} className={rowClass} style={{cursor:"pointer"}} onClick={()=>openDetail(r)}>
-                              <td style={{color:"var(--gray-400)",fontWeight:600,fontFamily:"Outfit,sans-serif",fontSize:"var(--text-xs)"}} onClick={e=>e.stopPropagation()}>{globalIndex}</td>
+                              <td style={{color:"var(--gray-400)",fontWeight:600,fontFamily:"Inter,sans-serif",fontSize:"var(--text-xs)"}} onClick={e=>e.stopPropagation()}>{globalIndex}</td>
                               <td onClick={e=>e.stopPropagation()}>
                                 <div>
-                                  {/* ── display friendly name here ── */}
-                                  <div style={{fontWeight:700,color:"var(--gray-900)",fontSize:"var(--text-sm)",fontFamily:"Outfit,sans-serif",textTransform:"uppercase"}}>{displaySectionName(r.section)}</div>
+                                  <div style={{fontWeight:700,color:"var(--gray-900)",fontSize:"var(--text-sm)",fontFamily:"Inter,sans-serif",textTransform:"uppercase"}}>{displaySectionName(r.section)}</div>
                                   <div style={{fontSize:"var(--text-xs)",color:"var(--gray-400)",marginTop:1,display:"flex",alignItems:"center",gap:4}}>
-                                    {show(r.assetId)}{r.assetId&&r.assetId!=="N/A"&&(<button onClick={e=>{e.stopPropagation();copyToClipboard(r.assetId);}} style={{background:"none",border:"none",cursor:"pointer",opacity:0.35,padding:"1px 3px",fontSize:10,borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.35"}>📋</button>)}
+                                    {show(r.assetId)}{r.assetId&&r.assetId!=="N/A"&&(<button onClick={e=>{e.stopPropagation();copyToClipboard(r.assetId);}} title="Copy asset code" style={{background:"none",border:"none",cursor:"pointer",opacity:0.35,padding:"1px 3px",fontSize:10,borderRadius:4,color:"var(--gray-500)"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.35"}>Copy</button>)}
                                   </div>
                                 </div>
                               </td>
@@ -1632,14 +1623,14 @@ export default function BranchAssetsMasterReport() {
                               <td>
                                 {r.assignedUser?(
                                   <div style={{display:"flex",alignItems:"center",gap:6}}>
-                                    <div style={{width:22,height:22,borderRadius:"50%",background:NL_GRADIENT,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:9,fontWeight:800,flexShrink:0}}>{String(r.assignedUser).charAt(0).toUpperCase()}</div>
+                                    <div style={{width:22,height:22,borderRadius:"50%",background:NL_BLUE,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:9,fontWeight:800,flexShrink:0}}>{String(r.assignedUser).charAt(0).toUpperCase()}</div>
                                     <span style={{fontSize:"var(--text-sm)",color:"var(--gray-700)"}}>{r.assignedUser}</span>
                                   </div>
                                 ):<span style={{fontSize:"var(--text-sm)",color:"var(--gray-300)"}}>—</span>}
                               </td>
                               <td style={{fontSize:"var(--text-xs)",color:"var(--gray-400)",whiteSpace:"nowrap"}}>{formatUpdated(r.lastUpdated)}</td>
                               <td><span className={getStatusClass(r.status)}>{normalizeStatus(r.status)}</span></td>
-                              <td onClick={e=>e.stopPropagation()}><button className="ar-btn ar-btn-primary ar-btn-sm" onClick={()=>openDetail(r)}>View →</button></td>
+                              <td onClick={e=>e.stopPropagation()}><button className="ar-btn ar-btn-primary ar-btn-sm" onClick={()=>openDetail(r)}>View</button></td>
                             </tr>
                           );
                         })}
@@ -1648,7 +1639,7 @@ export default function BranchAssetsMasterReport() {
                   ):(
                     <div className="ar-empty">
                       <svg width="52" height="52" fill="none" stroke="var(--gray-200)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-                      <p style={{color:"var(--gray-700)",fontWeight:700,fontSize:"var(--text-lg)",margin:0,fontFamily:"Outfit,sans-serif"}}>No assets found</p>
+                      <p style={{color:"var(--gray-700)",fontWeight:700,fontSize:"var(--text-lg)",margin:0,fontFamily:"Inter,sans-serif"}}>No assets found</p>
                       <p style={{color:"var(--gray-400)",fontSize:"var(--text-sm)",margin:0}}>Try adjusting your filters or search query</p>
                       {activeFiltersCount>0&&<button className="ar-btn ar-btn-blue-outline ar-btn-sm" onClick={clearFilters}>Clear all filters</button>}
                     </div>
@@ -1667,40 +1658,38 @@ export default function BranchAssetsMasterReport() {
                         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12,position:"relative",zIndex:1}}>
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-                              <div style={{width:40,height:40,borderRadius:11,background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{SECTION_ICONS[detailRow?.section]||"📦"}</div>
                               <div>
-                                <div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"rgba(255,255,255,0.55)",letterSpacing:"0.15em",textTransform:"uppercase",fontFamily:"Outfit,sans-serif"}}>Asset Details</div>
-                                <div style={{fontFamily:"Outfit,sans-serif",fontSize:"clamp(0.95rem,2.5vw,1.3rem)",fontWeight:900,color:"white",letterSpacing:"-0.02em",display:"flex",alignItems:"center",gap:7,flexWrap:"wrap"}}>
+                                <div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"rgba(255,255,255,0.6)",letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"Inter,sans-serif"}}>Asset Details</div>
+                                <div style={{fontFamily:"Inter,sans-serif",fontSize:"clamp(0.95rem,2.5vw,1.3rem)",fontWeight:800,color:"white",letterSpacing:"-0.01em",display:"flex",alignItems:"center",gap:7,flexWrap:"wrap"}}>
                                   {show(detailRow?.assetId)}
-                                  {detailRow?.assetId&&detailRow.assetId!=="N/A"&&(<button onClick={()=>copyToClipboard(detailRow.assetId)} style={{background:"rgba(255,255,255,0.2)",border:"none",color:"white",padding:"2px 7px",borderRadius:5,fontSize:10,cursor:"pointer",fontFamily:"Outfit,sans-serif",fontWeight:600}}>📋 Copy</button>)}
+                                  {detailRow?.assetId&&detailRow.assetId!=="N/A"&&(<button onClick={()=>copyToClipboard(detailRow.assetId)} style={{background:"rgba(255,255,255,0.2)",border:"none",color:"white",padding:"2px 7px",borderRadius:5,fontSize:10,cursor:"pointer",fontFamily:"Inter,sans-serif",fontWeight:600}}>Copy</button>)}
                                 </div>
                               </div>
                             </div>
                             <div style={{display:"flex",flexWrap:"wrap",gap:5,alignItems:"center"}}>
-                              {/* ── show friendly name in detail header ── */}
-                              <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.18)",fontSize:"var(--text-xs)",fontWeight:700,color:"white"}}>{displaySectionName(detailRow?.section)}</span>
-                              <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.85)"}}>{show(detailRow?.subCategoryCode)}</span>
-                              <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.85)"}}>🏢 {show(detailRow?.branch)}</span>
-                              {detailRow?.assignedUser&&<span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:7,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.8)"}}>👤 {detailRow.assignedUser}</span>}
+                              <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:6,background:"rgba(255,255,255,0.18)",fontSize:"var(--text-xs)",fontWeight:700,color:"white"}}>{displaySectionName(detailRow?.section)}</span>
+                              <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:6,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.85)"}}>{show(detailRow?.subCategoryCode)}</span>
+                              <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:6,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.85)"}}>{show(detailRow?.branch)}</span>
+                              {detailRow?.assignedUser&&<span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:6,background:"rgba(255,255,255,0.12)",fontSize:"var(--text-xs)",color:"rgba(255,255,255,0.8)"}}>{detailRow.assignedUser}</span>}
                               <span className={getStatusClass(detailRow?.status)} style={{borderColor:"rgba(255,255,255,0.3)",background:"rgba(255,255,255,0.15)",color:"white"}}>{normalizeStatus(detailRow?.status)}</span>
                             </div>
                           </div>
                           <div style={{display:"flex",flexWrap:"wrap",gap:5,alignItems:"flex-start"}}>
-                            {canEdit&&(<button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.12)",border:"1.5px solid rgba(255,255,255,0.2)",color:"white"}} onClick={()=>{const bid=detailRow?.branchId;const cfg=sectionRouteMap[String(detailRow?.section||"").toLowerCase()];const sec=cfg?.plural||detailRow?.section;const aid=detailRow?.details?.id??detailRow?.assetId;const sc=detailRow?.subCategoryCode||"";navigate(`/maintenance?branchId=${bid}&section=${encodeURIComponent(sec)}&assetId=${aid}&subCat=${encodeURIComponent(sc)}`);}} disabled={!detailRow}>🔧 Maintenance</button>)}
-                            {canDelete&&<button className="ar-btn ar-btn-sm" style={{background:"rgb(220,12,12)",border:"1.5px solid rgb(200,2,2)",color:"#fca5a5"}} onClick={handleDelete} disabled={saving||deleting||transferring}>{deleting?"Deleting…":"🗑 Delete"}</button>}
-                            <button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.12)",border:"1.5px solid rgba(255,255,255,0.2)",color:"white"}} onClick={exportSingleAssetDetail}>⬇ Export</button>
-                            <button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.12)",border:"1.5px solid rgba(255,255,255,0.2)",color:"white"}}
+                            {canEdit&&(<button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.14)",border:"1px solid rgba(255,255,255,0.25)",color:"white"}} onClick={goToMaintenance} disabled={!detailRow}><Ic d={D.wrench} size={13}/> Maintenance</button>)}
+                            {canDelete&&<button className="ar-btn ar-btn-sm" style={{background:"rgb(220,12,12)",border:"1px solid rgb(200,2,2)",color:"#fca5a5"}} onClick={handleDelete} disabled={saving||deleting||transferring}>{deleting?"Deleting…":(<><Ic d={D.trash} size={13}/> Delete</>)}</button>}
+                            <button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.14)",border:"1px solid rgba(255,255,255,0.25)",color:"white"}} onClick={exportSingleAssetDetail}><Ic d={D.download} size={13}/> Export</button>
+                            <button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.14)",border:"1px solid rgba(255,255,255,0.25)",color:"white"}}
                               onClick={()=>{const assetCodeRaw=String(detailRow?.assetId||"").trim();setTransferHistoryTarget({assetCode:assetCodeRaw||"N/A",section:detailRow?.section,assetId:getRowIdFromRow()});setTransferHistoryOpen(true);}}>
-                              🔀 History
+                              <Ic d={D.history} size={13}/> History
                             </button>
-                            <button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.9)",border:"none",color:"var(--gray-700)",fontWeight:700}} onClick={closeDetail}>✕</button>
+                            <button className="ar-btn ar-btn-sm" style={{background:"rgba(255,255,255,0.9)",border:"none",color:"var(--gray-700)",fontWeight:700}} onClick={closeDetail}><Ic d={D.close} size={13}/></button>
                           </div>
                         </div>
                         <div className="detail-tabs">
-                          <button className={`detail-tab${detailTab==="info"?" active":""}`} onClick={()=>setDetailTab("info")}><span>📋</span><span className="tab-label">Information</span></button>
-                          {canEdit1&&(<button className={`detail-tab${detailTab==="edit"?" active":""}`} onClick={handleOpenEdit}><span>✏️</span><span className="tab-label">Edit</span></button>)}
-                          {canTransfer&&(<button className={`detail-tab${detailTab==="transfer"?" active":""}`} onClick={()=>{setDetailTab("transfer");resetTransferState();}}><span>🔄</span><span className="tab-label">Transfer</span></button>)}
-                          {detailRow?.section==="cctv"&&(<button className={`detail-tab${detailTab==="cameras"?" active":""}`} onClick={()=>{setDetailTab("cameras");setAddCameraOpen(false);}}><span>📹</span><span className="tab-label">Cameras ({detailRow?.details?.cameras?.length||0})</span></button>)}
+                          <button className={`detail-tab${detailTab==="info"?" active":""}`} onClick={()=>setDetailTab("info")}><span className="tab-label">Information</span></button>
+                          {canEdit1&&(<button className={`detail-tab${detailTab==="edit"?" active":""}`} onClick={handleOpenEdit}><span className="tab-label">Edit</span></button>)}
+                          {canTransfer&&(<button className={`detail-tab${detailTab==="transfer"?" active":""}`} onClick={()=>{setDetailTab("transfer");resetTransferState();}}><span className="tab-label">Transfer</span></button>)}
+                          {detailRow?.section==="cctv"&&(<button className={`detail-tab${detailTab==="cameras"?" active":""}`} onClick={()=>{setDetailTab("cameras");setAddCameraOpen(false);}}><span className="tab-label">Cameras ({detailRow?.details?.cameras?.length||0})</span></button>)}
                         </div>
                       </div>
 
@@ -1710,17 +1699,16 @@ export default function BranchAssetsMasterReport() {
                           <>
                             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(clamp(160px,18vw,200px),1fr))",gap:"clamp(9px,1.2vw,13px)",marginBottom:"clamp(14px,2vw,20px)"}}>
                               {[
-                                {icon:"🏢",label:"Branch",value:show(detailRow?.branch),sub:`Updated: ${formatUpdated(detailRow?.lastUpdated)}`,accent:NL_BLUE},
-                                {icon:"🗂",label:"Category / Sub",value:show(detailRow?.categoryId),sub:`${show(detailRow?.subCategoryName)} · ${show(detailRow?.subCategoryCode)}`,accent:"#7c3aed"},
-                                {icon:"⚙️",label:"Model / Info",value:show(detailRow?.model),sub:`Year: ${show(detailRow?.purchaseYear)}`,accent:NL_BLUE2},
-                                {icon:"👤",label:"Assigned User",value:detailRow?.assignedUser||"Unassigned",sub:`Section: ${displaySectionName(detailRow?.section)}`,accent:NL_RED},
+                                {label:"Branch",value:show(detailRow?.branch),sub:`Updated: ${formatUpdated(detailRow?.lastUpdated)}`},
+                                {label:"Category / Sub",value:show(detailRow?.categoryId),sub:`${show(detailRow?.subCategoryName)} · ${show(detailRow?.subCategoryCode)}`},
+                                {label:"Model / Info",value:show(detailRow?.model),sub:`Year: ${show(detailRow?.purchaseYear)}`},
+                                {label:"Assigned User",value:detailRow?.assignedUser||"Unassigned",sub:`Section: ${displaySectionName(detailRow?.section)}`},
                               ].map((card,i)=>(
                                 <div key={i} className="ar-info-card">
                                   <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:7}}>
-                                    <span style={{fontSize:"clamp(15px,1.8vw,19px)"}}>{card.icon}</span>
-                                    <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:card.accent,textTransform:"uppercase",letterSpacing:"0.1em",fontFamily:"Outfit,sans-serif"}}>{card.label}</span>
+                                    <span style={{fontSize:"var(--text-xs)",fontWeight:700,color:NL_BLUE,textTransform:"uppercase",letterSpacing:"0.08em",fontFamily:"Inter,sans-serif"}}>{card.label}</span>
                                   </div>
-                                  <div style={{fontFamily:"Outfit,sans-serif",fontSize:"clamp(0.82rem,1.2vw,0.95rem)",fontWeight:800,color:"var(--gray-900)",marginBottom:3,wordBreak:"break-word"}}>{card.value}</div>
+                                  <div style={{fontFamily:"Inter,sans-serif",fontSize:"clamp(0.82rem,1.2vw,0.95rem)",fontWeight:800,color:"var(--gray-900)",marginBottom:3,wordBreak:"break-word"}}>{card.value}</div>
                                   <div style={{fontSize:"var(--text-xs)",color:"var(--gray-400)"}}>{card.sub}</div>
                                 </div>
                               ))}
@@ -1731,10 +1719,10 @@ export default function BranchAssetsMasterReport() {
                                 const isStatus=isStatusField(label);const isRemark=label==="Remarks";const isIP=label.toLowerCase().includes("ip");
                                 return(
                                   <div key={`${label}-${i}`} className="ar-field-item" style={isRemark?{gridColumn:"1 / -1"}:{}}>
-                                    <div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.09em",marginBottom:4,fontFamily:"Outfit,sans-serif"}}>{label}</div>
+                                    <div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:4,fontFamily:"Inter,sans-serif"}}>{label}</div>
                                     {isStatus?(<span className={getStatusClass(value)}>{value}</span>)
-                                    :isIP&&value!=="N/A"?(<div style={{display:"flex",alignItems:"center",gap:5}}><code style={{fontSize:11,fontFamily:"'Courier New',monospace",background:"var(--gray-50)",padding:"2px 6px",borderRadius:5,border:"1px solid var(--gray-200)",color:"var(--gray-800)"}}>{value}</code><button onClick={()=>copyToClipboard(value)} style={{background:"none",border:"none",cursor:"pointer",fontSize:10,opacity:0.5}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.5"}>📋</button></div>)
-                                    :(<div style={{fontSize:"var(--text-sm)",fontWeight:value==="N/A"?400:600,color:value==="N/A"?"var(--gray-300)":"var(--gray-900)",wordBreak:"break-word",lineHeight:1.5,display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:4}}><span>{value}</span>{value!=="N/A"&&value.length>3&&(<button className="copy-btn" onClick={()=>copyToClipboard(value)}>📋</button>)}</div>)}
+                                    :isIP&&value!=="N/A"?(<div style={{display:"flex",alignItems:"center",gap:5}}><code style={{fontSize:11,fontFamily:"'Courier New',monospace",background:"var(--gray-50)",padding:"2px 6px",borderRadius:5,border:"1px solid var(--gray-200)",color:"var(--gray-800)"}}>{value}</code><button onClick={()=>copyToClipboard(value)} title="Copy" style={{background:"none",border:"none",cursor:"pointer",fontSize:10,opacity:0.5,color:"var(--gray-500)"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.5"}>Copy</button></div>)
+                                    :(<div style={{fontSize:"var(--text-sm)",fontWeight:value==="N/A"?400:600,color:value==="N/A"?"var(--gray-300)":"var(--gray-900)",wordBreak:"break-word",lineHeight:1.5,display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:4}}><span>{value}</span>{value!=="N/A"&&value.length>3&&(<button className="copy-btn" onClick={()=>copyToClipboard(value)}>Copy</button>)}</div>)}
                                   </div>
                                 );
                               })}
@@ -1747,19 +1735,19 @@ export default function BranchAssetsMasterReport() {
                           <div className="ar-action-block ar-action-edit" style={{marginBottom:0}}>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:11,marginBottom:"clamp(12px,1.5vw,18px)"}}>
                               <div>
-                                <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.4vw,15px)",color:"var(--amber-600)",display:"flex",alignItems:"center",gap:7,marginBottom:3}}><span>✏️</span> Edit Asset</div>
+                                <div style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.4vw,15px)",color:"var(--amber-600)",marginBottom:3}}>Edit Asset</div>
                                 <div style={{fontSize:"var(--text-sm)",color:"var(--gray-500)"}}>Update fields below — remarks are required</div>
                               </div>
                               <div style={{display:"flex",gap:7}}>
-                                <button className="ar-btn ar-btn-amber ar-btn-sm" onClick={handleSaveEdit} disabled={saving||!String(newRemark??"").trim()}>{saving?"Saving…":"✓ Save Changes"}</button>
-                                <button className="ar-btn ar-btn-ghost ar-btn-sm" onClick={handleCancelEdit} disabled={saving}>✕ Cancel</button>
+                                <button className="ar-btn ar-btn-amber ar-btn-sm" onClick={handleSaveEdit} disabled={saving||!String(newRemark??"").trim()}>{saving?"Saving…":"Save Changes"}</button>
+                                <button className="ar-btn ar-btn-ghost ar-btn-sm" onClick={handleCancelEdit} disabled={saving}>Cancel</button>
                               </div>
                             </div>
-                            <div style={{marginBottom:"clamp(12px,1.5vw,16px)",padding:"clamp(10px,1.2vw,13px) clamp(11px,1.3vw,15px)",border:"1.5px solid var(--amber-200)",borderRadius:12,background:"var(--amber-50)"}}>
+                            <div style={{marginBottom:"clamp(12px,1.5vw,16px)",padding:"clamp(10px,1.2vw,13px) clamp(11px,1.3vw,15px)",border:"1px solid var(--amber-200)",borderRadius:10,background:"var(--amber-50)"}}>
                               <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:5}}>Remarks * <span style={{color:"var(--red-500)"}}>Required before saving</span></label>
                               <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
-                                <span style={{padding:"8px 10px",background:"var(--amber-100)",border:"1.5px solid var(--amber-200)",borderRadius:9,fontSize:"var(--text-xs)",fontWeight:700,color:"var(--amber-600)",whiteSpace:"nowrap",flexShrink:0}}>By {currentUserName}:</span>
-                                <textarea style={{flex:1,minWidth:180,padding:"8px 12px",borderRadius:9,border:"1.5px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",resize:"vertical",fontFamily:"DM Sans,sans-serif"}} value={newRemark} onChange={e=>setNewRemark(e.target.value)} placeholder="Describe what changed and why…" rows={2}/>
+                                <span style={{padding:"8px 10px",background:"var(--amber-100)",border:"1px solid var(--amber-200)",borderRadius:8,fontSize:"var(--text-xs)",fontWeight:700,color:"var(--amber-600)",whiteSpace:"nowrap",flexShrink:0}}>By {currentUserName}:</span>
+                                <textarea style={{flex:1,minWidth:180,padding:"8px 12px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",resize:"vertical",fontFamily:"Inter,sans-serif"}} value={newRemark} onChange={e=>setNewRemark(e.target.value)} placeholder="Describe what changed and why…" rows={2}/>
                               </div>
                             </div>
                             <div className="ar-divider"><div className="ar-divider-line"/><span className="ar-divider-text">Editable Fields</span><div className="ar-divider-line"/></div>
@@ -1769,17 +1757,17 @@ export default function BranchAssetsMasterReport() {
                                 if(!fieldKey)return null;
                                 const fieldValue=editValues[fieldKey]??"";
                                 if(isStatusField(header))return(
-                                  <div key={fieldKey} style={{padding:"clamp(9px,1.1vw,12px) clamp(10px,1.2vw,14px)",border:"1.5px solid var(--gray-200)",borderRadius:10,background:"white"}}>
-                                    <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.09em",marginBottom:5}}>{header}</label>
-                                    <select style={{width:"100%",padding:"7px 11px",borderRadius:9,border:"1.5px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)"}} value={normalizeStatus(fieldValue)} onChange={e=>setEditValues(prev=>({...prev,[fieldKey]:e.target.value}))}>
+                                  <div key={fieldKey} style={{padding:"clamp(9px,1.1vw,12px) clamp(10px,1.2vw,14px)",border:"1px solid var(--gray-200)",borderRadius:8,background:"white"}}>
+                                    <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:5}}>{header}</label>
+                                    <select style={{width:"100%",padding:"7px 11px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)"}} value={normalizeStatus(fieldValue)} onChange={e=>setEditValues(prev=>({...prev,[fieldKey]:e.target.value}))}>
                                       {statusOptions.map(opt=><option key={opt} value={opt}>{opt}</option>)}
                                     </select>
                                   </div>
                                 );
                                 return(
-                                  <div key={fieldKey} style={{padding:"clamp(9px,1.1vw,12px) clamp(10px,1.2vw,14px)",border:"1.5px solid var(--gray-200)",borderRadius:10,background:"white"}}>
-                                    <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.09em",marginBottom:5}}>{header}</label>
-                                    <input style={{width:"100%",padding:"7px 11px",borderRadius:9,border:"1.5px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",fontFamily:"DM Sans,sans-serif"}} type="text" value={fieldValue??""} onChange={e=>setEditValues(prev=>({...prev,[fieldKey]:e.target.value}))} placeholder={header.includes("Date")?"YYYY-MM-DD":""}/>
+                                  <div key={fieldKey} style={{padding:"clamp(9px,1.1vw,12px) clamp(10px,1.2vw,14px)",border:"1px solid var(--gray-200)",borderRadius:8,background:"white"}}>
+                                    <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:5}}>{header}</label>
+                                    <input style={{width:"100%",padding:"7px 11px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",fontFamily:"Inter,sans-serif"}} type="text" value={fieldValue??""} onChange={e=>setEditValues(prev=>({...prev,[fieldKey]:e.target.value}))} placeholder={header.includes("Date")?"YYYY-MM-DD":""}/>
                                   </div>
                                 );
                               }).filter(Boolean)}
@@ -1792,40 +1780,40 @@ export default function BranchAssetsMasterReport() {
                           <div className="ar-action-block ar-action-transfer" style={{marginBottom:0}}>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:11,marginBottom:"clamp(14px,1.8vw,18px)"}}>
                               <div>
-                                <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.4vw,15px)",color:"var(--purple-600)",display:"flex",alignItems:"center",gap:7,marginBottom:3}}><span>🔄</span> Transfer Asset</div>
+                                <div style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.4vw,15px)",color:"var(--purple-600)",marginBottom:3}}>Transfer Asset</div>
                                 <div style={{fontSize:"var(--text-sm)",color:"var(--gray-500)"}}>Move to another branch, reassign to a user, or both</div>
                               </div>
                               <div style={{display:"flex",gap:7}}>
                                 <button className="ar-btn ar-btn-purple ar-btn-sm" onClick={handleTransfer}
                                   disabled={transferring||!String(newRemark??"").trim()||(transferType!=="user"&&!toBranchId)||(transferType!=="branch"&&!toUserId&&!toUserName)}>
-                                  {transferring?"Transferring…":"🔄 Confirm Transfer"}
+                                  {transferring?"Transferring…":"Confirm Transfer"}
                                 </button>
-                                <button className="ar-btn ar-btn-ghost ar-btn-sm" onClick={()=>setDetailTab("info")} disabled={transferring}>✕ Cancel</button>
+                                <button className="ar-btn ar-btn-ghost ar-btn-sm" onClick={()=>setDetailTab("info")} disabled={transferring}>Cancel</button>
                               </div>
                             </div>
                             <div style={{marginBottom:"clamp(14px,1.8vw,18px)"}}>
-                              <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:10,textTransform:"uppercase",letterSpacing:"0.08em"}}>Transfer Type *</label>
+                              <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:10,textTransform:"uppercase",letterSpacing:"0.06em"}}>Transfer Type *</label>
                               <div className="transfer-type-selector">
-                                {[{key:"branch",icon:"🏢",label:"Branch Transfer",desc:"Move to another branch"},{key:"user",icon:"👤",label:"User Transfer",desc:"Reassign to another user"},{key:"both",icon:"🔄",label:"Branch + User",desc:"Move branch & reassign user"}].map(t=>(
+                                {[{key:"branch",label:"Branch Transfer",desc:"Move to another branch"},{key:"user",label:"User Transfer",desc:"Reassign to another user"},{key:"both",label:"Branch + User",desc:"Move branch & reassign user"}].map(t=>(
                                   <button key={t.key} className={`transfer-type-btn${transferType===t.key?" selected":""}`}
                                     onClick={()=>{setTransferType(t.key);setToBranchId("");setToUserId("");setToUserName("");setShowNewUserForm(false);setNewUserNameInput("");setNewUserJustSaved(false);}}>
-                                    <span className="icon">{t.icon}</span><span className="label">{t.label}</span><span className="desc">{t.desc}</span>
+                                    <span className="label">{t.label}</span><span className="desc">{t.desc}</span>
                                   </button>
                                 ))}
                               </div>
                             </div>
                             {(transferType==="branch"||transferType==="both")&&(
-                              <div style={{display:"flex",alignItems:"center",gap:11,padding:"clamp(11px,1.3vw,15px) clamp(14px,1.8vw,19px)",background:"var(--purple-50)",border:"1.5px solid var(--purple-100)",borderRadius:12,marginBottom:"clamp(12px,1.5vw,16px)",flexWrap:"wrap"}}>
+                              <div style={{display:"flex",alignItems:"center",gap:11,padding:"clamp(11px,1.3vw,15px) clamp(14px,1.8vw,19px)",background:"var(--purple-50)",border:"1px solid var(--purple-100)",borderRadius:10,marginBottom:"clamp(12px,1.5vw,16px)",flexWrap:"wrap"}}>
                                 <div style={{textAlign:"center",flex:1,minWidth:100}}><div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",marginBottom:3,textTransform:"uppercase"}}>From Branch</div><div style={{fontWeight:700,fontSize:"var(--text-sm)",color:"var(--gray-800)"}}>{activeBranchName||`Branch #${detailRow?.branchId}`}</div></div>
-                                <div style={{flex:1,height:2,background:"linear-gradient(90deg,var(--purple-300),var(--purple-500))",borderRadius:999,position:"relative",minWidth:36}}><div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)",background:"white",padding:"2px 5px",borderRadius:5,fontSize:14}}>→</div></div>
+                                <div style={{flex:1,height:2,background:"var(--purple-300)",borderRadius:999,position:"relative",minWidth:36}}></div>
                                 <div style={{textAlign:"center",flex:1,minWidth:100}}><div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",marginBottom:3,textTransform:"uppercase"}}>To Branch</div><div style={{fontWeight:700,fontSize:"var(--text-sm)",color:toBranchId?NL_BLUE:"var(--gray-400)"}}>{toBranchId?branchOptions.find(b=>String(b.id)===String(toBranchId))?.name||"Selected":"Select below"}</div></div>
                               </div>
                             )}
                             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(clamp(200px,25vw,260px),1fr))",gap:"clamp(11px,1.5vw,15px)",marginBottom:"clamp(12px,1.5vw,16px)"}}>
                               {(transferType==="branch"||transferType==="both")&&(
                                 <div>
-                                  <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.08em"}}>Target Branch *</label>
-                                  <select style={{width:"100%",padding:"clamp(8px,1vw,11px) clamp(10px,1.2vw,14px)",borderRadius:10,border:"1.5px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",background:"white"}} value={toBranchId} onChange={e=>{setToBranchId(e.target.value);setToUserId("");setToUserName("");}} disabled={transferring}>
+                                  <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.06em"}}>Target Branch *</label>
+                                  <select style={{width:"100%",padding:"clamp(8px,1vw,11px) clamp(10px,1.2vw,14px)",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",background:"white"}} value={toBranchId} onChange={e=>{setToBranchId(e.target.value);setToUserId("");setToUserName("");}} disabled={transferring}>
                                     <option value="">-- Select destination branch --</option>
                                     {branchOptions.filter(b=>Number(b.id)!==Number(detailRow?.branchId)).map(b=><option key={b.id} value={b.id}>{b.name}</option>)}
                                   </select>
@@ -1833,35 +1821,35 @@ export default function BranchAssetsMasterReport() {
                               )}
                               {(transferType==="user"||transferType==="both")&&(
                                 <div>
-                                  <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.08em"}}>Target User *</label>
+                                  <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.06em"}}>Target User *</label>
                                   <div style={{display:"flex",gap:7,alignItems:"flex-start"}}>
-                                    <select style={{flex:1,padding:"clamp(8px,1vw,11px) clamp(10px,1.2vw,14px)",borderRadius:10,border:"1.5px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",background:"white"}} value={toUserId} onChange={e=>{const sel=allEmployeeOptions.find(emp=>String(emp.id)===e.target.value);setToUserId(e.target.value);setToUserName(sel?.name||"");}} disabled={transferring}>
+                                    <select style={{flex:1,padding:"clamp(8px,1vw,11px) clamp(10px,1.2vw,14px)",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",background:"white"}} value={toUserId} onChange={e=>{const sel=allEmployeeOptions.find(emp=>String(emp.id)===e.target.value);setToUserId(e.target.value);setToUserName(sel?.name||"");}} disabled={transferring}>
                                       <option value="">-- Select employee --</option>
                                       {allEmployeeOptions.map(emp=><option key={emp.id} value={emp.id}>{emp.name}{emp.branch?` — ${emp.branch}`:""}</option>)}
                                       {allEmployeeOptions.length===0&&<option disabled>No employees found</option>}
                                     </select>
                                     <button type="button" onClick={()=>{setShowNewUserForm(f=>!f);setNewUserNameInput("");setNewUserJustSaved(false);}} disabled={transferring}
-                                      style={{flexShrink:0,padding:"clamp(8px,1vw,11px) clamp(10px,1.2vw,13px)",borderRadius:10,border:"1.5px solid",borderColor:showNewUserForm?"var(--red-300)":"var(--green-200)",background:showNewUserForm?"var(--red-50)":"var(--green-50)",color:showNewUserForm?"var(--red-600)":"var(--green-700)",cursor:transferring?"not-allowed":"pointer",fontSize:"var(--text-xs)",fontWeight:800,fontFamily:"Outfit,sans-serif",whiteSpace:"nowrap",transition:"all 0.18s ease"}}>
-                                      {showNewUserForm?"✕ Cancel":"+ New User"}
+                                      style={{flexShrink:0,padding:"clamp(8px,1vw,11px) clamp(10px,1.2vw,13px)",borderRadius:8,border:"1px solid",borderColor:showNewUserForm?"var(--red-300)":"var(--green-200)",background:showNewUserForm?"var(--red-50)":"var(--green-50)",color:showNewUserForm?"var(--red-600)":"var(--green-700)",cursor:transferring?"not-allowed":"pointer",fontSize:"var(--text-xs)",fontWeight:800,fontFamily:"Inter,sans-serif",whiteSpace:"nowrap",transition:"all 0.15s ease"}}>
+                                      {showNewUserForm?"Cancel":"+ New User"}
                                     </button>
                                   </div>
                                   {toUserName&&!showNewUserForm&&(
                                     <div style={{marginTop:6,padding:"6px 10px",borderRadius:8,background:"var(--purple-50)",border:"1px solid var(--purple-100)",display:"flex",alignItems:"center",gap:7}}>
-                                      <div style={{width:22,height:22,borderRadius:"50%",background:NL_GRADIENT,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:9,fontWeight:800,flexShrink:0}}>{toUserName.charAt(0).toUpperCase()}</div>
-                                      <span style={{fontSize:11,fontWeight:700,color:"var(--purple-700)"}}>→ {toUserName}</span>
-                                      {newUserJustSaved&&(<span style={{fontSize:9,fontWeight:700,color:"var(--green-600)",background:"var(--green-50)",border:"1px solid var(--green-200)",borderRadius:999,padding:"1px 6px",marginLeft:"auto"}}>✓ Asset Updated</span>)}
+                                      <div style={{width:22,height:22,borderRadius:"50%",background:NL_BLUE,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:9,fontWeight:800,flexShrink:0}}>{toUserName.charAt(0).toUpperCase()}</div>
+                                      <span style={{fontSize:11,fontWeight:700,color:"var(--purple-700)"}}>{toUserName}</span>
+                                      {newUserJustSaved&&(<span style={{fontSize:9,fontWeight:700,color:"var(--green-600)",background:"var(--green-50)",border:"1px solid var(--green-200)",borderRadius:999,padding:"1px 6px",marginLeft:"auto"}}>Asset Updated</span>)}
                                     </div>
                                   )}
                                   {showNewUserForm&&(
                                     <div className="new-user-form">
-                                      <div style={{fontSize:"var(--text-xs)",fontWeight:800,color:"var(--green-700)",marginBottom:10,display:"flex",alignItems:"center",gap:6,textTransform:"uppercase",letterSpacing:"0.08em"}}><span>👤</span> Add New Assigned User</div>
-                                      <label style={{fontSize:9,fontWeight:700,color:"var(--gray-500)",textTransform:"uppercase",letterSpacing:"0.1em",display:"block",marginBottom:4}}>Full Name *</label>
-                                      <input type="text" value={newUserNameInput} onChange={e=>setNewUserNameInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&newUserNameInput.trim()&&!savingNewUser)handleSaveNewUser();}} placeholder="Enter the person's full name…" autoFocus style={{width:"100%",padding:"9px 12px",borderRadius:9,border:"1.5px solid var(--green-300)",outline:"none",fontSize:"var(--text-sm)",fontFamily:"DM Sans,sans-serif",marginBottom:10,background:"white"}}/>
+                                      <div style={{fontSize:"var(--text-xs)",fontWeight:800,color:"var(--green-700)",marginBottom:10,textTransform:"uppercase",letterSpacing:"0.06em"}}>Add New Assigned User</div>
+                                      <label style={{fontSize:9,fontWeight:700,color:"var(--gray-500)",textTransform:"uppercase",letterSpacing:"0.08em",display:"block",marginBottom:4}}>Full Name *</label>
+                                      <input type="text" value={newUserNameInput} onChange={e=>setNewUserNameInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&newUserNameInput.trim()&&!savingNewUser)handleSaveNewUser();}} placeholder="Enter the person's full name…" autoFocus style={{width:"100%",padding:"9px 12px",borderRadius:8,border:"1px solid var(--green-300)",outline:"none",fontSize:"var(--text-sm)",fontFamily:"Inter,sans-serif",marginBottom:10,background:"white"}}/>
                                       <div style={{display:"flex",gap:7,alignItems:"center"}}>
-                                        <button onClick={handleSaveNewUser} disabled={savingNewUser||!newUserNameInput.trim()} style={{padding:"8px 16px",borderRadius:9,background:savingNewUser||!newUserNameInput.trim()?"var(--gray-200)":"linear-gradient(135deg,#16a34a,#22c55e)",color:savingNewUser||!newUserNameInput.trim()?"var(--gray-400)":"white",border:"none",cursor:savingNewUser||!newUserNameInput.trim()?"not-allowed":"pointer",fontSize:"var(--text-xs)",fontWeight:800,fontFamily:"Outfit,sans-serif",display:"flex",alignItems:"center",gap:5}}>
-                                          {savingNewUser?(<><div className="ar-spinner" style={{width:12,height:12,borderTopColor:"white"}}/>Saving…</>):"✓ Save & Select"}
+                                        <button onClick={handleSaveNewUser} disabled={savingNewUser||!newUserNameInput.trim()} style={{padding:"8px 16px",borderRadius:8,background:savingNewUser||!newUserNameInput.trim()?"var(--gray-200)":"var(--green-600)",color:savingNewUser||!newUserNameInput.trim()?"var(--gray-400)":"white",border:"none",cursor:savingNewUser||!newUserNameInput.trim()?"not-allowed":"pointer",fontSize:"var(--text-xs)",fontWeight:800,fontFamily:"Inter,sans-serif",display:"flex",alignItems:"center",gap:5}}>
+                                          {savingNewUser?(<><div className="ar-spinner" style={{width:12,height:12,borderTopColor:"white"}}/>Saving…</>):"Save & Select"}
                                         </button>
-                                        <span style={{fontSize:9,color:"var(--gray-400)",fontFamily:"Outfit,sans-serif"}}>Press Enter or click Save</span>
+                                        <span style={{fontSize:9,color:"var(--gray-400)",fontFamily:"Inter,sans-serif"}}>Press Enter or click Save</span>
                                       </div>
                                     </div>
                                   )}
@@ -1869,10 +1857,10 @@ export default function BranchAssetsMasterReport() {
                               )}
                             </div>
                             <div>
-                              <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.08em"}}>Reason / Remarks *</label>
+                              <label style={{display:"block",fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-600)",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.06em"}}>Reason / Remarks *</label>
                               <div style={{display:"flex",gap:7}}>
-                                <span style={{padding:"8px 9px",background:"var(--purple-50)",border:"1.5px solid var(--purple-100)",borderRadius:9,fontSize:"var(--text-xs)",fontWeight:700,color:"var(--purple-600)",whiteSpace:"nowrap",flexShrink:0}}>By {currentUserName.split(" ")[0]}:</span>
-                                <textarea style={{flex:1,padding:"8px 12px",borderRadius:9,border:"1.5px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",resize:"vertical",fontFamily:"DM Sans,sans-serif"}} value={newRemark} onChange={e=>setNewRemark(e.target.value)} placeholder="Reason for transfer…" rows={3} disabled={transferring}/>
+                                <span style={{padding:"8px 9px",background:"var(--purple-50)",border:"1px solid var(--purple-100)",borderRadius:8,fontSize:"var(--text-xs)",fontWeight:700,color:"var(--purple-600)",whiteSpace:"nowrap",flexShrink:0}}>By {currentUserName.split(" ")[0]}:</span>
+                                <textarea style={{flex:1,padding:"8px 12px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:"var(--text-sm)",resize:"vertical",fontFamily:"Inter,sans-serif"}} value={newRemark} onChange={e=>setNewRemark(e.target.value)} placeholder="Reason for transfer…" rows={3} disabled={transferring}/>
                               </div>
                             </div>
                           </div>
@@ -1883,19 +1871,18 @@ export default function BranchAssetsMasterReport() {
                           <div>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"clamp(12px,1.5vw,17px)",flexWrap:"wrap",gap:8}}>
                               <div>
-                                <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.5vw,15px)",color:"var(--gray-800)",display:"flex",alignItems:"center",gap:7}}>
-                                  📹 CCTV Cameras
+                                <div style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:"clamp(13px,1.5vw,15px)",color:"var(--gray-800)",display:"flex",alignItems:"center",gap:7}}>
+                                  CCTV Cameras
                                   <span style={{background:NL_BLUE,color:"white",borderRadius:999,padding:"1px 8px",fontSize:12,fontWeight:700}}>{detailRow?.details?.cameras?.length||0}</span>
                                 </div>
                                 <div style={{fontSize:"var(--text-sm)",color:"var(--gray-500)",marginTop:2}}>NVR: {detailRow.assetId} · {detailRow.branch}</div>
                               </div>
                               <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
-                                <span style={{padding:"4px 11px",borderRadius:999,background:"var(--green-50)",color:"var(--green-700)",border:"1px solid var(--green-200)",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Outfit,sans-serif"}}>{(detailRow?.details?.cameras||[]).filter(c=>c.cctv_status==="On").length} Online</span>
-                                <span style={{padding:"4px 11px",borderRadius:999,background:"var(--red-50)",color:"var(--red-600)",border:"1px solid var(--red-100)",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Outfit,sans-serif"}}>{(detailRow?.details?.cameras||[]).filter(c=>c.cctv_status!=="On").length} Offline</span>
-                                {/* ── Add Camera button ── */}
+                                <span style={{padding:"4px 11px",borderRadius:999,background:"var(--green-50)",color:"var(--green-700)",border:"1px solid var(--green-200)",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Inter,sans-serif"}}>{(detailRow?.details?.cameras||[]).filter(c=>c.cctv_status==="On").length} Online</span>
+                                <span style={{padding:"4px 11px",borderRadius:999,background:"var(--red-50)",color:"var(--red-600)",border:"1px solid var(--red-100)",fontSize:"var(--text-xs)",fontWeight:700,fontFamily:"Inter,sans-serif"}}>{(detailRow?.details?.cameras||[]).filter(c=>c.cctv_status!=="On").length} Offline</span>
                                 {canEdit1&&(
                                   <button className="ar-btn ar-btn-success ar-btn-sm" onClick={()=>setAddCameraOpen(o=>!o)} disabled={savingCamera}>
-                                    {addCameraOpen?"✕ Cancel":"➕ Add Camera"}
+                                    {addCameraOpen?"Cancel":"+ Add Camera"}
                                   </button>
                                 )}
                               </div>
@@ -1904,24 +1891,24 @@ export default function BranchAssetsMasterReport() {
                             {/* ── Add Camera inline form ── */}
                             {addCameraOpen&&canEdit1&&(
                               <div className="add-camera-form">
-                                <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:13,color:"var(--blue-700)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
-                                  📷 New Camera Details
+                                <div style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:13,color:"var(--blue-700)",marginBottom:12}}>
+                                  New Camera Details
                                 </div>
                                 <div className="add-camera-grid">
                                   <div>
                                     <label style={{display:"block",fontSize:11,fontWeight:700,color:"var(--gray-600)",marginBottom:5}}>Camera Model</label>
                                     <input type="text" value={newCameraData.camera_model} onChange={e=>setNewCameraData(p=>({...p,camera_model:e.target.value}))} placeholder="e.g. Hikvision DS-2CD2143" disabled={savingCamera}
-                                      style={{width:"100%",padding:"8px 11px",borderRadius:9,border:"1.5px solid #e2e8f0",outline:"none",fontSize:13,fontFamily:"DM Sans,sans-serif"}}/>
+                                      style={{width:"100%",padding:"8px 11px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:13,fontFamily:"Inter,sans-serif"}}/>
                                   </div>
                                   <div>
                                     <label style={{display:"block",fontSize:11,fontWeight:700,color:"var(--gray-600)",marginBottom:5}}>Location</label>
                                     <input type="text" value={newCameraData.location} onChange={e=>setNewCameraData(p=>({...p,location:e.target.value}))} placeholder="e.g. Main Entrance" disabled={savingCamera}
-                                      style={{width:"100%",padding:"8px 11px",borderRadius:9,border:"1.5px solid #e2e8f0",outline:"none",fontSize:13,fontFamily:"DM Sans,sans-serif"}}/>
+                                      style={{width:"100%",padding:"8px 11px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:13,fontFamily:"Inter,sans-serif"}}/>
                                   </div>
                                   <div>
                                     <label style={{display:"block",fontSize:11,fontWeight:700,color:"var(--gray-600)",marginBottom:5}}>Status</label>
                                     <select value={newCameraData.cctv_status} onChange={e=>setNewCameraData(p=>({...p,cctv_status:e.target.value}))} disabled={savingCamera}
-                                      style={{width:"100%",padding:"8px 11px",borderRadius:9,border:"1.5px solid #e2e8f0",outline:"none",fontSize:13,cursor:"pointer",appearance:"none",background:"white url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E\") no-repeat calc(100% - 10px) center"}}>
+                                      style={{width:"100%",padding:"8px 11px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:13,cursor:"pointer",appearance:"none",background:"white url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E\") no-repeat calc(100% - 10px) center"}}>
                                       <option value="On">On</option>
                                       <option value="Off">Off</option>
                                       <option value="Repair">Repair</option>
@@ -1930,25 +1917,24 @@ export default function BranchAssetsMasterReport() {
                                   <div>
                                     <label style={{display:"block",fontSize:11,fontWeight:700,color:"var(--gray-600)",marginBottom:5}}>Remarks</label>
                                     <input type="text" value={newCameraData.remarks} onChange={e=>setNewCameraData(p=>({...p,remarks:e.target.value}))} placeholder="Any notes…" disabled={savingCamera}
-                                      style={{width:"100%",padding:"8px 11px",borderRadius:9,border:"1.5px solid #e2e8f0",outline:"none",fontSize:13,fontFamily:"DM Sans,sans-serif"}}/>
+                                      style={{width:"100%",padding:"8px 11px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",fontSize:13,fontFamily:"Inter,sans-serif"}}/>
                                   </div>
                                 </div>
                                 <div style={{marginTop:12,display:"flex",gap:8,alignItems:"center"}}>
                                   <button className="ar-btn ar-btn-success ar-btn-sm" onClick={handleAddCamera} disabled={savingCamera||(!newCameraData.camera_model&&!newCameraData.location)}>
-                                    {savingCamera?(<><Spinner size={13} color="white"/>Saving…</>):"💾 Save Camera"}
+                                    {savingCamera?(<><Spinner size={13} color="white"/>Saving…</>):"Save Camera"}
                                   </button>
                                   <button className="ar-btn ar-btn-ghost ar-btn-sm" onClick={()=>{setAddCameraOpen(false);setNewCameraData({camera_model:"",location:"",cctv_status:"On",remarks:""});}} disabled={savingCamera}>Cancel</button>
-                                  <span style={{fontSize:10,color:"var(--gray-400)",fontFamily:"Outfit,sans-serif"}}>Camera Model or Location is required</span>
+                                  <span style={{fontSize:10,color:"var(--gray-400)",fontFamily:"Inter,sans-serif"}}>Camera Model or Location is required</span>
                                 </div>
                               </div>
                             )}
 
                             {/* Existing cameras grid */}
                             {(!detailRow?.details?.cameras||detailRow.details.cameras.length===0)&&!addCameraOpen?(
-                              <div style={{textAlign:"center",padding:"40px 20px",background:"white",borderRadius:14,border:"1.5px dashed var(--gray-200)",color:"var(--gray-400)"}}>
-                                <div style={{fontSize:36,marginBottom:10}}>📷</div>
-                                <div style={{fontWeight:700,fontFamily:"Outfit,sans-serif"}}>No cameras recorded yet</div>
-                                <div style={{fontSize:12,marginTop:4}}>Click <strong>➕ Add Camera</strong> above to add one</div>
+                              <div style={{textAlign:"center",padding:"40px 20px",background:"white",borderRadius:10,border:"1px dashed var(--gray-200)",color:"var(--gray-400)"}}>
+                                <div style={{fontWeight:700,fontFamily:"Inter,sans-serif"}}>No cameras recorded yet</div>
+                                <div style={{fontSize:12,marginTop:4}}>Click <strong>Add Camera</strong> above to add one</div>
                               </div>
                             ):(
                               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(clamp(180px,20vw,230px),1fr))",gap:"clamp(11px,1.5vw,15px)"}}>
@@ -1958,7 +1944,7 @@ export default function BranchAssetsMasterReport() {
                                     <div key={camera.id||idx} className="camera-card">
                                       <div className="camera-card-header" style={{background:isOn?"var(--green-50)":"var(--gray-50)"}}>
                                         <div style={{display:"flex",alignItems:"center",gap:9}}>
-                                          <div className="camera-icon" style={{background:isOn?NL_GRADIENT:"var(--gray-300)"}}>{idx+1}</div>
+                                          <div className="camera-icon" style={{background:isOn?NL_BLUE:"var(--gray-400)"}}>{idx+1}</div>
                                           <div>
                                             <div style={{fontSize:"var(--text-sm)",fontWeight:700,color:"var(--gray-800)"}}>Camera {idx+1}</div>
                                             <div style={{fontSize:"var(--text-xs)",color:"var(--gray-500)"}}>ID: {camera.id||"N/A"}</div>
@@ -1967,16 +1953,15 @@ export default function BranchAssetsMasterReport() {
                                         <span className={`ar-status ${isOn?"ar-status-active":"ar-status-inactive"}`}>{camera.cctv_status||"Unknown"}</span>
                                       </div>
                                       <div style={{padding:"clamp(10px,1.3vw,14px)",display:"flex",flexDirection:"column",gap:7}}>
-                                        {[{icon:"📷",label:"Model",val:camera.camera_model},{icon:"📍",label:"Location",val:camera.location}].map(({icon,label,val})=>(
+                                        {[{label:"Model",val:camera.camera_model},{label:"Location",val:camera.location}].map(({label,val})=>(
                                           <div key={label} style={{padding:"7px 9px",background:"var(--gray-50)",border:"1px solid var(--gray-200)",borderRadius:8,display:"flex",gap:7,alignItems:"flex-start"}}>
-                                            <span style={{fontSize:13,flexShrink:0}}>{icon}</span>
                                             <div>
                                               <div style={{fontSize:"var(--text-xs)",fontWeight:700,color:"var(--gray-400)",textTransform:"uppercase",marginBottom:1}}>{label}</div>
                                               <div style={{fontSize:"var(--text-sm)",fontWeight:600,color:"var(--gray-700)"}}>{val||"Not specified"}</div>
                                             </div>
                                           </div>
                                         ))}
-                                        {camera.remarks&&<div style={{padding:"7px 9px",background:"var(--amber-50)",border:"1px solid var(--amber-100)",borderRadius:8,fontSize:"var(--text-xs)",color:"var(--amber-700)",fontStyle:"italic"}}>💬 {camera.remarks}</div>}
+                                        {camera.remarks&&<div style={{padding:"7px 9px",background:"var(--amber-50)",border:"1px solid var(--amber-100)",borderRadius:8,fontSize:"var(--text-xs)",color:"var(--amber-700)",fontStyle:"italic"}}>{camera.remarks}</div>}
                                       </div>
                                     </div>
                                   );

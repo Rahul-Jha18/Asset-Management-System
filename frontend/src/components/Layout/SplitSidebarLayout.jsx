@@ -159,7 +159,7 @@ const SplitSidebarLayout = ({
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         * {
           box-sizing: border-box;
         }
@@ -167,31 +167,28 @@ const SplitSidebarLayout = ({
           margin: 0;
           padding: 0;
           min-height: 100%;
-          background: #eef4fb;
+          background: #f8fafc;
         }
         .sl-shell {
           min-height: 100vh;
           margin: 0;
           padding: 0;
-          background:
-            radial-gradient(circle at 0% 0%, rgba(20,116,243,0.06), transparent 28%),
-            radial-gradient(circle at 100% 0%, rgba(11,92,171,0.05), transparent 32%),
-            linear-gradient(180deg, #f8fafc 0%, #eef4fb 100%);
+          background: #f8fafc;
         }
         .sl-root {
           --sb-open: 220px;
           --sb-closed: 78px;
-          --sb-bg: #0b1120;
-          --sb-bg2: #0f1829;
+          --sb-bg: #0f172a;
+          --sb-bg2: #111827;
           --sb-border: rgba(255,255,255,0.07);
           --sb-muted: #64748b;
           --sb-soft: #94a3b8;
           --sb-text: #e2e8f0;
-          --accent: #1474F3;
-          --accent2: #60a5fa;
+          --accent: #1D4ED8;
+          --accent2: #60A5FA;
           --nav-hover: rgba(255,255,255,0.06);
-          --nav-active: linear-gradient(135deg, rgba(20,116,243,0.22), rgba(96,165,250,0.13));
-          --nav-active-bd: rgba(96,165,250,0.30);
+          --nav-active: rgba(29,78,216,0.18);
+          --nav-active-bd: rgba(96,165,250,0.28);
 
           display: flex;
           width: 100%;
@@ -199,7 +196,7 @@ const SplitSidebarLayout = ({
           margin: 0;
           padding: 0;
           align-items: stretch;
-          font-family: 'Outfit', system-ui, sans-serif;
+          font-family: 'Inter', system-ui, sans-serif;
         }
 
         .sl-sidebar-wrap {
@@ -210,11 +207,9 @@ const SplitSidebarLayout = ({
 
         .sl-sidebar {
           width: var(--sb-closed);
-          background:
-            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
-            linear-gradient(180deg, var(--sb-bg) 0%, var(--sb-bg2) 100%);
+          background: linear-gradient(180deg, var(--sb-bg) 0%, var(--sb-bg2) 100%);
           border-right: 1px solid var(--sb-border);
-          box-shadow: 10px 0 34px rgba(2,6,23,0.24);
+          box-shadow: 8px 0 24px rgba(15,23,42,0.18);
           transition: width 0.28s cubic-bezier(0.4,0,0.2,1);
           position: sticky;
           top: 0;
@@ -256,7 +251,7 @@ const SplitSidebarLayout = ({
           font-size: 18px;
           font-weight: 900;
           border: 1px solid rgba(160, 155, 155, 0.55);
-          font-family: Syne, sans-serif;
+          font-family: 'Inter', system-ui, sans-serif;
           box-shadow: 0px 12px 20px rgba(21, 216, 250, 0.31);
           user-select: none;
         }
@@ -282,7 +277,7 @@ const SplitSidebarLayout = ({
           color: #fff;
           font-size: 14.5px;
           font-weight: 800;
-          font-family: Syne, sans-serif;
+          font-family: 'Inter', system-ui, sans-serif;
           line-height: 1.1;
         }
 
@@ -419,6 +414,74 @@ const SplitSidebarLayout = ({
           text-overflow: ellipsis;
         }
 
+        .sl-nav-badge {
+          min-width: 22px;
+          height: 22px;
+          padding: 0 7px;
+          border-radius: 999px;
+          background: #dc2626;
+          color: #ffffff;
+          border: 2px solid rgba(15,23,42,0.95);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10.5px;
+          font-weight: 900;
+          line-height: 1;
+          box-shadow: 0 8px 18px rgba(220,38,38,0.28);
+          flex-shrink: 0;
+          animation: sl-badge-heartbeat 1.35s ease-in-out infinite, sl-badge-blink 1.35s ease-in-out infinite;
+          transform-origin: center;
+        }
+
+        @keyframes sl-badge-heartbeat {
+          0% {
+            transform: scale(1);
+          }
+          14% {
+            transform: scale(1.22);
+          }
+          28% {
+            transform: scale(1);
+          }
+          42% {
+            transform: scale(1.16);
+          }
+          70% {
+            transform: scale(1);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+
+        @keyframes sl-badge-blink {
+          0%, 100% {
+            opacity: 1;
+            box-shadow: 0 8px 18px rgba(220,38,38,0.28), 0 0 0 0 rgba(220,38,38,0.42);
+          }
+          50% {
+            opacity: .72;
+            box-shadow: 0 8px 18px rgba(220,38,38,0.22), 0 0 0 7px rgba(220,38,38,0);
+          }
+        }
+
+        .sl-nav-link.active .sl-nav-badge {
+          border-color: rgba(29,78,216,0.35);
+        }
+
+        .sl-sidebar:not(.open) .sl-nav-badge {
+          position: absolute;
+          top: 4px;
+          right: 6px;
+          min-width: 18px;
+          height: 18px;
+          padding: 0 5px;
+          font-size: 9px;
+          border-width: 2px;
+          z-index: 5;
+        }
+
         .sl-sidebar:not(.open) .sl-nav-label,
         .sl-sidebar:not(.open) .sl-nav-chevron {
           opacity: 0;
@@ -509,7 +572,7 @@ const SplitSidebarLayout = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: Syne, sans-serif;
+          font-family: 'Inter', system-ui, sans-serif;
           font-weight: 900;
           color: #fff;
           font-size: 12px;
@@ -574,8 +637,8 @@ const SplitSidebarLayout = ({
           width: 36px;
           height: 36px;
           border-radius: 999px;
-          background: #1474F3;
-          border: 3px solid #eef4fb;
+          background: #1D4ED8;
+          border: 3px solid #f8fafc;
           color: #fff;
           display: inline-flex;
           align-items: center;
@@ -586,7 +649,7 @@ const SplitSidebarLayout = ({
 
         .sl-float-btn:hover {
           transform: scale(1.06);
-          background: #0B5CAB;
+          background: #1E40AF;
         }
 
         .sl-overlay {
@@ -649,7 +712,7 @@ const SplitSidebarLayout = ({
         }
 
         .sl-page-header h1 {
-          font-family: Syne, sans-serif;
+          font-family: 'Inter', system-ui, sans-serif;
           font-size: clamp(1.7rem, 2.8vw, 2.4rem);
           font-weight: 900;
           color: #0f172a;
@@ -683,11 +746,10 @@ const SplitSidebarLayout = ({
           flex: 1;
           display: flex;
           flex-direction: column;
-          background: rgba(255,255,255,0.82);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(15,23,42,0.06);
-          border-radius: 24px;
-          box-shadow: 0 10px 28px rgba(15,23,42,0.06);
+          background: #ffffff;
+          border: 1px solid rgba(226,232,240,0.9);
+          border-radius: 18px;
+          box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 8px 20px rgba(15,23,42,0.04);
           overflow: hidden;
           margin: 0 16px 16px;
         }
@@ -861,6 +923,15 @@ const SplitSidebarLayout = ({
                   {navItems.map((item) => {
                     const active = isNavActive(item.path);
                     const icon = resolveIcon(item);
+                    const rawBadge =
+                      item.notificationCount ??
+                      item.badge ??
+                      item.count ??
+                      item.unreadCount ??
+                      0;
+                    const badgeCount = Number(rawBadge || 0);
+                    const showBadge = badgeCount > 0;
+                    const cleanLabel = String(item.label || "").replace(/\s*\(\d+\)\s*$/, "");
 
                     return (
                       <NavLink
@@ -871,13 +942,24 @@ const SplitSidebarLayout = ({
                         onClick={() => isMobile && setMenuOpen(false)}
                       >
                         <span className="sl-nav-icon">{icon}</span>
-                        <span className="sl-nav-label">{item.label}</span>
+                        <span className="sl-nav-label">{cleanLabel}</span>
+
+                        {showBadge && (
+                          <span className="sl-nav-badge" title={`${badgeCount} new report${badgeCount > 1 ? "s" : ""}`}>
+                            {badgeCount > 99 ? "99+" : badgeCount}
+                          </span>
+                        )}
+
                         {active && (
                           <span className="sl-nav-chevron">
                             <ChevronIcon />
                           </span>
                         )}
-                        <span className="sl-tooltip">{item.label}</span>
+
+                        <span className="sl-tooltip">
+                          {cleanLabel}
+                          {showBadge ? ` (${badgeCount})` : ""}
+                        </span>
                       </NavLink>
                     );
                   })}
