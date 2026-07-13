@@ -114,6 +114,58 @@ ${FONTS}
 .nb-ico{opacity:.70;display:flex;align-items:center;transition:opacity .18s;}
 .nb-lnk:hover .nb-ico,.nb-lnk.active .nb-ico{opacity:1;}
 
+.nb-nav-badge{
+  min-width:20px;
+  height:20px;
+  padding:0 6px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  color:#fff;
+  border:2px solid rgba(40,64,90,.96);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  font-weight:900;
+  line-height:1;
+  flex-shrink:0;
+  box-shadow:0 6px 14px rgba(220,38,38,.34);
+  animation:nbNavHeartbeat 1.35s ease-in-out infinite,nbNavBlink 1.35s ease-in-out infinite;
+  transform-origin:center;
+}
+.nb-lnk.active .nb-nav-badge{border-color:rgba(20,116,243,.72);}
+.nb-dr-nav-badge{
+  margin-left:auto;
+  min-width:22px;
+  height:22px;
+  padding:0 7px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  color:#fff;
+  border:2px solid #080e1c;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  font-weight:900;
+  line-height:1;
+  box-shadow:0 6px 14px rgba(220,38,38,.34);
+  animation:nbNavHeartbeat 1.35s ease-in-out infinite,nbNavBlink 1.35s ease-in-out infinite;
+  transform-origin:center;
+}
+@keyframes nbNavHeartbeat{
+  0%{transform:scale(1)}
+  14%{transform:scale(1.22)}
+  28%{transform:scale(1)}
+  42%{transform:scale(1.16)}
+  70%{transform:scale(1)}
+  100%{transform:scale(1)}
+}
+@keyframes nbNavBlink{
+  0%,100%{opacity:1;box-shadow:0 6px 14px rgba(220,38,38,.34),0 0 0 0 rgba(220,38,38,.38)}
+  50%{opacity:.74;box-shadow:0 6px 14px rgba(220,38,38,.24),0 0 0 7px rgba(220,38,38,0)}
+}
+
 /* ACTIONS */
 .nb-act{display:flex;align-items:center;gap:8px;}
 
@@ -666,6 +718,7 @@ export default function Nav() {
   const [dropOpen,    setDropOpen]    = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [unread,      setUnread]      = useState(0);
+  const [issueUnread, setIssueUnread] = useState(0);
   const [bellWiggle,  setBellWiggle]  = useState(false);
   const dropRef = useRef(null);
 
@@ -673,13 +726,17 @@ export default function Nav() {
   const hideNav     = location.pathname === "/login";
   const canRequests = isAdmin || isSubAdmin;
 
+  const normalizedUserRole = normalizeRole(user?.role?.name || user?.role);
+  const isCorpUser =
+    normalizedUserRole === "corp_user" ||
+    normalizedUserRole === "corpuser";
+
   const NAV_LINKS = [
+    { to: "/assetdashboard",       label: "Analytics",     icon: D.graph    },
     { to: "/branches",             label: "Branch",        icon: D.branch   },
     { to: "/branch-assets-report", label: "Asset Master",  icon: D.assets   },
-    { to: "/branch-issues",        label: "Issue Tracker", icon: D.issue    },
+    { to: "/branch-issues",        label: "Issue Tracker", icon: D.issue, notificationCount: issueUnread },
     { to: "/requests",             label: "Requests",      icon: D.requests, show: canRequests },
-    { to: "/support",              label: "Help",          icon: D.help     },
-    { to: "/assetdashboard",       label: "Analytics",     icon: D.graph    },
     { to: "/admin/users",          label: "Users",         icon: D.users,    show: isAdmin },
   ].filter(l => l.show !== false);
 
@@ -708,6 +765,75 @@ export default function Nav() {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
+
+  // Poll new/open Issue Tracker reports so the top navigation badge
+  // matches the notification count shown in the sidebar.
+  useEffect(() => {
+    if (!token || !user) {
+      setIssueUnread(0);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadIssueUnread = async () => {
+      try {
+        const res = await api.get("/api/v1/branch-issues", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const payload = res?.data;
+        const issues = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload?.items)
+              ? payload.items
+              : [];
+
+        const currentUserId = String(user?.id ?? user?.userId ?? "");
+
+        const count = issues.filter((issue) => {
+          if (String(issue?.status || "").toLowerCase() !== "open") {
+            return false;
+          }
+
+          if (isCorpUser) {
+            const assignedUserId = String(
+              issue?.assigned_to_user_id ??
+              issue?.assignedToUserId ??
+              issue?.assigned_user_id ??
+              ""
+            );
+
+            return assignedUserId !== "" && assignedUserId === currentUserId;
+          }
+
+          return true;
+        }).length;
+
+        if (!cancelled) setIssueUnread(count);
+      } catch (error) {
+        console.error("[Nav] Failed to load Issue Tracker notification count", error);
+        if (!cancelled) setIssueUnread(0);
+      }
+    };
+
+    loadIssueUnread();
+
+    const intervalId = window.setInterval(loadIssueUnread, 30000);
+    const handleIssueUpdate = () => loadIssueUnread();
+
+    window.addEventListener("branch-issues:updated", handleIssueUpdate);
+    window.addEventListener("focus", handleIssueUpdate);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener("branch-issues:updated", handleIssueUpdate);
+      window.removeEventListener("focus", handleIssueUpdate);
+    };
+  }, [token, user?.id, user?.userId, isCorpUser]);
 
   // Poll unread notifications
   useEffect(() => {
@@ -755,12 +881,29 @@ export default function Nav() {
           {/* Desktop links */}
           {!hideNav && (
             <nav className="nb-links">
-              {NAV_LINKS.map(({ to, label, icon }) => (
-                <NavLink key={to} to={to} className={({ isActive }) => `nb-lnk${isActive ? " active" : ""}`}>
-                  <span className="nb-ico"><Ic d={icon} size={14} /></span>
-                  {label}
-                </NavLink>
-              ))}
+              {NAV_LINKS.map(({ to, label, icon, notificationCount = 0 }) => {
+                const count = Number(notificationCount || 0);
+
+                return (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    className={({ isActive }) => `nb-lnk${isActive ? " active" : ""}`}
+                  >
+                    <span className="nb-ico"><Ic d={icon} size={14} /></span>
+                    <span>{label}</span>
+
+                    {count > 0 && (
+                      <span
+                        className="nb-nav-badge"
+                        title={`${count} new report${count === 1 ? "" : "s"}`}
+                      >
+                        {count > 99 ? "99+" : count}
+                      </span>
+                    )}
+                  </NavLink>
+                );
+              })}
             </nav>
           )}
 
@@ -852,13 +995,30 @@ export default function Nav() {
 
         <div className="nb-drsep" />
 
-        {NAV_LINKS.map(({ to, label, icon }) => (
-          <NavLink key={to} to={to} onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `nb-drlnk${isActive ? " active" : ""}`}>
-            <span className="nb-drico"><Ic d={icon} size={15} /></span>
-            {label}
-          </NavLink>
-        ))}
+        {NAV_LINKS.map(({ to, label, icon, notificationCount = 0 }) => {
+          const count = Number(notificationCount || 0);
+
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) => `nb-drlnk${isActive ? " active" : ""}`}
+            >
+              <span className="nb-drico"><Ic d={icon} size={15} /></span>
+              <span>{label}</span>
+
+              {count > 0 && (
+                <span
+                  className="nb-dr-nav-badge"
+                  title={`${count} new report${count === 1 ? "" : "s"}`}
+                >
+                  {count > 99 ? "99+" : count}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
 
         {user && isAdmin && (
           <NavLink to="/admin/expiry" onClick={() => setMenuOpen(false)}
@@ -894,10 +1054,10 @@ export default function Nav() {
         <div className="nb-ticker">
           <div style={{ overflow: "hidden", width: "100%" }}>
             <div className="nb-ttrack">
-              {[0, 1].map(i => (
+              {[0, 1].map((i) => (
                 <span key={i} className="nb-titem">
-                  <span className="nb-ttag">Update</span>
-                  Sub-Admin can now submit new requests · Admin can update, edit, or delete requests · Stay compliant with monthly asset audits
+                  <span className="nb-ttag">AMS Update 🚀</span>
+                  Welcome to the Asset Management System 🖥️ — track company assets, monitor branch records, manage assigned users, and follow support issue progress from one smart centralized platform 📊✅
                   <span style={{ color: "rgba(255,255,255,0.15)", padding: "0 18px" }}>·</span>
                 </span>
               ))}

@@ -5,8 +5,6 @@ import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Layout/Footer";
 import NepalLifeLogo from "../assets/nepallife.png";
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Outfit:wght@400;500;600;700;800;900&display=swap');`;
-
 const LANDING_STYLES = `
   :root {
     --nl-blue: #0B5CAB;
@@ -119,7 +117,7 @@ const LANDING_STYLES = `
     color: var(--nl-blue);
     border-radius: 999px;
     padding: clamp(5px,0.6vw,7px) clamp(11px,1.4vw,16px);
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-size: var(--t-xs);
     font-weight: 800;
     letter-spacing: .08em;
@@ -135,7 +133,7 @@ const LANDING_STYLES = `
   }
 
   .nl-title {
-    font-family: Syne, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-weight: 900;
     font-size: var(--t-3xl);
     letter-spacing: -0.03em;
@@ -152,7 +150,7 @@ const LANDING_STYLES = `
     color: rgba(15,23,42,0.40);
     font-weight: 700;
     margin-top: clamp(4px, 0.5vw, 8px);
-    font-family: DM Sans, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     letter-spacing: 0.01em;
   }
 
@@ -206,7 +204,7 @@ const LANDING_STYLES = `
     border-radius: 999px;
     background: rgba(34,197,94,0.10);
     border: 1px solid rgba(34,197,94,0.25);
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-size: var(--t-xs);
     font-weight: 800;
     color: #15803d;
@@ -234,7 +232,7 @@ const LANDING_STYLES = `
     transition: all 0.2s ease;
     justify-content: center;
     white-space: nowrap;
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     letter-spacing: 0.01em;
   }
   .cta-primary:hover { opacity:0.92; transform:translateY(-2px); box-shadow:0 14px 38px rgba(20,116,243,0.34); }
@@ -250,7 +248,7 @@ const LANDING_STYLES = `
     transition: all 0.2s ease;
     justify-content: center;
     white-space: nowrap;
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
   }
   .cta-secondary:hover { background:rgba(11,92,171,0.12); border-color:rgba(11,92,171,0.35); transform:translateY(-2px); }
 
@@ -265,7 +263,7 @@ const LANDING_STYLES = `
     transition: all 0.2s ease;
     justify-content: center;
     white-space: nowrap;
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
   }
   .cta-ghost:hover { background:rgba(225,29,46,0.11); border-color:rgba(225,29,46,0.36); transform:translateY(-2px); }
 
@@ -305,7 +303,7 @@ const LANDING_STYLES = `
     min-height: 32px;
   }
   .stat-num {
-    font-family: Syne, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-size: clamp(1.3rem, 2.8vw, 2.1rem);
     font-weight: 900;
     background: linear-gradient(135deg, var(--nl-blue) 0%, var(--nl-red) 100%);
@@ -319,7 +317,7 @@ const LANDING_STYLES = `
     font-size: var(--t-xs);
     color: rgba(15,23,42,0.42);
     margin-top: 5px;
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-weight: 600;
     letter-spacing: 0.03em;
   }
@@ -333,7 +331,7 @@ const LANDING_STYLES = `
     font-weight: 900;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     display: flex; align-items: center; gap: 8px;
     margin-bottom: var(--sp-xs);
   }
@@ -345,7 +343,7 @@ const LANDING_STYLES = `
     display: inline-block;
   }
   .section-heading {
-    font-family: Syne, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-size: var(--t-2xl);
     font-weight: 900;
     letter-spacing: -0.025em;
@@ -392,13 +390,13 @@ const LANDING_STYLES = `
     display: inline-flex; align-items: center;
     padding: 3px 9px; border-radius: 999px;
     font-size: var(--t-xs); font-weight: 800;
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     letter-spacing: 0.06em;
     position: absolute; top: clamp(14px,1.8vw,20px); right: clamp(14px,1.8vw,20px);
   }
 
   .mod-name {
-    font-family: Syne, sans-serif; font-weight: 800;
+    font-family: 'Times New Roman', Times, serif; font-weight: 800;
     font-size: clamp(15px, 1.6vw, 19px);
     margin: 0; color: var(--nl-ink); line-height: 1.2;
   }
@@ -417,12 +415,12 @@ const LANDING_STYLES = `
   }
   .mod-stat-val {
     font-weight: 900; font-size: clamp(14px,1.5vw,17px);
-    font-family: Outfit, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     line-height: 1;
   }
   .mod-stat-lbl {
     font-size: var(--t-xs); color: rgba(15,23,42,0.38);
-    font-family: Outfit, sans-serif; font-weight:600;
+    font-family: 'Times New Roman', Times, serif; font-weight:600;
     letter-spacing: 0.02em;
   }
 
@@ -433,7 +431,7 @@ const LANDING_STYLES = `
     padding: clamp(6px,0.8vw,9px) clamp(10px,1.3vw,15px);
     text-decoration: none; margin-top: auto; width: fit-content;
     transition: all 0.2s ease;
-    letter-spacing: 0.02em; font-family: Outfit, sans-serif;
+    letter-spacing: 0.02em; font-family: 'Times New Roman', Times, serif;
   }
   .card-cta:hover { transform: translateX(3px); }
   .card-cta:hover .cta-arrow { transform: translateX(3px); }
@@ -470,7 +468,7 @@ const LANDING_STYLES = `
     flex-shrink: 0;
   }
   .feature-name {
-    font-family: Outfit, sans-serif; font-weight: 800;
+    font-family: 'Times New Roman', Times, serif; font-weight: 800;
     font-size: var(--t-sm); color: var(--nl-ink); margin: 0;
   }
   .feature-desc {
@@ -493,7 +491,7 @@ const LANDING_STYLES = `
   }
   .quick-link-label {
     font-size: var(--t-xs); font-weight: 800;
-    color: rgba(15,23,42,0.38); font-family: Outfit, sans-serif;
+    color: rgba(15,23,42,0.38); font-family: 'Times New Roman', Times, serif;
     letter-spacing: 0.1em; text-transform: uppercase;
     flex-shrink: 0; margin-right: 4px;
   }
@@ -504,7 +502,7 @@ const LANDING_STYLES = `
     font-size: var(--t-xs); font-weight: 700;
     text-decoration: none;
     transition: all 0.18s ease;
-    font-family: Outfit, sans-serif; letter-spacing: 0.02em;
+    font-family: 'Times New Roman', Times, serif; letter-spacing: 0.02em;
     border: 1.5px solid;
     white-space: nowrap;
   }
@@ -548,13 +546,13 @@ const LANDING_STYLES = `
     flex-shrink: 0;
   }
   .ticker-label {
-    font-family: Outfit, sans-serif; font-weight: 800;
+    font-family: 'Times New Roman', Times, serif; font-weight: 800;
     font-size: var(--t-xs); color: rgba(255,255,255,0.70);
     letter-spacing: 0.1em; text-transform: uppercase;
     flex-shrink: 0;
   }
   .ticker-text {
-    font-family: Outfit, sans-serif; font-size: var(--t-sm);
+    font-family: 'Times New Roman', Times, serif; font-size: var(--t-sm);
     font-weight: 600; color: white;
     display: flex; gap: clamp(12px, 2vw, 28px); flex-wrap: wrap;
   }
@@ -804,13 +802,13 @@ export default function Landing() {
 
   return (
     <>
-      <style>{FONTS}{LANDING_STYLES}</style>
+      <style>{LANDING_STYLES}</style>
 
       <div className="page-wrap" style={{
         minHeight: "100vh",
         background: "var(--nl-bg)",
         color: "var(--nl-ink)",
-        fontFamily: "'DM Sans', sans-serif",
+        fontFamily: "'Times New Roman', Times, serif",
         position: "relative",
         overflowX: "hidden",
       }}>
@@ -895,7 +893,7 @@ export default function Landing() {
                 <div key={s.label} style={{ textAlign: "center" }}>
                   <div
                     style={{
-                      fontFamily: "Syne, sans-serif",
+                      fontFamily: "'Times New Roman', Times, serif",
                       fontSize: "clamp(1.4rem,3vw,2rem)",
                       fontWeight: 900,
                       background: "linear-gradient(135deg, var(--nl-blue) 0%, var(--nl-red) 100%)",
@@ -965,7 +963,7 @@ export default function Landing() {
               <div style={{ position:"relative", zIndex:1, flex:1, minWidth:0 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:"clamp(6px,0.8vw,10px)" }}>
                   <div style={{ fontSize:"clamp(22px,3vw,32px)" }}>💬</div>
-                  <h3 style={{ fontFamily:"Syne, sans-serif", fontSize:"clamp(16px, 2vw, 22px)", fontWeight:900, margin:0, color:"var(--nl-ink)" }}>
+                  <h3 style={{ fontFamily:"'Times New Roman', Times, serif", fontSize:"clamp(16px, 2vw, 22px)", fontWeight:900, margin:0, color:"var(--nl-ink)" }}>
                     Need help with an IT issue?
                   </h3>
                 </div>
@@ -975,7 +973,7 @@ export default function Landing() {
                 {/* Mini feature row */}
                 <div style={{ display:"flex", gap:"clamp(10px,1.5vw,20px)", marginTop:"clamp(10px,1.3vw,16px)", flexWrap:"wrap" }}>
                   {["⚡ Fast response","🔒 Secure tickets","📊 Track status","✅ Resolved same-day"].map(item => (
-                    <span key={item} style={{ fontSize:"var(--t-xs)", fontWeight:700, color:"rgba(15,23,42,0.55)", display:"flex", alignItems:"center", gap:5, fontFamily:"Outfit,sans-serif" }}>
+                    <span key={item} style={{ fontSize:"var(--t-xs)", fontWeight:700, color:"rgba(15,23,42,0.55)", display:"flex", alignItems:"center", gap:5, fontFamily:"'Times New Roman', Times, serif" }}>
                       {item}
                     </span>
                   ))}
