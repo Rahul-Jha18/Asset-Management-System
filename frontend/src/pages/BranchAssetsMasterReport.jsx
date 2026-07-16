@@ -1034,20 +1034,33 @@ export default function BranchAssetsMasterReport() {
   const groupMap=useMemo(()=>{const m=new Map();for(const g of groups||[])if(g?.id!==undefined)m.set(g.id,g);return m;},[groups]);
 
   const normalizeText=(v)=>String(v??"").trim().toLowerCase();
-  const roleFilteredBranches=useMemo(()=>{
-    if (!user) return [];
+const roleFilteredBranches = useMemo(() => {
+  if (!user) return [];
 
-    const role = normalizeRoleForScope(user?.role);
-    const isCorporateUser = isCorpUser || role === "corp_user" || role === "corpuser";
+  const role = normalizeRoleForScope(user?.role);
+  const isCorporateUser = isCorpUser || role === "corp_user" || role === "corpuser";
 
-    if (isAdmin) return branches||[];
+  // Admin sees everything
+  if (isAdmin) return branches || [];
 
-    if (isSubAdmin || isCorporateUser) {
-      return (branches||[]).filter(b => branchMatchesUserStation(b, user));
-    }
+  // Sub-admin & corp user: existing service-station based scoping (unchanged)
+  if (isSubAdmin || isCorporateUser) {
+    return (branches || []).filter(b => branchMatchesUserStation(b, user));
+  }
 
-    return(branches||[]).filter(b=>normalizeText(b?.name)===normalizeText(user?.name));
-  },[branches,user,isAdmin,isSubAdmin,isCorpUser]);
+  // Plain "user" role: match by br_code (user) <-> branch_code (branch)
+  const userBrCode = normalizeText(user?.br_code);
+  if (userBrCode) {
+    return (branches || []).filter(
+      b => normalizeText(b?.branch_code) === userBrCode
+    );
+  }
+
+  // Fallback: if the user has no br_code set, they see nothing
+  // (avoids accidentally showing all branches, or matching on name which
+  // is unreliable)
+  return [];
+}, [branches, user, isAdmin, isSubAdmin, isCorpUser]);
 
   const branchOptions=useMemo(()=>(roleFilteredBranches||[]).map(b=>({id:b.id,name:b.name})).sort((a,c)=>(a.name||"").localeCompare(c.name||"")),[roleFilteredBranches]);
   const getBranchNameById=useCallback(bid=>{const id=Number(bid);return roleFilteredBranches.find(b=>Number(b.id)===id)?.name||"";},[roleFilteredBranches]);
