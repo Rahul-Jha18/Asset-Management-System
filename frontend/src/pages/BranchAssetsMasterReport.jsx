@@ -1056,9 +1056,6 @@ const roleFilteredBranches = useMemo(() => {
     );
   }
 
-  // Fallback: if the user has no br_code set, they see nothing
-  // (avoids accidentally showing all branches, or matching on name which
-  // is unreliable)
   return [];
 }, [branches, user, isAdmin, isSubAdmin, isCorpUser]);
 
