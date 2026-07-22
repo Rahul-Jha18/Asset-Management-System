@@ -22,9 +22,9 @@ const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@4
 
 const NL_BLUE    = "#0B5CAB";
 const NL_BLUE2   = "#1474F3";
-const NL_RED     = "#f31225ef";
+const NL_RED     = "#E11D2E";
 const NL_GRADIENT    = `linear-gradient(135deg, ${NL_BLUE} 0%, ${NL_BLUE2} 55%, ${NL_RED} 100%)`;
-const NL_GRADIENT_90 = `linear-gradient(90deg, ${NL_BLUE} 70%, ${NL_RED} 30%)`;
+const NL_GRADIENT_90 = `linear-gradient(90deg, ${NL_BLUE} 0%, ${NL_BLUE2} 70%, ${NL_RED} 100%)`;
 
 /* ─── Styles ─── */
 const BRANCH_STYLES = `
@@ -32,181 +32,192 @@ const BRANCH_STYLES = `
 
   :root {
     --blue-50:#eff6ff; --blue-100:#dbeafe; --blue-200:#bfdbfe;
-    --blue-500:#3b82f6; --blue-600:#2563eb; --blue-700:#1d4ed8; --blue-900:#1e3a8a;
+    --blue-300:#93c5fd; --blue-500:#3b82f6; --blue-600:#2563eb; --blue-700:#1d4ed8; --blue-900:#1e3a8a;
     --green-50:#f0fdf4; --green-100:#dcfce7; --green-200:#bbf7d0;
     --green-500:#22c55e; --green-600:#16a34a; --green-700:#15803d;
     --red-50:#fef2f2; --red-100:#fee2e2; --red-500:#ef4444; --red-600:#dc2626;
     --amber-50:#fffbeb; --amber-100:#fef3c7; --amber-500:#f59e0b; --amber-600:#d97706;
-    --gray-50:#f9fafb; --gray-100:#f3f4f6; --gray-200:#e5e7eb;
-    --gray-300:#d1d5db; --gray-400:#9ca3af; --gray-500:#6b7280;
-    --gray-600:#4b5563; --gray-700:#374151; --gray-800:#1f2937; --gray-900:#111827;
+    --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0;
+    --gray-300:#cbd5e1; --gray-400:#94a3b8; --gray-500:#64748b;
+    --gray-600:#475569; --gray-700:#334155; --gray-800:#1e293b; --gray-900:#0f172a;
     --white:#ffffff;
-    --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
-    --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.05);
-    --shadow-md:0 4px 6px rgba(0,0,0,0.06),0 10px 24px rgba(0,0,0,0.08);
-    --shadow-lg:0 8px 16px rgba(0,0,0,0.08),0 24px 48px rgba(0,0,0,0.1);
-    --radius:10px; --radius-lg:14px; --radius-xl:18px;
+    --shadow-xs:0 1px 2px rgba(15,23,42,0.04);
+    --shadow-sm:0 1px 2px rgba(15,23,42,0.05), 0 1px 1px rgba(15,23,42,0.03);
+    --shadow:0 1px 3px rgba(15,23,42,0.06), 0 6px 16px rgba(15,23,42,0.06);
+    --shadow-md:0 4px 10px rgba(15,23,42,0.06), 0 12px 28px rgba(15,23,42,0.08);
+    --shadow-lg:0 12px 24px rgba(15,23,42,0.10), 0 28px 56px rgba(15,23,42,0.14);
+    --radius-sm:8px; --radius:12px; --radius-lg:16px; --radius-xl:20px;
     --nl-blue:${NL_BLUE}; --nl-blue-2:${NL_BLUE2}; --nl-red:${NL_RED}; --nl-ink:#0F172A;
+    --focus-ring:0 0 0 3px rgba(20,116,243,0.16);
   }
 
-  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
   @keyframes scaleIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
   @keyframes spin { to{transform:rotate(360deg)} }
   @keyframes bounceIn {
-    0%{opacity:0;transform:scale(0.94) translateY(10px)}
-    60%{transform:scale(1.02) translateY(-3px)}
+    0%{opacity:0;transform:scale(0.96) translateY(8px)}
+    60%{transform:scale(1.008) translateY(-2px)}
     100%{opacity:1;transform:scale(1) translateY(0)}
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nl-logo, .bp-table-card, .bp-preview-panel { animation:none !important; }
   }
 
   /* ─── Layout ─── */
-  .bp-root { font-family:'DM Sans',sans-serif; background:var(--gray-50); max-height:90vh; color:var(--gray-900); }
+  .bp-root { font-family:'DM Sans',sans-serif; background:var(--gray-50); max-height:90vh; color:var(--gray-900); -webkit-font-smoothing:antialiased; }
   .bp-layout { display:flex; max-height:90vh; }
 
- 
   /* ─── Main ─── */
   .bp-main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
   .bp-topbar {
-    background:var(--white); border-bottom:1px solid var(--gray-100);
-    padding:6px 12px; display:flex; align-items:center; justify-content:space-between;
+    background:var(--white); border-bottom:1px solid var(--gray-200);
+    padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
     gap:12px; flex-wrap:wrap; position:sticky; top:0; z-index:30;
-    box-shadow:0 1px 4px rgba(0,0,0,0.06);
   }
-  .bp-topbar-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .bp-topbar-left { display:flex; align-items:center; gap:12px; flex-wrap:wrap; min-width:0; }
+  .bp-topbar-title { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .bp-topbar-title .eyebrow { font-family:'Outfit',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--gray-400); }
+  .bp-topbar-title h2 { margin:0; font-family:'Outfit',sans-serif; font-size:16px; font-weight:800; color:var(--gray-900); letter-spacing:-0.01em; }
   .bp-topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .bp-content { flex:1; padding:7px 4px; overflow-y:auto; }
+
+  .bp-content { flex:1; padding:16px 20px 28px; overflow-y:auto; }
 
   /* ─── Panel Toggle Bar ─── */
   .bp-panel-toggle-bar {
-    background:white; border-bottom:1px solid var(--gray-100);
-    padding:8px 12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-    position:sticky; top:49px; z-index:25; box-shadow:0 1px 3px rgba(0,0,0,0.04);
+    background:var(--white); border-bottom:1px solid var(--gray-200);
+    padding:10px 20px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    position:sticky; top:57px; z-index:25;
   }
   .bp-toggle-pill {
     display:inline-flex; align-items:center; gap:6px;
-    padding:6px 14px; border-radius:999px; font-size:12px; font-weight:700;
-    border:1.5px solid var(--gray-200); background:var(--gray-50);
-    color:var(--gray-600); cursor:pointer; transition:all 0.18s ease;
+    padding:7px 14px; border-radius:999px; font-size:12.5px; font-weight:700;
+    border:1.5px solid var(--gray-200); background:var(--white);
+    color:var(--gray-600); cursor:pointer; transition:all 0.16s ease;
     font-family:'Outfit',sans-serif; position:relative;
   }
   .bp-toggle-pill:hover { border-color:var(--blue-300); color:var(--blue-700); background:var(--blue-50); }
+  .bp-toggle-pill:focus-visible { outline:none; box-shadow:var(--focus-ring); }
   .bp-toggle-pill.active {
     background:${NL_GRADIENT}; color:white; border-color:transparent;
-    box-shadow:0 2px 10px rgba(11,92,171,0.3);
+    box-shadow:0 4px 14px rgba(11,92,171,0.28);
   }
   .bp-toggle-pill .pill-badge {
     position:absolute; top:-6px; right:-6px;
-    width:16px; height:16px; border-radius:50%; background:var(--red-500);
-    color:white; font-size:9px; font-weight:900; display:flex; align-items:center; justify-content:center;
+    width:17px; height:17px; border-radius:50%; background:var(--red-500);
+    color:white; font-size:9.5px; font-weight:800; display:flex; align-items:center; justify-content:center;
     font-family:'Outfit',sans-serif; border:2px solid white;
   }
+  .bp-toggle-divider { width:1px; align-self:stretch; background:var(--gray-200); margin:0 2px; }
 
   /* ─── Collapsible Panel ─── */
   .bp-collapsible-panel {
-    overflow:hidden; transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease;
+    overflow:hidden; transition:max-height 0.36s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease, margin 0.28s ease;
     max-height:0; opacity:0;
   }
-  .bp-collapsible-panel.open { max-height:600px; opacity:1; }
+  .bp-collapsible-panel.open { max-height:640px; opacity:1; }
 
   /* ─── Active Filter Chips ─── */
   .bp-active-filters { display:flex; align-items:center; gap:6px; flex-wrap:wrap; flex:1; min-width:0; }
   .bp-filter-chip {
-    display:inline-flex; align-items:center; gap:5px;
-    padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700;
-    background:rgba(11,92,171,0.08); border:1px solid rgba(11,92,171,0.2);
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 6px 5px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
+    background:rgba(11,92,171,0.07); border:1px solid rgba(11,92,171,0.18);
     color:var(--blue-700); font-family:'Outfit',sans-serif;
     transition:all 0.15s ease;
   }
   .bp-filter-chip button {
-    width:14px; height:14px; border-radius:50%; border:none;
-    background:rgba(11,92,171,0.15); color:var(--blue-700);
+    width:16px; height:16px; border-radius:50%; border:none;
+    background:rgba(11,92,171,0.14); color:var(--blue-700);
     cursor:pointer; display:flex; align-items:center; justify-content:center;
-    font-size:9px; font-weight:900; padding:0; line-height:1;
-    transition:background 0.15s;
+    font-size:10px; font-weight:900; padding:0; line-height:1;
+    transition:background 0.15s, color 0.15s;
   }
   .bp-filter-chip button:hover { background:var(--red-500); color:white; }
   .bp-clear-all {
-    font-size:11px; font-weight:700; color:var(--red-600); cursor:pointer;
-    background:none; border:none; padding:2px 6px; border-radius:6px;
+    font-size:11.5px; font-weight:700; color:var(--red-600); cursor:pointer;
+    background:none; border:none; padding:4px 8px; border-radius:6px;
     font-family:'Outfit',sans-serif; transition:background 0.15s;
   }
   .bp-clear-all:hover { background:var(--red-50); }
 
   /* ─── Buttons ─── */
   .bp-btn {
-    display:inline-flex; align-items:center; gap:6px; padding:8px 16px;
-    border-radius:var(--radius); font-weight:600; font-size:13px; border:none;
-    cursor:pointer; transition:all 0.18s ease; white-space:nowrap;
+    display:inline-flex; align-items:center; gap:6px; padding:9px 16px;
+    border-radius:var(--radius-sm); font-weight:600; font-size:13px; border:1.5px solid transparent;
+    cursor:pointer; transition:all 0.16s ease; white-space:nowrap;
     font-family:'Outfit',sans-serif; letter-spacing:0.01em; line-height:1;
   }
-  .bp-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .bp-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none !important; }
   .bp-btn:hover:not(:disabled) { transform:translateY(-1px); }
   .bp-btn:active:not(:disabled) { transform:translateY(0) scale(0.98); }
+  .bp-btn:focus-visible { outline:none; box-shadow:var(--focus-ring); }
   .bp-btn-primary { background:var(--blue-600); color:white; box-shadow:0 2px 8px rgba(37,99,235,0.25); }
   .bp-btn-primary:hover:not(:disabled) { background:var(--blue-700); }
-  .bp-btn-success { background:var(--green-600); color:white; box-shadow:0 2px 8px rgba(22,163,74,0.25); }
+  .bp-btn-success { background:var(--green-600); color:white; box-shadow:0 2px 8px rgba(22,163,74,0.22); }
   .bp-btn-success:hover:not(:disabled) { background:var(--green-700); }
   .bp-btn-amber { background:var(--amber-500); color:white; }
   .bp-btn-amber:hover:not(:disabled) { background:var(--amber-600); }
-  .bp-btn-white { background:white; border:1.5px solid var(--gray-200); color:var(--gray-700); box-shadow:var(--shadow-sm); }
+  .bp-btn-white { background:white; border-color:var(--gray-200); color:var(--gray-700); box-shadow:var(--shadow-xs); }
   .bp-btn-white:hover:not(:disabled) { border-color:var(--blue-300); color:var(--blue-700); background:var(--blue-50); }
-  .bp-btn-ghost { background:transparent; border:1.5px solid var(--gray-200); color:var(--gray-600); }
+  .bp-btn-ghost { background:transparent; border-color:var(--gray-200); color:var(--gray-600); }
   .bp-btn-ghost:hover:not(:disabled) { background:var(--gray-100); }
-  .bp-btn-blue-outline { background:var(--blue-50); border:1.5px solid var(--blue-200); color:var(--blue-700); }
+  .bp-btn-blue-outline { background:var(--blue-50); border-color:var(--blue-200); color:var(--blue-700); }
   .bp-btn-blue-outline:hover:not(:disabled) { background:var(--blue-100); }
-  .bp-btn-green-outline { background:var(--green-50); border:1.5px solid var(--green-200); color:var(--green-700); }
+  .bp-btn-green-outline { background:var(--green-50); border-color:var(--green-200); color:var(--green-700); }
   .bp-btn-green-outline:hover:not(:disabled) { background:var(--green-100); }
-  .bp-btn-sm { padding:6px 12px; font-size:12px; }
-  .bp-btn-icon { width:34px; height:34px; padding:0; justify-content:center; border-radius:var(--radius); }
+  .bp-btn-sm { padding:7px 13px; font-size:12px; }
+  .bp-btn-icon { width:36px; height:36px; padding:0; justify-content:center; border-radius:var(--radius-sm); }
   .bp-btn-label { display:inline; }
-  @media(max-width:480px) { .bp-btn-label { display:none; } }
+  @media(max-width:480px) { .bp-btn-label { display:none; } .bp-btn { padding:9px 11px; } }
 
   /* ─── Inputs ─── */
   .bp-input, .bp-select, .bp-textarea {
-    width:100%; background:rgba(55,65,82,0.07); border:1.5px solid var(--gray-300);
-    border-radius:var(--radius); padding:9px 13px; color:var(--gray-900); font-size:13.5px;
-    font-family:'DM Sans',sans-serif; outline:none; transition:all 0.18s ease;
+    width:100%; background:var(--white); border:1.5px solid var(--gray-200);
+    border-radius:var(--radius-sm); padding:10px 13px; color:var(--gray-900); font-size:13.5px;
+    font-family:'DM Sans',sans-serif; outline:none; transition:all 0.16s ease;
   }
+  .bp-input:hover, .bp-select:hover, .bp-textarea:hover { border-color:var(--gray-300); }
   .bp-input:focus, .bp-select:focus, .bp-textarea:focus {
-    border-color:var(--blue-500); box-shadow:0 0 0 3px rgba(59,130,246,0.1);
+    border-color:var(--blue-500); box-shadow:var(--focus-ring);
   }
   .bp-input::placeholder, .bp-textarea::placeholder { color:var(--gray-400); }
   .bp-select {
     cursor:pointer; appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat:no-repeat; background-position:calc(100% - 12px) center; padding-right:34px;
   }
-  .bp-label { font-size:11.5px; font-weight:600; color:var(--gray-600); margin-bottom:6px; display:block; }
+  .bp-label { font-size:11.5px; font-weight:700; color:var(--gray-500); margin-bottom:6px; display:block; font-family:'Outfit',sans-serif; letter-spacing:0.02em; }
   .bp-textarea { resize:vertical; }
 
   /* ─── Filter / Hero Cards ─── */
-  .bp-filter-card { background:white; border-radius:10px; padding:14px 12px; box-shadow:var(--shadow); }
-  .bp-filter-card1 { background:white; border-radius:10px; padding:20px 12px; box-shadow:var(--shadow); }
+  .bp-filter-card { background:white; border-radius:var(--radius-lg); padding:16px; box-shadow:var(--shadow); border:1px solid var(--gray-100); }
+  .bp-filter-card1 { background:white; border-radius:var(--radius-lg); padding:18px 18px 20px; box-shadow:var(--shadow); border:1px solid var(--gray-100); }
 
   /* ─── Table ─── */
   .bp-table-card {
-    background:white; margin-top:1px; border-radius:var(--radius);
-    border:1.5px solid var(--gray-200); box-shadow:var(--shadow);
-    overflow:hidden; animation:fadeUp 0.35s ease both; margin-bottom:1rem;
+    background:white; margin-top:14px; border-radius:var(--radius-lg);
+    border:1px solid var(--gray-200); box-shadow:var(--shadow);
+    overflow:hidden; animation:fadeUp 0.32s ease both; margin-bottom:16px;
   }
-  .bp-table { width:100%; border-collapse:collapse; }
-  
+  .bp-table-scroll { overflow-x:auto; }
+  .bp-table { width:100%; border-collapse:collapse; min-width:820px; }
+
   .bp-table thead th {
-    padding:12px 16px; text-align:left; font-size:10.5px; font-weight:700 margin-top:10px;
-    color:rgba(255,255,255,0.92); text-transform:uppercase; letter-spacing:0.09em;
+    padding:13px 16px; text-align:left; font-size:10.5px; font-weight:700;
+    color:rgba(255,255,255,0.94); text-transform:uppercase; letter-spacing:0.08em;
     white-space:nowrap; font-family:'Outfit',sans-serif;
     background:${NL_BLUE};
-    border-right:0.5px solid rgba(255,255,255,0.15);
+    border-right:1px solid rgba(255,255,255,0.12);
   }
-  .bp-table thead th:nth-child(8) { background:${NL_RED}; }
-  .bp-table thead th:nth-child(9) { background:${NL_RED}; }
-  .bp-table thead th:nth-child(10) { background:${NL_RED}; }
-  .bp-table th, .bp-table td { border-right:0.5px solid rgba(0,0,0,0.08); border-bottom:1px solid #e2e8f0; }
+  .bp-table thead tr th:first-child { border-top-left-radius:0; }
+  .bp-table thead th:nth-last-child(-n+2) { background:${NL_RED}; }
+  .bp-table th, .bp-table td { border-right:1px solid var(--gray-100); }
   .bp-table tbody tr { border-bottom:1px solid var(--gray-100); transition:background 0.12s; cursor:pointer; }
   .bp-table tbody tr:last-child { border-bottom:none; }
   .bp-table tbody tr:hover { background:var(--blue-50); }
-  .bp-table tbody td { padding:13px 16px; font-size:13px; color:var(--gray-700); }
+  .bp-table tbody td { padding:13px 16px; font-size:13px; color:var(--gray-700); vertical-align:middle; }
 
   /* ─── Badges ─── */
   .bp-badge { display:inline-flex; align-items:center; padding:3px 9px; border-radius:6px; font-size:11px; font-weight:700; font-family:'Outfit',sans-serif; }
@@ -224,41 +235,41 @@ const BRANCH_STYLES = `
 
   /* ─── Stat Cards ─── */
   .bp-stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px; margin-bottom:20px; }
-  .bp-stat-card { background:white; border-radius:var(--radius-lg); border:1.5px solid var(--gray-200); padding:16px 18px; box-shadow:var(--shadow-sm); transition:all 0.18s ease; }
+  .bp-stat-card { background:white; border-radius:var(--radius-lg); border:1px solid var(--gray-200); padding:16px 18px; box-shadow:var(--shadow-xs); transition:all 0.18s ease; }
   .bp-stat-card:hover { border-color:var(--blue-200); box-shadow:var(--shadow); transform:translateY(-2px); }
   .bp-stat-value { font-family:'Outfit',sans-serif; font-size:1.6rem; font-weight:800; color:var(--gray-900); line-height:1; }
   .bp-stat-label { font-size:11.5px; color:var(--gray-500); margin-top:4px; font-weight:500; }
 
   /* ─── Preview Modal ─── */
   .bp-preview-overlay {
-    position:fixed; inset:0; z-index:9999; background:rgba(17,24,39,0.6);
-    backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center;
+    position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.55);
+    backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center;
     padding:16px; animation:fadeIn 0.2s ease;
   }
   .bp-preview-panel {
-    width:100%; max-width:980px; max-height:90vh; background:white; border-radius:var(--radius-xl);
+    width:100%; max-width:1000px; max-height:90vh; background:white; border-radius:var(--radius-xl);
     overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow-lg);
-    animation:bounceIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
-    border:1.5px solid var(--gray-200);
+    animation:bounceIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both;
+    border:1px solid var(--gray-200);
   }
   .bp-preview-header { background:${NL_GRADIENT_90}; padding:22px 26px; flex-shrink:0; }
-  .bp-preview-body { flex:1; overflow-y:auto; background:var(--gray-50); padding:24px 26px; }
+  .bp-preview-body { flex:1; overflow-y:auto; background:var(--gray-50); padding:22px 24px; }
 
   /* ─── Detail Section ─── */
-  .bp-detail-card { background:white; border-radius:var(--radius-lg); border:1.5px solid var(--gray-200); overflow:hidden; box-shadow:var(--shadow-sm); }
-  .bp-detail-card-header { padding:14px 18px; background:var(--gray-50); border-bottom:1.5px solid var(--gray-200); display:flex; align-items:center; gap:10px; }
-  .bp-detail-card-body { padding:6px 18px 18px; }
-  .bp-detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--gray-100); gap:12px; }
+  .bp-detail-card { background:white; border-radius:var(--radius-lg); border:1px solid var(--gray-200); overflow:hidden; box-shadow:var(--shadow-xs); }
+  .bp-detail-card-header { padding:14px 18px; background:var(--gray-50); border-bottom:1px solid var(--gray-200); display:flex; align-items:center; gap:10px; }
+  .bp-detail-card-body { padding:4px 18px 16px; }
+  .bp-detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:11px 0; border-bottom:1px solid var(--gray-100); gap:14px; }
   .bp-detail-row:last-child { border-bottom:none; }
   .bp-detail-label { font-size:12px; font-weight:600; color:var(--gray-500); white-space:nowrap; }
   .bp-detail-value { font-size:13px; font-weight:600; color:var(--gray-900); text-align:right; max-width:65%; word-break:break-word; }
 
   /* ─── Chart Legend ─── */
-  .bp-legend-item { display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border-radius:var(--radius); border:1.5px solid var(--gray-100); background:white; transition:all 0.15s; }
+  .bp-legend-item { display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border-radius:var(--radius-sm); border:1px solid var(--gray-100); background:white; transition:all 0.15s; }
   .bp-legend-item:hover { border-color:var(--blue-200); background:var(--blue-50); }
 
   /* ─── Empty State ─── */
-  .bp-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; gap:12px; text-align:center; }
+  .bp-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:64px 20px; gap:12px; text-align:center; }
 
   /* ─── Spinner ─── */
   .bp-spinner { border-radius:50%; border:2.5px solid var(--gray-200); border-top-color:var(--blue-500); animation:spin 0.7s linear infinite; }
@@ -269,66 +280,73 @@ const BRANCH_STYLES = `
   .bp-search-wrap .icon { position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--gray-400); pointer-events:none; }
 
   /* ─── Scrollbar ─── */
-  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar { width:6px; height:6px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:var(--gray-300); border-radius:999px; }
   ::-webkit-scrollbar-thumb:hover { background:var(--gray-400); }
 
   /* Mobile overlay */
-  .bp-mobile-overlay { position:fixed; inset:0; z-index:49; background:rgba(17,24,39,0.4); }
+  .bp-mobile-overlay { position:fixed; inset:0; z-index:49; background:rgba(15,23,42,0.4); }
 
   /* Mono */
-  .bp-mono { font-family:'Courier New',monospace; font-size:12px; background:var(--gray-50); border:1px solid var(--gray-200); border-radius:6px; padding:2px 8px; color:var(--gray-800); }
+  .bp-mono { font-family:'SFMono-Regular',Consolas,'Courier New',monospace; font-size:12px; background:var(--gray-50); border:1px solid var(--gray-200); border-radius:6px; padding:2px 8px; color:var(--gray-800); }
 
   /* ─── Nepal Life Hero ─── */
   .nl-hero-wrap {
-    background:linear-gradient(135deg,rgba(11,92,171,0.10) 0%,rgba(255,255,255,0.72) 45%,rgba(225,29,46,0.06) 100%);
-    box-shadow:0 18px 60px rgba(2,32,53,0.14);
+    border-radius:var(--radius-lg);
+    background:linear-gradient(135deg,rgba(11,92,171,0.09) 0%,rgba(255,255,255,0.85) 45%,rgba(225,29,46,0.05) 100%);
+    box-shadow:0 12px 40px rgba(2,32,53,0.10);
     overflow:hidden; position:relative;
+    border:1px solid rgba(11,92,171,0.10);
   }
   .nl-hero-wrap::before {
     content:''; position:absolute; inset:-2px;
     background:
-      radial-gradient(ellipse at 15% 30%,rgba(20,116,243,0.22) 0%,transparent 55%),
-      radial-gradient(ellipse at 85% 20%,rgba(225,29,46,0.14) 0%,transparent 55%),
-      radial-gradient(ellipse at 70% 85%,rgba(11,92,171,0.12) 0%,transparent 60%);
+      radial-gradient(ellipse at 15% 30%,rgba(20,116,243,0.20) 0%,transparent 55%),
+      radial-gradient(ellipse at 85% 20%,rgba(225,29,46,0.12) 0%,transparent 55%),
+      radial-gradient(ellipse at 70% 85%,rgba(11,92,171,0.10) 0%,transparent 60%);
     pointer-events:none;
   }
   .nl-hero-inner {
-    position:relative; padding:16px 20px;
-    display:flex; align-items:center; justify-content:space-between; gap:18px;
+    position:relative; padding:22px 26px;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
   }
   .nl-logo {
-    width:90px; max-width:28vw; height:auto; display:block;
-    filter:drop-shadow(0 8px 18px rgba(2,32,53,0.22));
+    width:88px; max-width:26vw; height:auto; display:block;
+    filter:drop-shadow(0 8px 18px rgba(2,32,53,0.20));
     animation:floaty 4.5s ease-in-out infinite;
   }
   .nl-title {
     font-family:Syne,sans-serif; font-weight:900;
-    font-size:clamp(1.1rem,2vw,1.55rem);
-    letter-spacing:-0.03em; margin:0; color:var(--nl-ink); line-height:1.1;
+    font-size:clamp(1.15rem,2vw,1.6rem);
+    letter-spacing:-0.03em; margin:0; color:var(--nl-ink); line-height:1.15;
   }
   .nl-title .blue { color:var(--nl-blue); }
   .nl-title .red { color:var(--nl-red); }
   .nl-divider {
-    width:46px; height:3px; border-radius:999px;
+    width:44px; height:3px; border-radius:999px;
     background:linear-gradient(90deg,var(--nl-blue),var(--nl-red));
-    margin-top:8px;
+    margin-top:9px;
   }
-  .nl-sub { margin-top:6px; font-size:12px; color:rgba(15,23,42,0.62); line-height:1.5; max-width:600px; }
+  .nl-sub { margin-top:8px; font-size:12.5px; color:rgba(15,23,42,0.6); line-height:1.55; max-width:600px; }
   @media(max-width:920px) {
-    .nl-hero-inner { flex-direction:column; text-align:center; }
+    .nl-hero-inner { flex-direction:column; text-align:center; padding:22px 18px; }
     .nl-divider { margin-left:auto; margin-right:auto; }
   }
 
   @media(max-width:1024px) {
     .b-sidebar { position:fixed; top:0; left:0; height:100vh; z-index:100; }
-    .bp-content { padding:7px 5px; }
+    .bp-content { padding:14px 14px 24px; }
+    .bp-topbar { padding:12px 14px; }
+    .bp-panel-toggle-bar { padding:10px 14px; top:53px; }
   }
   @media(max-width:640px) {
-    .bp-topbar { padding:8px 10px; }
-    .bp-content { padding: 7px 5px; }
-    .bp-table thead th, .bp-table tbody td { padding:10px 12px; font-size:12px; }
+    .bp-topbar { padding:10px 12px; }
+    .bp-topbar-title h2 { font-size:14.5px; }
+    .bp-content { padding:12px 10px 20px; }
+    .bp-table thead th, .bp-table tbody td { padding:11px 13px; font-size:12px; }
+    .bp-preview-header { padding:18px 18px; }
+    .bp-preview-body { padding:16px; }
   }
 `;
 /* ─── Hero Component ─── */
@@ -337,7 +355,7 @@ function NepalLifeHero() {
     <div className="nl-hero-wrap">
       <div className="nl-hero-inner">
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(11,92,171,0.10)", border:"1px solid rgba(11,92,171,0.20)", color:"rgba(11,92,171,0.90)", borderRadius:999, padding:"5px 12px", fontSize:10, fontWeight:900, letterSpacing:".08em", textTransform:"uppercase", marginBottom:10 }}>
+          <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(11,92,171,0.10)", border:"1px solid rgba(11,92,171,0.20)", color:"rgba(11,92,171,0.90)", borderRadius:999, padding:"5px 12px", fontSize:10, fontWeight:900, letterSpacing:".08em", textTransform:"uppercase", marginBottom:11, fontFamily:"Outfit,sans-serif" }}>
             <span style={{ width:7, height:7, borderRadius:"50%", background:NL_BLUE2, boxShadow:"0 0 8px rgba(20,116,243,0.65)" }} />
             Nepal Life · Branch Management
           </div>
@@ -346,7 +364,7 @@ function NepalLifeHero() {
             <span className="red">LIFE</span>{" "}
             <span style={{ color:"rgba(15,23,42,0.70)", fontWeight:800 }}>Insurance Co. Ltd.</span>
             <br />
-            <span style={{ fontSize:14, color:"rgba(15,23,42,0.52)", fontWeight:800 }}>"किनकी जीवन अमूल्य छ"</span>
+            <span style={{ fontSize:14, color:"rgba(15,23,42,0.5)", fontWeight:700 }}>"किनकी जीवन अमूल्य छ"</span>
           </h1>
           <div className="nl-divider" />
           <p className="nl-sub">Manage branches, connectivity, service stations, and asset distribution across all regions.</p>
@@ -907,8 +925,10 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
           {/* ─── Topbar ─── */}
           <div className="bp-topbar">
             <div className="bp-topbar-left">
-              <div style={{ width:1, height:20, background:"var(--gray-200)" }} />
-              <div style={{ fontSize:13, fontWeight:700, color:"var(--gray-700)", fontFamily:"Outfit,sans-serif" }}>Branch Management</div>
+              <div className="bp-topbar-title">
+                <span className="eyebrow">Nepal Life · Asset IMS</span>
+                <h2>Branch Management</h2>
+              </div>
             </div>
               {canManage &&(
             <div className="bp-topbar-right">
@@ -923,7 +943,7 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
                   <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={onImportFile} style={{ display:"none" }} />
                   <button className="bp-btn bp-btn-success bp-btn-sm" onClick={handleOpenForm}>
                     <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                    Add Branch
+                    <span className="bp-btn-label">Add Branch</span>
                   </button>
             </div>
               )}
@@ -938,6 +958,7 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
               🔍 <span>Filters</span>
               {activeFiltersCount > 0 && <span className="pill-badge">{activeFiltersCount}</span>}
             </button>
+            <div className="bp-toggle-divider" />
 
             {/* Active filter chips */}
             <div className="bp-active-filters">
@@ -974,41 +995,43 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
 
           {/* ─── Collapsible: Hero ─── */}
           <div className={`bp-collapsible-panel ${showPanel === "hero" ? "open" : ""}`}>
-            <div className="bp-filter-card" style={{ margin:"2px 2px 0" }}>
+            <div style={{ padding:"14px 20px 0" }}>
               <NepalLifeHero />
             </div>
           </div>
 
           {/* ─── Collapsible: Filters ─── */}
           <div className={`bp-collapsible-panel ${showPanel === "filters" ? "open" : ""}`}>
-            <div className="bp-filter-card1" style={{ margin:"2px 2px 0" }}>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:14, alignItems:"end" }}>
-                <div style={{ gridColumn:"span 2", minWidth:0 }}>
-                  <label className="bp-label">Search</label>
-                  <div className="bp-search-wrap">
-                    <input type="text" placeholder="Name, code, manager, gateway…" className="bp-input" value={search} onChange={e => setSearch(e.target.value)} />
-                    <svg className="icon" width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+            <div style={{ padding:"14px 20px 0" }}>
+              <div className="bp-filter-card1">
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:14, alignItems:"end" }}>
+                  <div style={{ gridColumn:"span 2", minWidth:0 }}>
+                    <label className="bp-label">Search</label>
+                    <div className="bp-search-wrap">
+                      <input type="text" placeholder="Name, code, manager, gateway…" className="bp-input" value={search} onChange={e => setSearch(e.target.value)} />
+                      <svg className="icon" width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="bp-label">Region</label>
-                  <select className="bp-select" value={filterRegion} onChange={e => setFilterRegion(e.target.value)}>
-                    <option value="">All Regions</option>
-                    {regionOptions.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="bp-label">Service Station</label>
-                  <select className="bp-select" value={filterStationId} onChange={e => setFilterStationId(e.target.value)}>
-                    <option value="">All Stations</option>
-                    {serviceStations.map(s => (
-                      <option key={s.id} value={String(s.id)}>
-                        {s.name}{getStationExt(s) ? ` (Ext. ${getStationExt(s)})` : ""}
-                      </option>
-                    ))}
-                  </select>
+                  <div>
+                    <label className="bp-label">Region</label>
+                    <select className="bp-select" value={filterRegion} onChange={e => setFilterRegion(e.target.value)}>
+                      <option value="">All Regions</option>
+                      {regionOptions.map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="bp-label">Service Station</label>
+                    <select className="bp-select" value={filterStationId} onChange={e => setFilterStationId(e.target.value)}>
+                      <option value="">All Stations</option>
+                      {serviceStations.map(s => (
+                        <option key={s.id} value={String(s.id)}>
+                          {s.name}{getStationExt(s) ? ` (Ext. ${getStationExt(s)})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1016,7 +1039,7 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
 
           {/* ─── Content ─── */}
           <div className="bp-content">
-            {alert && <div style={{ margin:"8px 0" }}><Alert type={alert.type} title={alert.title} message={alert.message} onClose={() => setAlert(null)} /></div>}
+            {alert && <div style={{ margin:"0 0 8px" }}><Alert type={alert.type} title={alert.title} message={alert.message} onClose={() => setAlert(null)} /></div>}
 
             {/* Branch Form Modal */}
             <Modal
@@ -1039,32 +1062,32 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
                 </div>
               }
             >
-              <form onSubmit={handleSubmit} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:18, padding:"20px 24px" }}>
+              <form onSubmit={handleSubmit} style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))", gap:18, padding:"20px 24px" }}>
                 <FormInput label="Branch Name" name="name" placeholder="Enter branch name" value={values.name} onChange={handleChange} onBlur={handleBlur} error={errors.name} touched={touched.name} required inputRef={branchNameInputRef} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm" />
                 <FormInput label="Manager Name" name="manager_name" placeholder="Enter manager name" value={values.manager_name} onChange={handleChange} onBlur={handleBlur} error={errors.manager_name} touched={touched.manager_name} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm" />
                 <FormInput label="Branch Code" name="branch_code" placeholder="e.g. 423" value={values.branch_code} onChange={handleChange} onBlur={handleBlur} error={errors.branch_code} touched={touched.branch_code} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm" />
                 <FormInput label="Gateway (IP)" name="gateway" placeholder="e.g. 192.168.221.253" value={values.gateway} onChange={handleChange} onBlur={handleBlur} error={errors.gateway} touched={touched.gateway} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm" />
                 <FormInput label="Contact Number" name="contact" placeholder="98XXXXXXXX" value={values.contact} onChange={(e) => { const value = e.target.value.replace(/\D/g,"").slice(0,10); handleChange({ target:{ name:"contact", value } }); }} onBlur={handleBlur} error={errors.contact} touched={touched.contact} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm" />
                 <div>
-                  <label style={{ fontSize:14, fontWeight:500, marginBottom:6, display:"block" }}>Service Station</label>
-                  <select name="service_station_id" value={values.service_station_id} onChange={handleChange} onBlur={handleBlur} style={{ width:"100%", padding:"9px 13px", borderRadius:10, border:"1.5px solid #e2e8f0", outline:"none", fontSize:13.5 }}>
+                  <label style={{ fontSize:13, fontWeight:600, marginBottom:6, display:"block", color:"var(--gray-700)" }}>Service Station</label>
+                  <select name="service_station_id" value={values.service_station_id} onChange={handleChange} onBlur={handleBlur} className="bp-select" style={{ background:"white" }}>
                     <option value="">-- Select Service Station --</option>
                     {serviceStations.map(s => <option key={s.id} value={s.id}>{s.name}{getStationExt(s) ? ` (Ext. ${getStationExt(s)})` : ""}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize:14, fontWeight:500, marginBottom:6, display:"block" }}>Region</label>
-                  <select name="region" value={values.region} onChange={handleChange} onBlur={handleBlur} style={{ width:"100%", padding:"9px 13px", borderRadius:10, border:"1.5px solid #e2e8f0", outline:"none", fontSize:13.5, background:"white" }}>
+                  <label style={{ fontSize:13, fontWeight:600, marginBottom:6, display:"block", color:"var(--gray-700)" }}>Region</label>
+                  <select name="region" value={values.region} onChange={handleChange} onBlur={handleBlur} className="bp-select" style={{ background:"white" }}>
                     <option value="">-- Select Region --</option>
                     {regionOptions.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
                 {canManage && (
                   <div style={{ gridColumn:"1 / -1" }}>
-                    <label style={{ fontSize:14, fontWeight:500, marginBottom:6, display:"block" }}>Remarks <span style={{ color:"var(--red-500)" }}>*</span></label>
-                    <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+                    <label style={{ fontSize:13, fontWeight:600, marginBottom:6, display:"block", color:"var(--gray-700)" }}>Remarks <span style={{ color:"var(--red-500)" }}>*</span></label>
+                    <div style={{ display:"flex", gap:10, alignItems:"flex-start", flexWrap:"wrap" }}>
                       <span style={{ padding:"9px 12px", background:"var(--gray-100)", border:"1.5px solid var(--gray-200)", borderRadius:9, fontSize:11, fontWeight:700, color:"var(--gray-600)", whiteSpace:"nowrap", flexShrink:0 }}>By {currentUserName}:</span>
-                      <textarea value={newRemark} onChange={e => setNewRemark(e.target.value)} placeholder="Write remarks…" rows={3} style={{ width:"100%", padding:"9px 13px", borderRadius:10, border:"1.5px solid #e2e8f0", outline:"none", fontSize:13.5, resize:"vertical", fontFamily:"DM Sans,sans-serif" }} />
+                      <textarea value={newRemark} onChange={e => setNewRemark(e.target.value)} placeholder="Write remarks…" rows={3} className="bp-textarea" style={{ flex:1, minWidth:180 }} />
                     </div>
                   </div>
                 )}
@@ -1072,12 +1095,13 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
             </Modal>
 
             {/* ─── Table ─── */}
-            <div className="bp-table-card" style={{ overflowX:"auto" }}>
+            <div className="bp-table-card">
               {loading && allBranches.length === 0 ? (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"60px 0", gap:14 }}>
                   <Spinner size={40} /><p style={{ color:"var(--gray-500)", fontSize:14, margin:0 }}>Loading branches…</p>
                 </div>
               ) : pagedBranches.length ? (
+                <div className="bp-table-scroll">
                 <table className="bp-table">
                   <thead>
                     <tr>
@@ -1125,6 +1149,7 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
                     })}
                   </tbody>
                 </table>
+                </div>
               ) : (
                 <div className="bp-empty">
                   <svg width="56" height="56" fill="none" stroke="var(--gray-200)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
@@ -1173,7 +1198,7 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
                       </div>
                       <div style={{ display:"flex", gap:7, flexWrap:"wrap" }}>
                         {previewBranchId && (
-                          <button className="bp-btn bp-btn-sm" style={{ background:"rgba(19,16,202,0.9)", border:"1.5px solid rgba(25,224,58,0.3)", color:"white", fontWeight:600 }} onClick={() => onOpenFullDetails(previewBranchId)}>
+                          <button className="bp-btn bp-btn-sm" style={{ background:"rgba(255,255,255,0.16)", border:"1.5px solid rgba(255,255,255,0.3)", color:"white", fontWeight:700 }} onClick={() => onOpenFullDetails(previewBranchId)}>
                             Asset Detail
                           </button>
                         )}
@@ -1235,7 +1260,7 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
                         </div>
 
                         <div className="bp-detail-card">
-                          <div style={{ padding:"14px 18px", background:"var(--gray-50)", borderBottom:"1.5px solid var(--gray-200)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+                          <div style={{ padding:"14px 18px", background:"var(--gray-50)", borderBottom:"1px solid var(--gray-200)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
                             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                               <div style={{ width:30, height:30, borderRadius:8, background:"linear-gradient(135deg,var(--green-500),var(--blue-500))", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>📊</div>
                               <div>
@@ -1254,17 +1279,17 @@ export default function Branch({ embedded = false, onPickBranch = null, hideFoot
                               </div>
                             ) : chartData.length ? (
                               <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-                                <div style={{ position:"relative", height:220, borderRadius:12, border:"1.5px solid var(--gray-100)", background:"var(--gray-50)", overflow:"hidden" }}>
+                                <div style={{ position:"relative", height:220, borderRadius:12, border:"1px solid var(--gray-100)", background:"var(--gray-50)", overflow:"hidden" }}>
                                   <ResponsiveContainer>
                                     <PieChart>
                                       <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={56} outerRadius={88} paddingAngle={3}>
                                         {chartData.map((_, idx) => <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />)}
                                       </Pie>
-                                      <Tooltip contentStyle={{ borderRadius:10, border:"1.5px solid var(--gray-200)", fontSize:12 }} />
+                                      <Tooltip contentStyle={{ borderRadius:10, border:"1px solid var(--gray-200)", fontSize:12 }} />
                                     </PieChart>
                                   </ResponsiveContainer>
                                   <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", pointerEvents:"none" }}>
-                                    <div style={{ background:"white", borderRadius:10, padding:"8px 14px", textAlign:"center", border:"1.5px solid var(--gray-200)", boxShadow:"var(--shadow)" }}>
+                                    <div style={{ background:"white", borderRadius:10, padding:"8px 14px", textAlign:"center", border:"1px solid var(--gray-200)", boxShadow:"var(--shadow)" }}>
                                       <div style={{ fontSize:10, fontWeight:700, color:"var(--gray-400)", fontFamily:"Outfit,sans-serif", letterSpacing:"0.1em" }}>TOTAL</div>
                                       <div style={{ fontSize:20, fontWeight:900, color:"var(--gray-900)", fontFamily:"Outfit,sans-serif" }}>{totalAssets}</div>
                                     </div>
