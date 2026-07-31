@@ -81,6 +81,7 @@ const BranchScanner = sequelize.define(
     scanner_model:     { type: DataTypes.STRING,      allowNull: true },
     assigned_user:     { type: DataTypes.STRING,      allowNull: true },
     location:          { type: DataTypes.STRING(150), allowNull: true },
+    status:            { type: DataTypes.STRING(20),  allowNull: false, defaultValue: "Active" },
     remarks:           { type: DataTypes.TEXT,        allowNull: true },
   },
   { tableName: "branch_scanners", timestamps: true }
@@ -227,6 +228,7 @@ const BranchCctv = sequelize.define(
     channel:           { type: DataTypes.INTEGER, allowNull: true },
     vendor:            { type: DataTypes.STRING(150), allowNull: true },
     purchase_date:     { type: DataTypes.DATEONLY, allowNull: true },
+    status:            { type: DataTypes.STRING(20), allowNull: false, defaultValue: "Active" },
     remarks:           { type: DataTypes.TEXT, allowNull: true },
   },
   { tableName: "branch_cctv", timestamps: true }
@@ -305,6 +307,7 @@ const BranchServer = sequelize.define(
     memory:                 { type: DataTypes.STRING(100), allowNull: true },
     windows_server_version: { type: DataTypes.STRING(100), allowNull: true },
     virtualization:         { type: DataTypes.ENUM("Yes","No"), allowNull: false, defaultValue: "No" },
+    status:                 { type: DataTypes.STRING(20), allowNull: false, defaultValue: "Active" },
     remarks:                { type: DataTypes.TEXT, allowNull: true },
   },
   {
@@ -327,6 +330,7 @@ const BranchFirewallRouter = sequelize.define(
     purchase_date:         { type: DataTypes.DATEONLY,    allowNull: true },
     vendor:                { type: DataTypes.STRING(150), allowNull: true },
     license_expiry:        { type: DataTypes.DATEONLY,    allowNull: true },
+    status:                { type: DataTypes.STRING(20),  allowNull: false, defaultValue: "Active" },
     remarks:               { type: DataTypes.TEXT,        allowNull: true },
   },
   { tableName: "firewall_router", timestamps: true }
@@ -347,6 +351,7 @@ const BranchSwitch = sequelize.define(
     location:          { type: DataTypes.STRING(255), allowNull: true },
     port:              { type: DataTypes.STRING(255), allowNull: true },
     assigned_user:     { type: DataTypes.STRING(255), allowNull: true },
+    status:            { type: DataTypes.STRING(20),  allowNull: false, defaultValue: "Active" },
     remarks:           { type: DataTypes.TEXT,        allowNull: true },
   },
   { tableName: "switch", timestamps: true }

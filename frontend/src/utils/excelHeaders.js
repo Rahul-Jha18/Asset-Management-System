@@ -72,6 +72,7 @@ const EXCEL_HEADERS = {
     "Model",
     "Assigned User",
     "Location",
+    "Status",
     "Remarks",
   ],
 
@@ -132,6 +133,7 @@ const EXCEL_HEADERS = {
     "Channel",
     "Vendor",
     "Purchase Date",
+    "Status",
     "Remarks",
   ],
 
@@ -206,6 +208,7 @@ const EXCEL_HEADERS = {
     "Window Server Version",
     "Virtualization",
     "How Many Server",
+    "Status",
     "Remarks",
   ],
 
@@ -220,6 +223,7 @@ const EXCEL_HEADERS = {
     "Vendor",
     "Liscence-expiry",
     "Specification Remarks",
+    "Status",
     "Remarks",
   ],
 
@@ -235,6 +239,7 @@ const EXCEL_HEADERS = {
     "Location",
     "Port",
     "Assigned User",
+    "Status",
     "Remarks",
   ],
 

@@ -216,6 +216,7 @@ const buildPayloadFromExcelRow = (section, row) => {
         scanner_model: toStrOrNull(getExcel(row, ["Model"])),
         assigned_user: toStrOrNull(getExcel(row, ["Assigned User"])),
         location: toStrOrNull(getExcel(row, ["Location"])),
+        status: toStrOrNull(getExcel(row, ["Status"])) || "Active",
       };
 
     case "projector":
@@ -268,6 +269,7 @@ const buildPayloadFromExcelRow = (section, row) => {
         channel: toIntOrNullSafe(getExcel(row, ["Channel"])),
         vendor: toStrOrNull(getExcel(row, ["Vendor"])),
         purchase_date: excelDateToJSDate(getExcel(row, ["Purchase Date"])),
+        status: toStrOrNull(getExcel(row, ["Status"])) || "Active",
       };
 
     case "connectivity":
@@ -333,6 +335,7 @@ const buildPayloadFromExcelRow = (section, row) => {
         memory: toStrOrNull(getExcel(row, ["Memory"])),
         windows_server_version: toStrOrNull(getExcel(row, ["Window Server Version"])),
         virtualization: toYesNoOrNull(getExcel(row, ["Virtualization"])),
+        status: toStrOrNull(getExcel(row, ["Status"])) || "Active",
       };
 
     case "firewall_router":
@@ -345,6 +348,7 @@ const buildPayloadFromExcelRow = (section, row) => {
         purchase_date: excelDateToJSDate(getExcel(row, ["Purchase Date"])),
         vendor: toStrOrNull(getExcel(row, ["Vendor"])),
         license_expiry: excelDateToJSDate(getExcel(row, ["Liscence-expiry", "License Expiry"])),
+        status: toStrOrNull(getExcel(row, ["Status"])) || "Active",
       };
 
     case "switch":
@@ -358,6 +362,7 @@ const buildPayloadFromExcelRow = (section, row) => {
         location: toStrOrNull(getExcel(row, ["Location"])),
         port: toStrOrNull(getExcel(row, ["Port"])),
         assigned_user: toStrOrNull(getExcel(row, ["Assigned User"])),
+        status: toStrOrNull(getExcel(row, ["Status"])) || "Active",
       };
 
     case "extra_monitor":

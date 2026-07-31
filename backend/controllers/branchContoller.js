@@ -637,7 +637,78 @@ exports.inverters = {
   }),
 };
 
-exports.scanners = deviceCrud(BranchScanner);
+exports.scanners = {
+  list: asyncHandler(async (req, res) => {
+    const { id: branchId } = req.params;
+
+    const rows = await BranchScanner.findAll({
+      where: { branchId },
+      order: [["id", "ASC"]],
+    });
+
+    return sendSuccess(res, rows, "Fetched successfully");
+  }),
+
+  create: asyncHandler(async (req, res) => {
+    const { id: branchId } = req.params;
+
+    const row = await BranchScanner.create({
+      branchId,
+      ...req.body,
+      status:
+        String(req.body?.status || "Active").trim() ||
+        "Active",
+    });
+
+    return sendSuccess(res, row, "Created successfully", 201);
+  }),
+
+  update: asyncHandler(async (req, res) => {
+    const { id: branchId, rowId } = req.params;
+
+    const row = await BranchScanner.findOne({
+      where: { id: rowId, branchId },
+    });
+
+    if (!row) {
+      return sendError(res, "Record not found", 404);
+    }
+
+    const payload = {
+      ...req.body,
+    };
+
+    if (payload.status !== undefined) {
+      payload.status =
+        String(payload.status || "Active").trim() ||
+        "Active";
+    }
+
+    await row.update(payload);
+
+    return sendSuccess(res, row, "Updated successfully");
+  }),
+
+  remove: asyncHandler(async (req, res) => {
+    const { id: branchId, rowId } = req.params;
+
+    const row = await BranchScanner.findOne({
+      where: { id: rowId, branchId },
+    });
+
+    if (!row) {
+      return sendError(res, "Record not found", 404);
+    }
+
+    await row.destroy();
+
+    return sendSuccess(
+      res,
+      { ok: true },
+      "Deleted successfully"
+    );
+  }),
+};
 exports.projectors = deviceCrud(BranchProjector);
 exports.printers = deviceCrud(BranchPrinter);
 exports.desktops = deviceCrud(BranchDesktop);
@@ -690,6 +761,9 @@ exports.cctvs = {
       cctv_record_days: req.body.cctv_record_days === "" ? null : req.body.cctv_record_days,
       channel: req.body.channel === "" ? null : req.body.channel,
       purchase_date: req.body.purchase_date === "" ? null : req.body.purchase_date,
+      status:
+        String(req.body?.status || "Active").trim() ||
+        "Active",
     };
 
     const row = await BranchCctv.create(payload);
@@ -715,6 +789,11 @@ exports.cctvs = {
       cctv_record_days: req.body.cctv_record_days === "" ? null : req.body.cctv_record_days,
       channel: req.body.channel === "" ? null : req.body.channel,
       purchase_date: req.body.purchase_date === "" ? null : req.body.purchase_date,
+      status:
+        req.body.status === undefined
+          ? row.status
+          : String(req.body.status || "Active").trim() ||
+            "Active",
     };
 
     await row.update(payload);

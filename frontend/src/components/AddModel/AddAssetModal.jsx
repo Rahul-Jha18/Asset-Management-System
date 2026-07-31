@@ -273,7 +273,8 @@ const SECTION_ALL_FIELDS = {
   ],
 
   scanner: [
-    "assetId","sub_category_code","scanner_name","scanner_model","assigned_user","location","remarks",
+    "assetId","sub_category_code","scanner_name","scanner_model",
+    "assigned_user","location","status","remarks",
   ],
 
   projector: [
@@ -293,7 +294,7 @@ const SECTION_ALL_FIELDS = {
 
   cctv: [
     "assetId","sub_category_code","cctv_brand","cctv_nvr_ip","cctv_record_days",
-    "capacity","channel","vendor","purchase_date","remarks",
+    "capacity","channel","vendor","purchase_date","status","remarks",
   ],
 
   connectivity: [
@@ -317,17 +318,17 @@ const SECTION_ALL_FIELDS = {
   server: [
     "assetId","sub_category_code","brand","ip_address","location","model_no","purchase_date",
     "vendor","specification","storage","memory","windows_server_version",
-    "virtualization","how_many_server","remarks",
+    "virtualization","how_many_server","status","remarks",
   ],
 
   firewall_router: [
     "sub_category_code","brand","model","purchase_date","vendor",
-    "license_expiry","specification_remarks","remarks",
+    "license_expiry","specification_remarks","status","remarks",
   ],
 
   switch: [
     "assetId","sub_category_code","asset_name","model","type",
-    "brand","location","port","assigned_user","remarks",
+    "brand","location","port","assigned_user","status","remarks",
   ],
 
   extra_monitor: [
@@ -536,21 +537,31 @@ const SECTION_GROUPS = {
     { label:"Network & Status", keys:["printer_status","location","ip_address"] },
     { label:"Notes",            keys:["remarks"] },
   ],
+  scanner: [
+    { label:"Scanner Info",      keys:["assetId","sub_category_code","scanner_name","scanner_model"] },
+    { label:"Assignment",        keys:["assigned_user","location","status"] },
+    { label:"Notes",             keys:["remarks"] },
+  ],
   cctv: [
     { label:"NVR / System Info", keys:["assetId","sub_category_code","cctv_brand","cctv_nvr_ip","cctv_record_days"] },
-    { label:"Capacity & Vendor", keys:["capacity","channel","vendor","purchase_date"] },
+    { label:"Capacity & Vendor", keys:["capacity","channel","vendor","purchase_date","status"] },
     { label:"Notes",             keys:["remarks"] },
   ],
   server: [
     { label:"Identity",         keys:["assetId","sub_category_code","brand","model_no","vendor"] },
-    { label:"Network",          keys:["ip_address","location"] },
+    { label:"Network",          keys:["ip_address","location","status"] },
     { label:"Hardware",         keys:["storage","memory","virtualization","how_many_server"] },
     { label:"Software",         keys:["windows_server_version","purchase_date"] },
     { label:"Notes",            keys:["specification","remarks"] },
   ],
+  firewall_router: [
+    { label:"Device Info",      keys:["sub_category_code","brand","model","status"] },
+    { label:"Purchase & Vendor",keys:["purchase_date","vendor","license_expiry"] },
+    { label:"Notes",            keys:["specification_remarks","remarks"] },
+  ],
   switch: [
     { label:"Identity",         keys:["assetId","sub_category_code","asset_name","brand","model","type"] },
-    { label:"Location & Access",keys:["location","port","assigned_user"] },
+    { label:"Location & Access",keys:["location","port","assigned_user","status"] },
     { label:"Notes",            keys:["remarks"] },
   ],
   extra_monitor: [
@@ -618,6 +629,7 @@ const SECTION_GROUPS = {
     { label:"Notes",            keys:["remarks"] },
   ],
 };
+
 /* ─────────────────────────────────────────────────────
    EmployeeSelect — allows manual typing + dropdown select
 ───────────────────────────────────────────────────── */
@@ -822,6 +834,7 @@ function EmployeeSelect({ employees, value, onChange, disabled }) {
     </div>
   );
 }
+
 /* ═══════════════════════════════════════════════════
    MAIN COMPONENT
 ═══════════════════════════════════════════════════ */
