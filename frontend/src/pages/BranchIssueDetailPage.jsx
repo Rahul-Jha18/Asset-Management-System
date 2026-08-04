@@ -766,6 +766,33 @@ const getIssueCustomerCategory = (issue) =>
       ""
   ).trim();
 
+
+const getAssignedToName = (issue) =>
+  String(
+    issue?.assigned_to_name ??
+      issue?.assignedToName ??
+      issue?.assigned_user?.name ??
+      issue?.assignedUser?.name ??
+      issue?.assigned_to_user?.name ??
+      issue?.assignedToUser?.name ??
+      issue?.assigned_to_email ??
+      issue?.assigned_user?.email ??
+      issue?.assignedUser?.email ??
+      ""
+  ).trim();
+
+const getAssignedToDisplay = (issue) => {
+  const name = getAssignedToName(issue);
+
+  if (name) return name;
+
+  if (issue?.assigned_to_user_id) {
+    return `User #${issue.assigned_to_user_id}`;
+  }
+
+  return "—";
+};
+
 export default function BranchIssueDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -995,6 +1022,11 @@ export default function BranchIssueDetailPage() {
                       <div className="it-meta">
                         <small>Reported By</small>
                         <strong>{issue.reporter_name || issue.reporter_email || "—"}</strong>
+                      </div>
+
+                      <div className="it-meta">
+                        <small>Assigned To</small>
+                        <strong>{getAssignedToDisplay(issue)}</strong>
                       </div>
 
                       <div className="it-meta">
