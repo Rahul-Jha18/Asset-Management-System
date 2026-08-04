@@ -114,6 +114,9 @@ export default function IssueCreateForm({
           corpUser.departmentName,
           corpUser.department_name,
           corpUser.role,
+          corpUser.br_code,
+          corpUser.emp_code,
+          corpUser.service_station_id,
         ]
           .map(normalizeText)
           .join(" ");
@@ -204,7 +207,7 @@ export default function IssueCreateForm({
     }
 
     if (!form.assigned_to_user_id) {
-      alert("Please select a Corporate User");
+      alert("Please select a User");
       return;
     }
 
@@ -411,7 +414,7 @@ export default function IssueCreateForm({
 
         <div className="it-form-field it-form-wide">
           <label>
-            Send To Corporate User <span>*</span>
+            Assign To User <span>*</span>
           </label>
 
           <div className="it-user-picker">
@@ -420,7 +423,7 @@ export default function IssueCreateForm({
               <input
                 value={corpUserSearch}
                 onChange={(e) => setCorpUserSearch(e.target.value)}
-                placeholder="Search corporate user by name, email, or department"
+                placeholder="Search user by name, email, role, branch, or employee code"
                 disabled={loading}
               />
             </div>
@@ -455,7 +458,7 @@ export default function IssueCreateForm({
                           {corpUser.departmentName ||
                             corpUser.department_name ||
                             corpUser.role ||
-                            "Corporate User"}
+                            "User"}
                         </small>
                       </span>
 
@@ -477,13 +480,13 @@ export default function IssueCreateForm({
                 <span>✓</span>
                 <div>
                   <strong>{selectedCorpUser.name || selectedCorpUser.email}</strong>
-                  <small>{selectedCorpUser.email || "Selected corporate user"}</small>
+                  <small>{selectedCorpUser.email || "Selected user"}</small>
                 </div>
               </div>
             )}
           </div>
 
-          <small>Only users with role Corporate User are shown here.</small>
+          <small>All users from the user table are shown here.</small>
         </div>
 
         <div className="it-form-field it-form-wide">

@@ -4,8 +4,12 @@ import api from "./api";
 export const getIssueCategories = (params = {}) =>
   api.get("/api/v1/branch-issues/categories", { params });
 
+// Kept old function name for compatibility.
+// Backend now returns all users from the User table, not only corporate users.
 export const getIssueCorpUsers = () =>
   api.get("/api/v1/branch-issues/corp-users");
+
+export const getIssueUsers = getIssueCorpUsers;
 
 /* Issues */
 export const listBranchIssues = (params = {}) =>

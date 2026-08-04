@@ -1471,13 +1471,11 @@ exports.getCategories = asyncHandler(
 
 exports.getCorpUsers = asyncHandler(
   async (_req, res) => {
+    /*
+      Keep the existing route/function name for frontend compatibility,
+      but return every user from the users table for assignment.
+    */
     const users = await User.findAll({
-      where: {
-        role: {
-          [Op.in]: ["admin", "corp_user"],
-        },
-      },
-
       attributes: [
         "id",
         "name",
@@ -1489,8 +1487,8 @@ exports.getCorpUsers = asyncHandler(
       ],
 
       order: [
-        ["role", "ASC"],
         ["name", "ASC"],
+        ["email", "ASC"],
       ],
     });
 
@@ -1767,23 +1765,12 @@ exports.createIssue = asyncHandler(
     if (!cleanAssignedToUserId) {
       return res.status(400).json({
         message:
-          "Please select an Admin or Corporate User",
+          "Please select a user",
       });
     }
 
     const assignedUser =
-      await User.findOne({
-        where: {
-          id: cleanAssignedToUserId,
-
-          role: {
-            [Op.in]: [
-              "admin",
-              "corp_user",
-            ],
-          },
-        },
-
+      await User.findByPk(cleanAssignedToUserId, {
         attributes: [
           "id",
           "name",
@@ -1795,7 +1782,7 @@ exports.createIssue = asyncHandler(
     if (!assignedUser) {
       return res.status(400).json({
         message:
-          "Invalid issue handler selected. Please select an Admin or Corporate User.",
+          "Invalid user selected. Please select a valid user.",
 
         received:
           assigned_to_user_id,
