@@ -150,6 +150,19 @@ const CSS = `
 
 .it-btn-soft:hover{background:#F8FAFC;border-color:#CBD5E1}
 
+.it-btn-analysis{
+  background:#FFFFFF;
+  color:#1D4ED8;
+  border:1px solid #BFDBFE;
+  box-shadow:var(--it-shadow-sm);
+}
+
+.it-btn-analysis:hover{
+  background:#EFF6FF;
+  border-color:#93C5FD;
+  color:#1E40AF;
+}
+
 /* Simple stat cards */
 .it-kpis{
   display:grid;
@@ -1917,6 +1930,14 @@ export default function BranchIssuesPage() {
                 <button className="it-btn it-btn-soft" onClick={load} disabled={loading}>
                   Refresh
                 </button>
+                <button
+                  className="it-btn it-btn-analysis"
+                  onClick={() => navigate("/branch-issues/analysis")}
+                  type="button"
+                >
+                  📊 Analysis Dashboard
+                </button>
+
                 <button
                   className={`it-btn ${showCreate ? "it-btn-amber" : "it-btn-primary"}`}
                   onClick={() => setShowCreate((value) => !value)}
