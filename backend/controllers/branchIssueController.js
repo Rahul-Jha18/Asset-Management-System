@@ -343,15 +343,258 @@ const getCategoryForAnalysis = (issue) => {
   );
 };
 
-const getBranchForAnalysis = (issue) => {
+const getAnyValue = (row, keys) => {
+  for (const key of keys) {
+    if (
+      row?.[key] !== undefined &&
+      row?.[key] !== null &&
+      String(row[key]).trim() !== ""
+    ) {
+      return row[key];
+    }
+  }
+
+  return null;
+};
+
+const getBranchModel = () =>
+  db.Branch ||
+  db.Branches ||
+  db.BranchMaster ||
+  db.BranchInfo ||
+  db.NlicBranch ||
+  db.nlicBranch ||
+  db.NLICBranch ||
+  null;
+
+const loadReporterUserLookup = async (issues) => {
+  const ids = Array.from(
+    new Set(
+      issues
+        .map((issue) => {
+          const row =
+            typeof issue.toJSON === "function"
+              ? issue.toJSON()
+              : issue;
+
+          return row?.reporter_user_id;
+        })
+        .filter((value) => value !== null && value !== undefined)
+        .map((value) => Number(value))
+        .filter((value) => !Number.isNaN(value))
+    )
+  );
+
+  const emails = Array.from(
+    new Set(
+      issues
+        .map((issue) => {
+          const row =
+            typeof issue.toJSON === "function"
+              ? issue.toJSON()
+              : issue;
+
+          return String(row?.reporter_email || "")
+            .trim()
+            .toLowerCase();
+        })
+        .filter(Boolean)
+    )
+  );
+
+  if (!ids.length && !emails.length) {
+    return {
+      byId: {},
+      byEmail: {},
+    };
+  }
+
+  const orWhere = [];
+
+  if (ids.length) {
+    orWhere.push({
+      id: {
+        [Op.in]: ids,
+      },
+    });
+  }
+
+  if (emails.length) {
+    orWhere.push({
+      email: {
+        [Op.in]: emails,
+      },
+    });
+  }
+
+  const users = await User.findAll({
+    where: {
+      [Op.or]: orWhere,
+    },
+
+    attributes: [
+      "id",
+      "name",
+      "email",
+      "role",
+      "service_station_id",
+      "br_code",
+      "emp_code",
+    ],
+  });
+
+  const byId = {};
+  const byEmail = {};
+
+  for (const user of users) {
+    const row =
+      typeof user.toJSON === "function"
+        ? user.toJSON()
+        : user;
+
+    if (row?.id !== undefined && row?.id !== null) {
+      byId[String(row.id)] = row;
+    }
+
+    if (row?.email) {
+      byEmail[String(row.email).trim().toLowerCase()] = row;
+    }
+  }
+
+  return {
+    byId,
+    byEmail,
+  };
+};
+
+const loadBranchLookup = async () => {
+  const BranchModel = getBranchModel();
+
+  const lookup = {
+    byCode: {},
+    byId: {},
+  };
+
+  if (!BranchModel?.findAll) {
+    return lookup;
+  }
+
+  try {
+    const branches = await BranchModel.findAll({
+      raw: true,
+    });
+
+    for (const branch of branches) {
+      const branchId = getAnyValue(branch, [
+        "id",
+        "Id",
+        "branch_id",
+        "BranchId",
+        "BranchID",
+      ]);
+
+      const branchCode = getAnyValue(branch, [
+        "br_code",
+        "BrCode",
+        "BR_CODE",
+        "branch_code",
+        "BranchCode",
+        "code",
+        "Code",
+      ]);
+
+      const branchName = getAnyValue(branch, [
+        "name",
+        "Name",
+        "branch_name",
+        "BranchName",
+        "BrName",
+        "BR_NAME",
+      ]);
+
+      if (branchName) {
+        if (branchCode !== null) {
+          lookup.byCode[String(branchCode).trim()] =
+            String(branchName).trim();
+        }
+
+        if (branchId !== null) {
+          lookup.byId[String(branchId).trim()] =
+            String(branchName).trim();
+        }
+      }
+    }
+  } catch (error) {
+    console.warn("Branch lookup failed for analysis dashboard:", {
+      message: error?.message,
+    });
+  }
+
+  return lookup;
+};
+
+const getBranchForAnalysis = (
+  issue,
+  reporterUserLookup = {
+    byId: {},
+    byEmail: {},
+  },
+  branchLookup = {
+    byCode: {},
+    byId: {},
+  }
+) => {
+  const reporterUser =
+    reporterUserLookup.byId?.[
+      String(issue?.reporter_user_id ?? "")
+    ] ||
+    reporterUserLookup.byEmail?.[
+      String(issue?.reporter_email || "")
+        .trim()
+        .toLowerCase()
+    ] ||
+    null;
+
   const branchId =
     issue?.reporter_branch_id ??
     issue?.branch_id ??
+    reporterUser?.service_station_id ??
     null;
 
-  return branchId
-    ? `Branch ${branchId}`
-    : "Unknown branch";
+  const branchCode =
+    issue?.reporter_branch_code ??
+    issue?.br_code ??
+    reporterUser?.br_code ??
+    null;
+
+  const branchName =
+    (branchCode !== null &&
+      branchLookup.byCode?.[
+        String(branchCode).trim()
+      ]) ||
+    (branchId !== null &&
+      branchLookup.byId?.[
+        String(branchId).trim()
+      ]) ||
+    null;
+
+  if (branchName && branchCode) {
+    return `${branchName} (${branchCode})`;
+  }
+
+  if (branchName) {
+    return branchName;
+  }
+
+  if (branchCode) {
+    return `Branch ${branchCode}`;
+  }
+
+  if (branchId) {
+    return `Branch ${branchId}`;
+  }
+
+  return "Unknown branch";
 };
 
 const monthKey = (dateValue) => {
@@ -1814,6 +2057,14 @@ exports.getAnalysisDashboard = asyncHandler(
       order: [["created_at", "ASC"]],
     });
 
+    const [
+      reporterUserLookup,
+      branchLookup,
+    ] = await Promise.all([
+      loadReporterUserLookup(issues),
+      loadBranchLookup(),
+    ]);
+
     const summary = {
       total: issues.length,
       open: 0,
@@ -1847,7 +2098,11 @@ exports.getAnalysisDashboard = asyncHandler(
         getCategoryForAnalysis(plainIssue);
 
       const branchName =
-        getBranchForAnalysis(plainIssue);
+        getBranchForAnalysis(
+          plainIssue,
+          reporterUserLookup,
+          branchLookup
+        );
 
       const statusValue =
         plainIssue.status || "Unknown";
@@ -1942,6 +2197,12 @@ exports.getAnalysisDashboard = asyncHandler(
             "Unknown",
           reporter_branch_id:
             plainIssue.reporter_branch_id,
+          branch:
+            getBranchForAnalysis(
+              plainIssue,
+              reporterUserLookup,
+              branchLookup
+            ),
           created_at:
             plainIssue.created_at,
         };
