@@ -19,6 +19,7 @@ import FileLibraryPage from './pages/FileLibraryPage.jsx'
 import Employee from "./pages/Employee";
 import BranchIssuesPage from "./pages/BranchIssuesPage";
 import BranchIssueDetailPage from "./pages/BranchIssueDetailPage";
+import BranchIssueAnalysisDashboard from "./pages/BranchIssueAnalysisDashboard";
 
 import Nav from './components/Layout/Nav';
 import { useAuth } from './context/AuthContext';
@@ -92,6 +93,7 @@ export default function App() {
         <Route path="asset-tracking" element={<AssetTrackingPage />} />
         <Route path="admin/users" element={<AdminUsers />} />
         <Route path="admin/expiry" element={<AdminExpiry />} />
+        <Route path="/branch-issues/analysis" element={<BranchIssueAnalysisDashboard />} />
         <Route path="assetdashboard" element={<AssetDashboard/>}/>
         <Route path="/employees-master" element={<Employee />} />
         <Route path="/file-library" element={<FileLibraryPage />} />

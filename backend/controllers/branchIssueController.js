@@ -241,6 +241,151 @@ const getSequelizeErrorPayload = (error) => ({
     : null,
 });
 
+
+const getUserBranchId = (user) =>
+  toNullableNumber(user?.branch_id) ??
+  toNullableNumber(user?.branchId) ??
+  toNullableNumber(user?.service_station_id) ??
+  null;
+
+const getAnalysisScope = (user) => {
+  const role = normalizeRole(user?.role);
+  const branchId = getUserBranchId(user);
+
+  /*
+    Dashboard visibility rule:
+    - admin / corp_user / approver / head office: all issue data
+    - subadmin: station/branch scoped data using service_station_id/branch_id
+    - normal branch user: own branch data, fallback to own submitted issues
+  */
+  if (
+    [
+      "admin",
+      "corpuser",
+      "approver",
+      "headoffice",
+    ].includes(role)
+  ) {
+    return {
+      where: {},
+      label: "All branches",
+      role,
+      level: "all",
+    };
+  }
+
+  if (role === "subadmin") {
+    if (branchId) {
+      return {
+        where: {
+          reporter_branch_id: branchId,
+        },
+        label: "Assigned station / branch",
+        role,
+        level: "station",
+      };
+    }
+
+    return {
+      where: {
+        reporter_user_id: user?.id ?? -1,
+      },
+      label: "Your submitted issues",
+      role,
+      level: "own",
+    };
+  }
+
+  if (branchId) {
+    return {
+      where: {
+        reporter_branch_id: branchId,
+      },
+      label: "Your branch",
+      role,
+      level: "branch",
+    };
+  }
+
+  return {
+    where: {
+      reporter_user_id: user?.id ?? -1,
+    },
+    label: "Your submitted issues",
+    role,
+    level: "own",
+  };
+};
+
+const getIssueTypeForAnalysis = (issue) =>
+  normalizeIssueTypeValue(
+    issue?.issue_type || "Employee"
+  );
+
+const getCategoryForAnalysis = (issue) => {
+  const issueType = getIssueTypeForAnalysis(issue);
+
+  if (issueType === "Customer") {
+    return (
+      normalizeCustomerCategoryName(
+        issue?.customer_category_name
+      ) ||
+      normalizeCustomerCategoryName(
+        issue?.custom_category_name
+      ) ||
+      "Customer Issue"
+    );
+  }
+
+  return (
+    issue?.category?.name ||
+    "Uncategorized"
+  );
+};
+
+const getBranchForAnalysis = (issue) => {
+  const branchId =
+    issue?.reporter_branch_id ??
+    issue?.branch_id ??
+    null;
+
+  return branchId
+    ? `Branch ${branchId}`
+    : "Unknown branch";
+};
+
+const monthKey = (dateValue) => {
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const incrementGroup = (target, key) => {
+  const safeKey =
+    String(key || "").trim() ||
+    "Unknown";
+
+  target[safeKey] =
+    (target[safeKey] || 0) + 1;
+};
+
+const groupMapToArray = (map, limit = 12) =>
+  Object.entries(map)
+    .map(([name, count]) => ({
+      name,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+
+
 /* ─────────────────────────────────────────────────────────────
    PROFESSIONAL EMAIL HELPERS
 ───────────────────────────────────────────────────────────── */
@@ -1598,6 +1743,244 @@ exports.listIssues = asyncHandler(
     res.json(issues);
   }
 );
+
+
+/* ─────────────────────────────────────────────────────────────
+   3B. ANALYSIS DASHBOARD
+   GET /api/v1/branch-issues/analysis-dashboard
+───────────────────────────────────────────────────────────── */
+
+exports.getAnalysisDashboard = asyncHandler(
+  async (req, res) => {
+    const {
+      from,
+      to,
+      issue_type,
+      status,
+      priority,
+    } = req.query || {};
+
+    const scope = getAnalysisScope(req.user);
+
+    const where = {
+      is_deleted: false,
+      ...scope.where,
+    };
+
+    const cleanIssueType =
+      normalizeIssueTypeFilter(issue_type);
+
+    if (cleanIssueType) {
+      where.issue_type = cleanIssueType;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (priority) {
+      where.priority = priority;
+    }
+
+    if (from || to) {
+      where.created_at = {};
+
+      if (from) {
+        where.created_at[Op.gte] = new Date(from);
+      }
+
+      if (to) {
+        const toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+        where.created_at[Op.lte] = toDate;
+      }
+    }
+
+    const issues = await BranchIssue.findAll({
+      where,
+
+      include: [
+        {
+          model: BranchIssueCategory,
+          as: "category",
+          attributes: [
+            "id",
+            "name",
+            "code",
+          ],
+        },
+      ],
+
+      order: [["created_at", "ASC"]],
+    });
+
+    const summary = {
+      total: issues.length,
+      open: 0,
+      underReview: 0,
+      closed: 0,
+      highCritical: 0,
+      employee: 0,
+      customer: 0,
+    };
+
+    const byStatus = {};
+    const byPriority = {};
+    const byType = {};
+    const byCategory = {};
+    const byBranch = {};
+    const monthlyCreated = {};
+    const monthlyClosed = {};
+    const byAssignedUser = {};
+    const byReporter = {};
+
+    for (const issue of issues) {
+      const plainIssue =
+        typeof issue.toJSON === "function"
+          ? issue.toJSON()
+          : issue;
+
+      const issueType =
+        getIssueTypeForAnalysis(plainIssue);
+
+      const categoryName =
+        getCategoryForAnalysis(plainIssue);
+
+      const branchName =
+        getBranchForAnalysis(plainIssue);
+
+      const statusValue =
+        plainIssue.status || "Unknown";
+
+      const priorityValue =
+        plainIssue.priority || "Unknown";
+
+      if (statusValue === "Open") summary.open += 1;
+      if (statusValue === "UnderReview") summary.underReview += 1;
+      if (statusValue === "Closed") summary.closed += 1;
+
+      if (
+        priorityValue === "High" ||
+        priorityValue === "Critical"
+      ) {
+        summary.highCritical += 1;
+      }
+
+      if (issueType === "Customer") {
+        summary.customer += 1;
+      } else {
+        summary.employee += 1;
+      }
+
+      incrementGroup(byStatus, statusValue);
+      incrementGroup(byPriority, priorityValue);
+      incrementGroup(byType, issueType);
+      incrementGroup(byCategory, categoryName);
+      incrementGroup(byBranch, branchName);
+      incrementGroup(
+        byAssignedUser,
+        plainIssue.assigned_to_user_id
+          ? `User ${plainIssue.assigned_to_user_id}`
+          : "Unassigned"
+      );
+      incrementGroup(
+        byReporter,
+        plainIssue.reporter_name ||
+          plainIssue.reporter_email ||
+          "Unknown reporter"
+      );
+
+      incrementGroup(
+        monthlyCreated,
+        monthKey(plainIssue.created_at)
+      );
+
+      if (plainIssue.closed_at) {
+        incrementGroup(
+          monthlyClosed,
+          monthKey(plainIssue.closed_at)
+        );
+      }
+    }
+
+    const monthlyKeys = Array.from(
+      new Set([
+        ...Object.keys(monthlyCreated),
+        ...Object.keys(monthlyClosed),
+      ])
+    ).filter((item) => item !== "Unknown");
+
+    const monthlyTrend = monthlyKeys.map((name) => ({
+      name,
+      created: monthlyCreated[name] || 0,
+      closed: monthlyClosed[name] || 0,
+    }));
+
+    const recentIssues = issues
+      .slice()
+      .reverse()
+      .slice(0, 10)
+      .map((issue) => {
+        const plainIssue =
+          typeof issue.toJSON === "function"
+            ? issue.toJSON()
+            : issue;
+
+        return {
+          id: plainIssue.id,
+          ticket_no: plainIssue.ticket_no,
+          title: plainIssue.title,
+          issue_type:
+            getIssueTypeForAnalysis(plainIssue),
+          category:
+            getCategoryForAnalysis(plainIssue),
+          priority: plainIssue.priority,
+          status: plainIssue.status,
+          reporter_name:
+            plainIssue.reporter_name ||
+            plainIssue.reporter_email ||
+            "Unknown",
+          reporter_branch_id:
+            plainIssue.reporter_branch_id,
+          created_at:
+            plainIssue.created_at,
+        };
+      });
+
+    res.json({
+      scope: {
+        label: scope.label,
+        role: scope.role,
+        level: scope.level,
+      },
+
+      filters: {
+        from: from || null,
+        to: to || null,
+        issue_type:
+          cleanIssueType || null,
+        status: status || null,
+        priority: priority || null,
+      },
+
+      summary,
+
+      charts: {
+        byType: groupMapToArray(byType),
+        byStatus: groupMapToArray(byStatus),
+        byPriority: groupMapToArray(byPriority),
+        byCategory: groupMapToArray(byCategory, 15),
+        byBranch: groupMapToArray(byBranch, 15),
+        byAssignedUser: groupMapToArray(byAssignedUser, 10),
+        byReporter: groupMapToArray(byReporter, 10),
+        monthlyTrend,
+      },
+
+      recentIssues,
+    });
+  }
+);
+
 
 /* ─────────────────────────────────────────────────────────────
    4. GET SINGLE ISSUE

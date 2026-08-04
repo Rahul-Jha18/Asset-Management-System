@@ -23,6 +23,7 @@ router.get("/categories", protect, ctrl.getCategories);
 router.get("/corp-users", protect, ctrl.getCorpUsers);
 
 router.get("/", protect, ctrl.listIssues);
+router.get("/analysis-dashboard", protect, ctrl.getAnalysisDashboard);
 router.post("/", protect, ctrl.createIssue);
 
 router.get("/:id", protect, ctrl.getIssue);

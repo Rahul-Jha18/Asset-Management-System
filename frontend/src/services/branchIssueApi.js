@@ -41,3 +41,8 @@ export const uploadBranchIssueAttachment = (id, file) => {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
+
+
+/* Analysis Dashboard */
+export const getBranchIssueAnalysisDashboard = (params = {}) =>
+  api.get("/api/v1/branch-issues/analysis-dashboard", { params });
