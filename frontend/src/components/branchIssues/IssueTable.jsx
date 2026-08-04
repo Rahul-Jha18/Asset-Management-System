@@ -64,6 +64,64 @@ const BASKETS = [
   },
 ];
 
+const CATEGORY_TONES = ["green", "blue", "purple", "amber", "slate", "red"];
+
+const normalizeIssueType = (value) =>
+  String(value || "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+
+const getIssueType = (issue) => {
+  const raw =
+    issue?.issue_type ??
+    issue?.issueType ??
+    issue?.type ??
+    issue?.issueCategoryType ??
+    issue?.issue_category_type ??
+    "Employee";
+
+  const normalized = normalizeIssueType(raw);
+
+  if (normalized === "customer" || normalized === "customerissue") {
+    return "Customer";
+  }
+
+  return "Employee";
+};
+
+const getCustomerCategoryName = (issue) =>
+  String(
+    issue?.customer_category_name ??
+      issue?.customerCategoryName ??
+      issue?.custom_category_name ??
+      issue?.customCategoryName ??
+      issue?.issue_category_name ??
+      issue?.issueCategoryName ??
+      ""
+  ).trim();
+
+const getDisplayCategory = (issue) => {
+  if (getIssueType(issue) === "Customer") {
+    return (
+      getCustomerCategoryName(issue) ||
+      issue?.category?.name ||
+      issue?.category_name ||
+      "Customer Issue"
+    );
+  }
+
+  return issue?.category?.name || issue?.category_name || "—";
+};
+
+const getIssueCategoryKey = (issue, issueTypeFilter) => {
+  if (issueTypeFilter === "Customer") {
+    const name = getCustomerCategoryName(issue);
+    return name ? `customer:${name}` : "customer:Other Customer Issue";
+  }
+
+  return String(issue?.category_id ?? issue?.categoryId ?? issue?.category?.id ?? "");
+};
+
 function MiniIssueTable({
   rows,
   canDelete,
@@ -94,6 +152,7 @@ function MiniIssueTable({
                 <tr>
                   <th>Ticket</th>
                   <th>Issue Summary</th>
+                  <th>Type</th>
                   <th>Category</th>
                   <th>Priority</th>
                   <th>Status</th>
@@ -120,8 +179,20 @@ function MiniIssueTable({
                     </td>
 
                     <td>
+                      <span
+                        className={`it-type-table-badge ${
+                          getIssueType(issue) === "Customer"
+                            ? "customer"
+                            : "employee"
+                        }`}
+                      >
+                        {getIssueType(issue)}
+                      </span>
+                    </td>
+
+                    <td>
                       <span className="it-category-cell">
-                        ▦ {issue.category?.name || issue.category_name || "—"}
+                        ▦ {getDisplayCategory(issue)}
                       </span>
                     </td>
 
@@ -229,6 +300,10 @@ export default function IssueTable({
   activeBasket = "all",
   newReportCount = 0,
   isCorpUser = false,
+  issueTypeFilter = "all",
+  categoryBaskets = [],
+  activeCategoryKey = "",
+  onCategoryBasketChange,
   onBasketChange,
   onRowClick,
   onRefresh,
@@ -237,9 +312,38 @@ export default function IssueTable({
   onPageChange,
 }) {
   const [localOpenBasket, setLocalOpenBasket] = useState(activeBasket || "all");
-  const openBasket = activeBasket || localOpenBasket;
+  const [localOpenCategory, setLocalOpenCategory] = useState(activeCategoryKey || "");
 
-  const basketRows = useMemo(() => {
+  const isCategoryMode = issueTypeFilter === "Employee" || issueTypeFilter === "Customer";
+  const openBasket = isCategoryMode
+    ? activeCategoryKey || localOpenCategory
+    : activeBasket || localOpenBasket;
+
+  const categoryRows = useMemo(() => {
+    if (!isCategoryMode) return {};
+
+    const knownKeys = new Set(categoryBaskets.map((basket) => String(basket.id)));
+
+    return categoryBaskets.reduce((acc, category) => {
+      const categoryKey = String(category.id);
+
+      acc[categoryKey] = issues.filter((issue) => {
+        if (getIssueType(issue) !== issueTypeFilter) return false;
+
+        const issueKey = getIssueCategoryKey(issue, issueTypeFilter);
+
+        if (categoryKey === "customer:Other Customer Issue") {
+          return !knownKeys.has(issueKey) || issueKey === categoryKey;
+        }
+
+        return issueKey === categoryKey;
+      });
+
+      return acc;
+    }, {});
+  }, [categoryBaskets, isCategoryMode, issueTypeFilter, issues]);
+
+  const statusRows = useMemo(() => {
     const getRows = (key) => {
       if (key === "all") return issues;
 
@@ -268,12 +372,25 @@ export default function IssueTable({
     }, {});
   }, [issues, isCorpUser, currentUser?.id]);
 
-  const handleBasketClick = (basketKey) => {
+  const handleStatusBasketClick = (basketKey) => {
     const nextBasket = openBasket === basketKey ? "all" : basketKey;
     setLocalOpenBasket(nextBasket);
 
     if (onBasketChange) {
       onBasketChange(nextBasket);
+    }
+
+    if (onPageChange) {
+      onPageChange(1);
+    }
+  };
+
+  const handleCategoryBasketClick = (basketKey) => {
+    const nextBasket = openBasket === basketKey ? "" : basketKey;
+    setLocalOpenCategory(nextBasket);
+
+    if (onCategoryBasketChange) {
+      onCategoryBasketChange(nextBasket);
     }
 
     if (onPageChange) {
@@ -305,17 +422,28 @@ export default function IssueTable({
     );
   }
 
+  const title = isCategoryMode
+    ? `${issueTypeFilter} Category Baskets`
+    : "Table Format [Basket]";
+
+  const description = isCategoryMode
+    ? `Click any ${issueTypeFilter.toLowerCase()} category to open its table.`
+    : "Click New Reports, Open, Under Review, Closed, or any basket to open its table.";
+
   return (
     <div className="it-basket-shell">
       <div className="it-basket-shell-head">
         <div>
-          <h3>Table Format [Basket]</h3> 
-          <p>Click New Reports, Open, Under Review, Closed, or any basket to open its table.</p>
+          <small>{isCategoryMode ? "CATEGORY VIEW" : "STATUS VIEW"}</small>
+          <h3>{title}</h3>
+          <p>{description}</p>
         </div>
 
         <div className="it-table-tools">
           <span className="it-basket-shell-pill">
-            {BASKETS.length} baskets
+            {isCategoryMode
+              ? `${categoryBaskets.length} categories`
+              : `${BASKETS.length} baskets`}
           </span>
           <span className="it-table-role-pill">
             {canAct ? "Admin / Corp View" : "Branch View"}
@@ -324,64 +452,131 @@ export default function IssueTable({
       </div>
 
       <div className="it-basket-list">
-        {BASKETS.map((basket) => {
-          const rows = basketRows[basket.key] || [];
-          const isOpen = openBasket === basket.key;
-          const showBlink = basket.key === "new" && Number(newReportCount || rows.length || 0) > 0;
-
-          return (
-            <div
-              className={`it-basket-row it-basket-${basket.tone} ${
-                isOpen ? "it-basket-row-open" : ""
-              }`}
-              key={basket.key}
-            >
-              <button
-                type="button"
-                className="it-basket-button"
-                onClick={() => handleBasketClick(basket.key)}
-              >
-                <div className="it-basket-left">
-                  <span className="it-basket-dot2" />
-                  <span className="it-basket-title">
-                    <strong>{basket.title}</strong>
-                    <span className="it-basket-sub">{basket.sub}</span>
-                  </span>
-                </div>
-
-                <div className="it-basket-right">
-                  {showBlink ? (
-                    <span className="it-basket-new-badge">
-                      {Number(newReportCount || rows.length).toLocaleString()}
-                    </span>
-                  ) : (
-                    <span className="it-basket-count-badge">
-                      {rows.length.toLocaleString()}
-                    </span>
-                  )}
-
-                  <span className="it-basket-arrow">
-                    {isOpen ? "▲" : "▼"}
-                  </span>
-                </div>
-              </button>
-
-              {isOpen && (
-                <div className="it-basket-panel">
-                  <MiniIssueTable
-                    rows={rows}
-                    canDelete={canDelete}
-                    onRowClick={onRowClick}
-                    onDelete={handleDelete}
-                    page={page}
-                    rowsPerPage={rowsPerPage}
-                    onPageChange={onPageChange}
-                  />
-                </div>
-              )}
+        {isCategoryMode ? (
+          categoryBaskets.length === 0 ? (
+            <div className="it-empty-state">
+              <div className="it-empty-icon">🧺</div>
+              <strong>No category basket found</strong>
+              <span>Add categories or choose another issue type.</span>
             </div>
-          );
-        })}
+          ) : (
+            categoryBaskets.map((category, index) => {
+              const basketKey = String(category.id);
+              const rows = categoryRows[basketKey] || [];
+              const isOpen = openBasket === basketKey;
+              const tone = CATEGORY_TONES[index % CATEGORY_TONES.length];
+
+              return (
+                <div
+                  className={`it-basket-row it-basket-${tone} ${
+                    isOpen ? "it-basket-row-open" : ""
+                  }`}
+                  key={basketKey}
+                >
+                  <button
+                    type="button"
+                    className="it-basket-button"
+                    onClick={() => handleCategoryBasketClick(basketKey)}
+                  >
+                    <div className="it-basket-left">
+                      <span className="it-basket-dot2" />
+                      <span className="it-basket-title">
+                        <strong>{category.name}</strong>
+                        <span className="it-basket-sub">
+                          {issueTypeFilter} issue category
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="it-basket-right">
+                      <span className="it-basket-count-badge">
+                        {rows.length.toLocaleString()}
+                      </span>
+
+                      <span className="it-basket-arrow">
+                        {isOpen ? "▲" : "▼"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="it-basket-panel">
+                      <MiniIssueTable
+                        rows={rows}
+                        canDelete={canDelete}
+                        onRowClick={onRowClick}
+                        onDelete={handleDelete}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        onPageChange={onPageChange}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )
+        ) : (
+          BASKETS.map((basket) => {
+            const rows = statusRows[basket.key] || [];
+            const isOpen = openBasket === basket.key;
+            const showBlink =
+              basket.key === "new" && Number(newReportCount || rows.length || 0) > 0;
+
+            return (
+              <div
+                className={`it-basket-row it-basket-${basket.tone} ${
+                  isOpen ? "it-basket-row-open" : ""
+                }`}
+                key={basket.key}
+              >
+                <button
+                  type="button"
+                  className="it-basket-button"
+                  onClick={() => handleStatusBasketClick(basket.key)}
+                >
+                  <div className="it-basket-left">
+                    <span className="it-basket-dot2" />
+                    <span className="it-basket-title">
+                      <strong>{basket.title}</strong>
+                      <span className="it-basket-sub">{basket.sub}</span>
+                    </span>
+                  </div>
+
+                  <div className="it-basket-right">
+                    {showBlink ? (
+                      <span className="it-basket-new-badge">
+                        {Number(newReportCount || rows.length).toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="it-basket-count-badge">
+                        {rows.length.toLocaleString()}
+                      </span>
+                    )}
+
+                    <span className="it-basket-arrow">
+                      {isOpen ? "▲" : "▼"}
+                    </span>
+                  </div>
+                </button>
+
+                {isOpen && (
+                  <div className="it-basket-panel">
+                    <MiniIssueTable
+                      rows={rows}
+                      canDelete={canDelete}
+                      onRowClick={onRowClick}
+                      onDelete={handleDelete}
+                      page={page}
+                      rowsPerPage={rowsPerPage}
+                      onPageChange={onPageChange}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

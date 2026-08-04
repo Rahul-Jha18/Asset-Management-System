@@ -754,6 +754,765 @@ const CSS = `
 .it-activity-mini-line small{font-size:10px;color:#94A3B8;white-space:nowrap}
 .it-activity-mini p{margin:2px 0 0;font-size:10.5px;color:#64748B;line-height:1.35}
 
+
+.it-type-switch-card{
+  background:#FFFFFF;
+  border:1px solid var(--it-line);
+  border-radius:18px;
+  box-shadow:var(--it-shadow-sm);
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.it-type-switch-info small{
+  display:block;
+  color:#64748B;
+  font-size:10px;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  font-weight:850;
+  margin-bottom:4px;
+}
+
+.it-type-switch-info strong{
+  display:block;
+  color:#0F172A;
+  font-size:15px;
+  font-weight:850;
+  letter-spacing:-.02em;
+}
+
+.it-type-switch-info span{
+  display:block;
+  margin-top:3px;
+  color:#64748B;
+  font-size:12px;
+  line-height:1.45;
+}
+
+.it-type-toggle{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.it-type-option{
+  border:1px solid #E2E8F0;
+  background:#FFFFFF;
+  color:#334155;
+  border-radius:14px;
+  padding:10px 12px;
+  font-family:var(--it-font);
+  cursor:pointer;
+  min-width:150px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  text-align:left;
+  transition:.18s ease;
+}
+
+.it-type-option:hover{
+  background:#F8FAFC;
+  border-color:#CBD5E1;
+  transform:translateY(-1px);
+}
+
+.it-type-option.active{
+  background:#EFF6FF;
+  border-color:#93C5FD;
+  box-shadow:0 8px 18px rgba(29,78,216,.12);
+}
+
+.it-type-option.customer.active{
+  background:#FFF7ED;
+  border-color:#FDBA74;
+  box-shadow:0 8px 18px rgba(217,119,6,.12);
+}
+
+.it-type-option-icon{
+  width:32px;
+  height:32px;
+  border-radius:11px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#F1F5F9;
+  flex-shrink:0;
+}
+
+.it-type-option.active .it-type-option-icon{
+  background:#1D4ED8;
+  color:#FFFFFF;
+}
+
+.it-type-option.customer.active .it-type-option-icon{
+  background:#EA580C;
+  color:#FFFFFF;
+}
+
+.it-type-option strong{
+  display:block;
+  color:#0F172A;
+  font-size:12.5px;
+  font-weight:850;
+}
+
+.it-type-option small{
+  display:block;
+  color:#64748B;
+  font-size:10.5px;
+  margin-top:2px;
+}
+
+.it-type-table-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:10.5px;
+  font-weight:850;
+  border:1px solid #BFDBFE;
+  background:#EFF6FF;
+  color:#1D4ED8;
+  white-space:nowrap;
+}
+
+.it-type-table-badge.customer{
+  border-color:#FED7AA;
+  background:#FFF7ED;
+  color:#C2410C;
+}
+
+.it-type-table-badge.employee{
+  border-color:#BFDBFE;
+  background:#EFF6FF;
+  color:#1D4ED8;
+}
+
+.it-type-radio-panel{
+  border:1px solid var(--it-line);
+  border-radius:16px;
+  background:#F8FAFC;
+  padding:13px;
+  margin-bottom:16px;
+}
+
+.it-type-radio-label{
+  display:block;
+  font-family:var(--it-font);
+  font-size:11px;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:#475569;
+  margin-bottom:10px;
+}
+
+.it-type-radio-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.it-type-radio-card{
+  border:1px solid #E2E8F0;
+  background:#FFFFFF;
+  border-radius:14px;
+  padding:12px;
+  display:flex;
+  gap:11px;
+  align-items:flex-start;
+  text-align:left;
+  cursor:pointer;
+  font-family:var(--it-font);
+  transition:.18s ease;
+}
+
+.it-type-radio-card:hover{
+  border-color:#CBD5E1;
+  box-shadow:0 8px 18px rgba(15,23,42,.06);
+  transform:translateY(-1px);
+}
+
+.it-type-radio-card.active{
+  background:#EFF6FF;
+  border-color:#93C5FD;
+  box-shadow:0 8px 18px rgba(29,78,216,.12);
+}
+
+.it-type-radio-card.active .it-type-radio-icon{
+  background:#1D4ED8;
+  color:#FFFFFF;
+}
+
+.it-type-radio-card.active .it-type-radio-icon.customer{
+  background:#EA580C;
+}
+
+.it-type-radio-icon{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  background:#F1F5F9;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.it-type-radio-card strong{
+  display:block;
+  color:#0F172A;
+  font-size:13px;
+  font-weight:850;
+}
+
+.it-type-radio-card small{
+  display:block;
+  color:#64748B;
+  font-size:11px;
+  line-height:1.45;
+  margin-top:3px;
+}
+
+.it-user-picker{
+  border:1px solid #E2E8F0;
+  border-radius:14px;
+  overflow:hidden;
+  background:#FFFFFF;
+}
+
+.it-user-picker-search{
+  height:42px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border-bottom:1px solid #E2E8F0;
+  padding:0 12px;
+  color:#94A3B8;
+}
+
+.it-user-picker-search input{
+  border:none;
+  outline:none;
+  width:100%;
+  background:transparent;
+  font-family:var(--it-font);
+  font-size:13px;
+  color:#0F172A;
+}
+
+.it-user-picker-search:focus-within{
+  box-shadow:0 0 0 3px rgba(29,78,216,.10) inset;
+}
+
+.it-user-picker-table{
+  max-height:230px;
+  overflow:auto;
+}
+
+.it-user-picker-head,
+.it-user-picker-row{
+  display:grid;
+  grid-template-columns:minmax(170px,1.2fr) minmax(180px,1fr) 92px;
+  gap:10px;
+  align-items:center;
+}
+
+.it-user-picker-head{
+  position:sticky;
+  top:0;
+  z-index:1;
+  background:#F8FAFC;
+  border-bottom:1px solid #E2E8F0;
+  padding:9px 12px;
+  color:#64748B;
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.it-user-picker-row{
+  width:100%;
+  border:none;
+  border-bottom:1px solid #EEF2F7;
+  background:#FFFFFF;
+  padding:10px 12px;
+  text-align:left;
+  cursor:pointer;
+  font-family:var(--it-font);
+}
+
+.it-user-picker-row:hover{
+  background:#F8FAFC;
+}
+
+.it-user-picker-row.active{
+  background:#EFF6FF;
+}
+
+.it-user-picker-row strong{
+  display:block;
+  color:#0F172A;
+  font-size:12.5px;
+  font-weight:850;
+}
+
+.it-user-picker-row small{
+  display:block;
+  color:#64748B;
+  font-size:10.5px;
+  margin-top:2px;
+}
+
+.it-user-picker-email{
+  color:#64748B;
+  font-size:12px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.it-user-picker-select{
+  justify-self:end;
+  border-radius:999px;
+  background:#F1F5F9;
+  color:#475569;
+  padding:5px 8px;
+  font-size:10.5px;
+  font-weight:850;
+}
+
+.it-user-picker-row.active .it-user-picker-select{
+  background:#1D4ED8;
+  color:#FFFFFF;
+}
+
+.it-user-picker-empty{
+  padding:20px;
+  text-align:center;
+  color:#94A3B8;
+  font-size:13px;
+}
+
+.it-user-selected{
+  display:flex;
+  gap:9px;
+  align-items:center;
+  background:#F0FDF4;
+  border-top:1px solid #BBF7D0;
+  padding:10px 12px;
+  color:#15803D;
+}
+
+.it-user-selected span{
+  width:24px;
+  height:24px;
+  border-radius:999px;
+  background:#16A34A;
+  color:#FFFFFF;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  flex-shrink:0;
+}
+
+.it-user-selected strong{
+  display:block;
+  color:#14532D;
+  font-size:12.5px;
+}
+
+.it-user-selected small{
+  display:block;
+  color:#16A34A;
+  font-size:11px;
+  margin-top:2px;
+}
+
+
+
+/* Full-page create issue overlay */
+.it-create-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  width:100%;
+  min-height:100dvh;
+  padding:12px;
+  background:rgba(15,23,42,.42);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  overflow:auto;
+  animation:it-overlay-fade .16s ease both;
+}
+
+.it-create-overlay .it-create-panel{
+  width:min(1480px,100%);
+  height:calc(100dvh - 24px);
+  max-height:calc(100dvh - 24px);
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  border-radius:18px;
+  border:1px solid rgba(226,232,240,.95);
+  background:#FFFFFF;
+  box-shadow:0 28px 80px rgba(15,23,42,.32);
+  overflow:hidden;
+  animation:it-overlay-slide .2s ease both;
+}
+
+.it-create-overlay .it-create-panel-head{
+  flex:0 0 auto;
+  position:sticky;
+  top:0;
+  z-index:3;
+  background:#FFFFFF;
+  border-bottom:1px solid var(--it-line);
+}
+
+.it-create-overlay .it-create-panel-body{
+  padding:10px;
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  background:#F8FAFC;
+}
+
+.it-create-overlay .it-create-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 315px;
+  gap:20px;
+  min-height:0;
+}
+
+.it-create-overlay .it-create-guide{
+  background:#FFFFFF;
+  border:1px solid var(--it-line);
+  border-radius:16px;
+  padding:15px;
+  align-self:start;
+  position:sticky;
+  top:10px;
+  max-height:calc(100dvh - 118px);
+  overflow:auto;
+}
+
+.it-create-overlay .it-guide-block{
+  padding-bottom:13px;
+  margin-bottom:13px;
+  border-bottom:1px solid var(--it-line);
+}
+
+.it-create-overlay .it-guide-block:last-child{
+  border-bottom:none;
+  margin-bottom:0;
+  padding-bottom:0;
+}
+
+.it-create-overlay .it-guide-block h4{
+  margin:0 0 8px;
+  font-family:var(--it-font);
+  font-size:13px;
+  color:#0F172A;
+}
+
+.it-create-overlay .it-guide-block p,
+.it-create-overlay .it-guide-block li{
+  font-size:12px;
+  line-height:1.58;
+  color:#64748B;
+  margin:0 0 6px;
+}
+
+.it-create-overlay .it-guide-block ul{
+  padding-left:18px;
+  margin:0;
+}
+
+.it-create-overlay .it-create-form{
+  min-width:0;
+  background:#FFFFFF;
+  border:1px solid var(--it-line);
+  border-radius:16px;
+  padding:14px;
+}
+
+.it-create-overlay .it-form-section-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--it-font);
+  font-weight:800;
+  font-size:15px;
+  margin-bottom:16px;
+}
+
+.it-create-overlay .it-section-icon{
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  background:#EFF6FF;
+  color:#1D4ED8;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.it-create-overlay .it-form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.it-create-overlay .it-form-field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.it-create-overlay .it-form-field label{
+  font-family:var(--it-font);
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:#475569;
+}
+
+.it-create-overlay .it-form-field label span{
+  color:var(--it-red);
+}
+
+.it-create-overlay .it-form-field input,
+.it-create-overlay .it-form-field select,
+.it-create-overlay .it-form-field textarea{
+  width:100%;
+  border:1px solid #CBD5E1;
+  background:#FFFFFF;
+  border-radius:11px;
+  padding:11px 13px;
+  font-family:var(--it-font);
+  font-size:13.5px;
+  outline:none;
+  color:#0F172A;
+  transition:.16s ease;
+}
+
+.it-create-overlay .it-form-field textarea{
+  resize:vertical;
+}
+
+.it-create-overlay .it-form-field input:focus,
+.it-create-overlay .it-form-field select:focus,
+.it-create-overlay .it-form-field textarea:focus{
+  border-color:var(--it-blue);
+  box-shadow:0 0 0 3px rgba(29,78,216,.10);
+}
+
+.it-create-overlay .it-form-field input:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  background:#F8FAFC;
+}
+
+.it-create-overlay .it-form-field small{
+  font-size:11px;
+  color:#94A3B8;
+}
+
+.it-create-overlay .it-form-wide{
+  grid-column:1/-1;
+}
+
+.it-create-overlay .it-dropzone{
+  border:2px dashed #CBD5E1;
+  background:#F8FAFC;
+  border-radius:14px;
+  padding:22px;
+  text-align:center;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  align-items:center;
+  justify-content:center;
+  color:#1D4ED8;
+}
+
+.it-create-overlay .it-dropzone:hover{
+  border-color:#93C5FD;
+  background:#EFF6FF;
+}
+
+.it-create-overlay .it-drop-icon{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  box-shadow:var(--it-shadow-sm);
+}
+
+.it-create-overlay .it-selected-files{
+  margin-top:12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.it-create-overlay .it-selected-files-head{
+  display:flex;
+  justify-content:space-between;
+  color:#64748B;
+  font-size:12px;
+}
+
+.it-create-overlay .it-selected-file{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#F8FAFC;
+  border:1px solid #E2E8F0;
+  border-radius:12px;
+  padding:10px 12px;
+}
+
+.it-create-overlay .it-selected-file div{
+  min-width:0;
+  flex:1;
+}
+
+.it-create-overlay .it-selected-file strong{
+  display:block;
+  font-size:12.5px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.it-create-overlay .it-selected-file small{
+  font-size:11px;
+  color:#94A3B8;
+}
+
+.it-create-overlay .it-selected-file button{
+  border:none;
+  background:transparent;
+  font-size:18px;
+  cursor:pointer;
+  color:#64748B;
+}
+
+.it-create-overlay .it-form-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--it-line);
+}
+
+.it-create-overlay .it-private-note{
+  font-size:12px;
+  color:#64748B;
+}
+
+.it-create-overlay .it-form-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+@keyframes it-overlay-fade{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+@keyframes it-overlay-slide{
+  from{opacity:0;transform:translateY(12px) scale(.99)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+@media(max-width:1150px){
+  .it-create-overlay .it-create-layout{
+    grid-template-columns:1fr;
+  }
+
+  .it-create-overlay .it-create-guide{
+    position:static;
+    max-height:none;
+  }
+}
+
+@media(max-width:760px){
+  .it-create-overlay{
+    padding:8px;
+  }
+
+  .it-create-overlay .it-create-panel{
+    width:100%;
+    height:calc(100dvh - 16px);
+    max-height:calc(100dvh - 16px);
+    border-radius:16px;
+  }
+
+  .it-create-overlay .it-create-panel-body{
+    padding:8px;
+  }
+
+  .it-create-overlay .it-create-form{
+    padding:12px;
+  }
+
+  .it-create-overlay .it-form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .it-create-overlay .it-form-wide{
+    grid-column:auto;
+  }
+}
+
+@media(max-width:480px){
+  .it-create-overlay{
+    padding:0;
+  }
+
+  .it-create-overlay .it-create-panel{
+    height:100dvh;
+    max-height:100dvh;
+    border-radius:0;
+    border-left:none;
+    border-right:none;
+  }
+
+  .it-create-overlay .it-create-panel-head{
+    padding:13px 14px;
+  }
+
+  .it-create-overlay .it-form-actions,
+  .it-create-overlay .it-form-actions .it-btn{
+    width:100%;
+  }
+}
+
 @media(max-width:1250px){.it-kpis{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:1150px){.it-create-layout{grid-template-columns:1fr}}
 @media(max-width:760px){
@@ -761,6 +1520,14 @@ const CSS = `
   .it-head{padding:16px}
   .it-kpis{grid-template-columns:repeat(2,1fr)}
   .it-filter-card{align-items:stretch}
+  .it-type-switch-card{align-items:stretch;flex-direction:column}
+  .it-type-toggle{width:100%}
+  .it-type-option{flex:1 1 100%}
+  .it-type-radio-row{grid-template-columns:1fr}
+  .it-user-picker-head{display:none}
+  .it-user-picker-row{grid-template-columns:1fr}
+  .it-user-picker-email{white-space:normal}
+  .it-user-picker-select{justify-self:start}
   .it-filter-search,.it-filter-select,.it-count-pill{width:100%;min-width:0;margin-left:0}
   .it-form-grid{grid-template-columns:1fr}
   .it-form-wide{grid-column:auto}
@@ -774,6 +1541,49 @@ const CSS = `
   .it-create-panel-head{align-items:flex-start;flex-direction:column}
 }
 `;
+
+
+const CUSTOMER_ISSUE_CATEGORIES = [
+  "Policy Servicing",
+  "Claim Related",
+  "Premium Payment",
+  "Policy Loan",
+  "Maturity / Survival Benefit",
+  "Agent / Service Feedback",
+  "Branch Service Complaint",
+  "Digital Service / Mobile App",
+  "Customer KYC / Profile Update",
+  "Other Customer Issue",
+];
+
+const ISSUE_TYPE_FILTERS = [
+  { key: "all", label: "All Issues", icon: "▦", hint: "Status baskets" },
+  { key: "Employee", label: "Employee Issue", icon: "👥", hint: "Internal categories" },
+  { key: "Customer", label: "Customer Issue", icon: "👤", hint: "Customer categories" },
+];
+
+const normalizeIssueType = (value) =>
+  String(value || "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+
+const getIssueType = (issue) => {
+  const raw =
+    issue?.issue_type ??
+    issue?.issueType ??
+    issue?.type ??
+    issue?.issueCategoryType ??
+    issue?.issue_category_type ??
+    "Employee";
+
+  const normalized = normalizeIssueType(raw);
+
+  if (normalized === "customer" || normalized === "customerissue") {
+    return "Customer";
+  }
+
+  return "Employee";
+};
 
 const makeIcon = (d) => (
   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -833,6 +1643,7 @@ export default function BranchIssuesPage() {
   const [statusF, setStatusF] = useState("");
   const [priorityF, setPriorityF] = useState("");
   const [categoryF, setCategoryF] = useState("");
+  const [issueTypeF, setIssueTypeF] = useState("all");
   const [page, setPage] = useState(1);
 
   // Stat-card filter — "all" | "new" | "Open" | "UnderReview" | "Closed" | "high"
@@ -847,7 +1658,16 @@ export default function BranchIssuesPage() {
       const params = {};
       if (statusF) params.status = statusF;
       if (priorityF) params.priority = priorityF;
-      if (categoryF) params.category_id = categoryF;
+      if (issueTypeF && issueTypeF !== "all") params.issue_type = issueTypeF;
+
+      if (categoryF) {
+        if (String(categoryF).startsWith("customer:")) {
+          params.customer_category_name = String(categoryF).replace("customer:", "");
+        } else {
+          params.category_id = categoryF;
+        }
+      }
+
       if (search) params.search = search;
 
       const res = await listBranchIssues(params);
@@ -858,7 +1678,7 @@ export default function BranchIssuesPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, statusF, priorityF, categoryF]);
+  }, [search, statusF, priorityF, categoryF, issueTypeF]);
 
   useEffect(() => {
     load();
@@ -874,16 +1694,42 @@ export default function BranchIssuesPage() {
       .catch(() => setCorpUsers([]));
   }, []);
 
+  const typeFilteredIssues = useMemo(() => {
+    if (!issueTypeF || issueTypeF === "all") return issues;
+
+    return issues.filter((issue) => getIssueType(issue) === issueTypeF);
+  }, [issues, issueTypeF]);
+
+  const categoriesForCurrentType = useMemo(() => {
+    if (issueTypeF === "Customer") {
+      return CUSTOMER_ISSUE_CATEGORIES.map((name) => ({
+        id: `customer:${name}`,
+        name,
+      }));
+    }
+
+    return categories;
+  }, [categories, issueTypeF]);
+
+  const selectedCategoryLabel = useMemo(() => {
+    if (!categoryF) return "";
+
+    return (
+      categoriesForCurrentType.find((item) => String(item.id) === String(categoryF))
+        ?.name || "Selected"
+    );
+  }, [categoryF, categoriesForCurrentType]);
+
   const stats = useMemo(() => {
-    const total = issues.length;
-    const open = issues.filter((issue) => issue.status === "Open").length;
-    const underReview = issues.filter((issue) => issue.status === "UnderReview").length;
-    const closed = issues.filter((issue) => issue.status === "Closed").length;
-    const high = issues.filter((issue) => ["High", "Critical"].includes(issue.priority)).length;
+    const total = typeFilteredIssues.length;
+    const open = typeFilteredIssues.filter((issue) => issue.status === "Open").length;
+    const underReview = typeFilteredIssues.filter((issue) => issue.status === "UnderReview").length;
+    const closed = typeFilteredIssues.filter((issue) => issue.status === "Closed").length;
+    const high = typeFilteredIssues.filter((issue) => ["High", "Critical"].includes(issue.priority)).length;
 
     // New Report = new/open issue assigned to the logged-in Corporate User.
     // For normal branch users/admin view, it shows open reports in the current visible list.
-    const newReports = issues.filter((issue) => {
+    const newReports = typeFilteredIssues.filter((issue) => {
       const isOpen = issue.status === "Open";
       if (!isOpen) return false;
 
@@ -895,7 +1741,7 @@ export default function BranchIssuesPage() {
     }).length;
 
     return { total, newReports, open, underReview, closed, high };
-  }, [issues, isCorpUser, user?.id]);
+  }, [typeFilteredIssues, isCorpUser, user?.id]);
 
   const newReportCount = stats.newReports || 0;
   const navItems = useMemo(
@@ -904,10 +1750,10 @@ export default function BranchIssuesPage() {
   );
 
   const filteredByStat = useMemo(() => {
-    if (activeStat === "all") return issues;
+    if (activeStat === "all") return typeFilteredIssues;
 
     if (activeStat === "new") {
-      return issues.filter((issue) => {
+      return typeFilteredIssues.filter((issue) => {
         const isOpen = issue.status === "Open";
         if (!isOpen) return false;
 
@@ -920,32 +1766,41 @@ export default function BranchIssuesPage() {
     }
 
     if (activeStat === "high") {
-      return issues.filter((i) => ["High", "Critical"].includes(i.priority));
+      return typeFilteredIssues.filter((i) => ["High", "Critical"].includes(i.priority));
     }
 
-    return issues.filter((i) => i.status === activeStat);
-  }, [issues, activeStat, isCorpUser, user?.id]);
+    return typeFilteredIssues.filter((i) => i.status === activeStat);
+  }, [typeFilteredIssues, activeStat, isCorpUser, user?.id]);
 
   useEffect(() => {
     setPage(1);
   }, [activeStat]);
 
-  const activeFilters = [search, statusF, priorityF, categoryF].filter(Boolean).length;
+  const activeFilters = [search, statusF, priorityF, categoryF, issueTypeF !== "all" ? issueTypeF : ""].filter(Boolean).length;
 
   const clearFilters = () => {
     setSearch("");
     setStatusF("");
     setPriorityF("");
     setCategoryF("");
+    setIssueTypeF("all");
   };
 
   const chips = [
     search && { key: "search", label: `Search: ${search}`, onRemove: () => setSearch("") },
+    issueTypeF !== "all" && {
+      key: "issue-type",
+      label: `Issue Type: ${issueTypeF}`,
+      onRemove: () => {
+        setIssueTypeF("all");
+        setCategoryF("");
+      },
+    },
     statusF && { key: "status", label: `Status: ${statusF === "UnderReview" ? "Under Review" : statusF}`, onRemove: () => setStatusF("") },
     priorityF && { key: "priority", label: `Priority: ${priorityF}`, onRemove: () => setPriorityF("") },
     categoryF && {
       key: "category",
-      label: `Category: ${categories.find((c) => String(c.id) === String(categoryF))?.name || "Selected"}`,
+      label: `Category: ${selectedCategoryLabel}`,
       onRemove: () => setCategoryF(""),
     },
   ].filter(Boolean);
@@ -1100,6 +1955,40 @@ export default function BranchIssuesPage() {
               ))}
             </div>
 
+            <div className="it-type-switch-card">
+              <div className="it-type-switch-info">
+                <small>Issue Type View</small>
+                <strong>Choose issue type before opening category baskets</strong>
+                <span>
+                  Employee shows existing categories. Customer shows customer-related categories.
+                </span>
+              </div>
+
+              <div className="it-type-toggle" role="radiogroup" aria-label="Issue type filter">
+                {ISSUE_TYPE_FILTERS.map((item) => (
+                  <button
+                    type="button"
+                    key={item.key}
+                    className={`it-type-option ${
+                      item.key === "Customer" ? "customer" : ""
+                    } ${issueTypeF === item.key ? "active" : ""}`}
+                    onClick={() => {
+                      setIssueTypeF(item.key);
+                      setCategoryF("");
+                      setActiveStat("all");
+                      setPage(1);
+                    }}
+                  >
+                    <span className="it-type-option-icon">{item.icon}</span>
+                    <span>
+                      <strong>{item.label}</strong>
+                      <small>{item.hint}</small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <IssueFilterBar
               search={search}
               onSearch={setSearch}
@@ -1109,7 +1998,7 @@ export default function BranchIssuesPage() {
               onPriority={setPriorityF}
               categoryF={categoryF}
               onCategory={setCategoryF}
-              categories={categories}
+              categories={categoriesForCurrentType}
               onClear={clearFilters}
               activeFilters={activeFilters}
               total={filteredByStat.length}
@@ -1127,11 +2016,17 @@ export default function BranchIssuesPage() {
             )}
 
             {showCreate && (
-              <div className="it-create-panel">
+              <div
+                className="it-create-overlay"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="issue-create-title"
+              >
+                <div className="it-create-panel">
                 <div className="it-create-panel-head">
                   <div>
                     <small>Report a Problem</small>
-                    <h2>New Issue Report</h2>
+                    <h2 id="issue-create-title">New Issue Report</h2>
                   </div>
                   <button className="it-btn it-btn-soft" onClick={() => setShowCreate(false)}>
                     Close
@@ -1142,7 +2037,7 @@ export default function BranchIssuesPage() {
                   <div className="it-create-layout">
                     <IssueCreateForm
                       user={user}
-                      categories={categories}
+                      categories={categoriesForCurrentType}
                       corpUsers={corpUsers}
                       onCancel={() => setShowCreate(false)}
                       onSuccess={() => {
@@ -1178,15 +2073,24 @@ export default function BranchIssuesPage() {
                   </div>
                 </div>
               </div>
+            </div>
             )}
 
             <IssueTable
-              issues={issues}
+              issues={typeFilteredIssues}
               loading={loading}
               canAct={canAct}
               canDelete={canDelete}
               currentUser={user}
               activeBasket={activeStat}
+              issueTypeFilter={issueTypeF}
+              categoryBaskets={categoriesForCurrentType}
+              activeCategoryKey={categoryF}
+              onCategoryBasketChange={(nextCategory) => {
+                setCategoryF(nextCategory);
+                setActiveStat("all");
+                setPage(1);
+              }}
               basketTitle={basketMeta.title}
               basketDescription={basketMeta.description}
               basketTone={basketMeta.tone}

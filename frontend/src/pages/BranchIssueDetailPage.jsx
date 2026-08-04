@@ -733,6 +733,39 @@ const getIssueTrackerNavItems = (user) => {
   ].filter((item) => item.show !== false);
 };
 
+
+const normalizeIssueType = (value) =>
+  String(value || "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+
+const getIssueTypeLabel = (issue) => {
+  const raw =
+    issue?.issue_type ??
+    issue?.issueType ??
+    issue?.type ??
+    issue?.issueCategoryType ??
+    issue?.issue_category_type ??
+    "Employee";
+
+  const normalized = normalizeIssueType(raw);
+
+  return normalized === "customer" || normalized === "customerissue"
+    ? "Customer"
+    : "Employee";
+};
+
+const getIssueCustomerCategory = (issue) =>
+  String(
+    issue?.customer_category_name ??
+      issue?.customerCategoryName ??
+      issue?.custom_category_name ??
+      issue?.customCategoryName ??
+      issue?.issue_category_name ??
+      issue?.issueCategoryName ??
+      ""
+  ).trim();
+
 export default function BranchIssueDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -975,8 +1008,17 @@ export default function BranchIssueDetailPage() {
                       </div>
 
                       <div className="it-meta">
+                        <small>Issue Type</small>
+                        <strong>{getIssueTypeLabel(issue)}</strong>
+                      </div>
+
+                      <div className="it-meta">
                         <small>Category</small>
-                        <strong>{issue.category?.name || "—"}</strong>
+                        <strong>
+                          {getIssueTypeLabel(issue) === "Customer"
+                            ? getIssueCustomerCategory(issue) || issue.category?.name || "Customer Issue"
+                            : issue.category?.name || "—"}
+                        </strong>
                       </div>
 
                       <div className="it-meta">

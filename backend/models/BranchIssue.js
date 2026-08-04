@@ -34,6 +34,23 @@ const BranchIssue = sequelize.define(
     description: { type: DataTypes.TEXT, allowNull: false },
     expected_outcome: { type: DataTypes.TEXT, allowNull: true },
     category_id: { type: DataTypes.INTEGER, allowNull: true },
+
+    issue_type: {
+      type: DataTypes.ENUM("Employee", "Customer"),
+      allowNull: false,
+      defaultValue: "Employee",
+    },
+
+    customer_category_name: {
+      type: DataTypes.STRING(160),
+      allowNull: true,
+    },
+
+    custom_category_name: {
+      type: DataTypes.STRING(160),
+      allowNull: true,
+    },
+
     priority: {
       type: DataTypes.ENUM("Low", "Medium", "High", "Critical"),
       defaultValue: "Medium",

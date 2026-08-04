@@ -1,10 +1,25 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import RichTextEditor from "../common/RichTextEditor";
 import {
   createBranchIssue,
   uploadBranchIssueAttachment,
 } from "../../services/branchIssueApi";
 import { getBranchByCode } from "../../services/branchService";
+
+export const CUSTOMER_ISSUE_CATEGORIES = [
+  "Policy Servicing",
+  "Claim Related",
+  "Premium Payment",
+  "Policy Loan",
+  "Maturity / Survival Benefit",
+  "Agent / Service Feedback",
+  "Branch Service Complaint",
+  "Digital Service / Mobile App",
+  "Customer KYC / Profile Update",
+  "Other Customer Issue",
+];
+
+const CUSTOMER_OTHER_VALUE = "__OTHER_CUSTOMER_CATEGORY__";
 
 const formatBytes = (bytes) => {
   const value = Number(bytes || 0);
@@ -26,10 +41,13 @@ const stripHtml = (html) => {
   return div.textContent || div.innerText || "";
 };
 
+const normalizeText = (value) => String(value || "").trim().toLowerCase();
+
 export default function IssueCreateForm({
   user,
   categories = [],
   corpUsers = [],
+  customerCategories = CUSTOMER_ISSUE_CATEGORIES,
   onSuccess,
   onCancel,
 }) {
@@ -39,11 +57,15 @@ export default function IssueCreateForm({
     title: "",
     description: "",
     expected_outcome: "",
+    issue_type: "Employee",
     category_id: "",
+    customer_category_name: "",
+    custom_category_name: "",
     priority: "Medium",
     assigned_to_user_id: "",
   });
 
+  const [corpUserSearch, setCorpUserSearch] = useState("");
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [branchInfo, setBranchInfo] = useState(null);
@@ -71,8 +93,48 @@ export default function IssueCreateForm({
     loadBranchName();
   }, [user?.br_code]);
 
+  const selectedCorpUser = useMemo(
+    () =>
+      corpUsers.find(
+        (corpUser) => String(corpUser.id) === String(form.assigned_to_user_id)
+      ) || null,
+    [corpUsers, form.assigned_to_user_id]
+  );
+
+  const filteredCorpUsers = useMemo(() => {
+    const query = normalizeText(corpUserSearch);
+
+    if (!query) return corpUsers.slice(0, 8);
+
+    return corpUsers
+      .filter((corpUser) => {
+        const haystack = [
+          corpUser.name,
+          corpUser.email,
+          corpUser.departmentName,
+          corpUser.department_name,
+          corpUser.role,
+        ]
+          .map(normalizeText)
+          .join(" ");
+
+        return haystack.includes(query);
+      })
+      .slice(0, 12);
+  }, [corpUsers, corpUserSearch]);
+
   const update = (name, value) => {
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const updateIssueType = (issueType) => {
+    setForm((prev) => ({
+      ...prev,
+      issue_type: issueType,
+      category_id: "",
+      customer_category_name: "",
+      custom_category_name: "",
+    }));
   };
 
   const addFiles = (incoming) => {
@@ -88,16 +150,28 @@ export default function IssueCreateForm({
       title: "",
       description: "",
       expected_outcome: "",
+      issue_type: "Employee",
       category_id: "",
+      customer_category_name: "",
+      custom_category_name: "",
       priority: "Medium",
       assigned_to_user_id: "",
     });
 
+    setCorpUserSearch("");
     setFiles([]);
 
     if (fileRef.current) {
       fileRef.current.value = "";
     }
+  };
+
+  const getResolvedCustomerCategory = () => {
+    if (form.customer_category_name === CUSTOMER_OTHER_VALUE) {
+      return form.custom_category_name.trim();
+    }
+
+    return form.customer_category_name.trim();
   };
 
   const submit = async (e) => {
@@ -106,14 +180,21 @@ export default function IssueCreateForm({
     const title = form.title.trim();
     const description = form.description || "";
     const plainDescription = stripHtml(description).trim();
+    const issueType = form.issue_type || "Employee";
+    const customerCategoryName = getResolvedCustomerCategory();
 
     if (!title) {
       alert("Issue title is required");
       return;
     }
 
-    if (!form.category_id) {
-      alert("Please select issue category");
+    if (issueType === "Employee" && !form.category_id) {
+      alert("Please select employee issue category");
+      return;
+    }
+
+    if (issueType === "Customer" && !customerCategoryName) {
+      alert("Please select or enter customer issue category");
       return;
     }
 
@@ -134,7 +215,25 @@ export default function IssueCreateForm({
         title,
         description,
         expected_outcome: form.expected_outcome?.trim() || null,
-        category_id: form.category_id ? Number(form.category_id) : null,
+        issue_type: issueType,
+
+        // Existing employee issue flow.
+        category_id:
+          issueType === "Employee" && form.category_id
+            ? Number(form.category_id)
+            : null,
+
+        // New customer issue flow. Backend must store these fields.
+        customer_category_name:
+          issueType === "Customer" ? customerCategoryName : null,
+        custom_category_name:
+          issueType === "Customer" &&
+          form.customer_category_name === CUSTOMER_OTHER_VALUE
+            ? customerCategoryName
+            : null,
+        issue_category_name:
+          issueType === "Customer" ? customerCategoryName : null,
+
         priority: form.priority || "Medium",
         assigned_to_user_id: form.assigned_to_user_id
           ? Number(form.assigned_to_user_id)
@@ -187,6 +286,42 @@ export default function IssueCreateForm({
         Issue Details
       </div>
 
+      <div className="it-type-radio-panel">
+        <label className="it-type-radio-label">Issue Type</label>
+
+        <div className="it-type-radio-row" role="radiogroup" aria-label="Issue Type">
+          <button
+            type="button"
+            className={`it-type-radio-card ${
+              form.issue_type === "Employee" ? "active" : ""
+            }`}
+            onClick={() => updateIssueType("Employee")}
+            disabled={loading}
+          >
+            <span className="it-type-radio-icon">👥</span>
+            <span>
+              <strong>Employee Issue</strong>
+              <small>Internal branch, staff, system, asset, or operational issue.</small>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className={`it-type-radio-card ${
+              form.issue_type === "Customer" ? "active" : ""
+            }`}
+            onClick={() => updateIssueType("Customer")}
+            disabled={loading}
+          >
+            <span className="it-type-radio-icon customer">👤</span>
+            <span>
+              <strong>Customer Issue</strong>
+              <small>Customer service, claim, premium, KYC, policy, or complaint.</small>
+            </span>
+          </button>
+        </div>
+      </div>
+
       <div className="it-form-grid">
         <div className="it-form-field">
           <label>
@@ -201,23 +336,62 @@ export default function IssueCreateForm({
           <small>Summarize the issue in a few words.</small>
         </div>
 
-        <div className="it-form-field">
-          <label>
-            Category <span>*</span>
-          </label>
-          <select
-            value={form.category_id}
-            onChange={(e) => update("category_id", e.target.value)}
-            disabled={loading}
-          >
-            <option value="">Select category</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {form.issue_type === "Employee" ? (
+          <div className="it-form-field">
+            <label>
+              Employee Category <span>*</span>
+            </label>
+            <select
+              value={form.category_id}
+              onChange={(e) => update("category_id", e.target.value)}
+              disabled={loading}
+            >
+              <option value="">Select employee issue category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <small>Uses your existing issue categories.</small>
+          </div>
+        ) : (
+          <div className="it-form-field">
+            <label>
+              Customer Category <span>*</span>
+            </label>
+            <select
+              value={form.customer_category_name}
+              onChange={(e) => update("customer_category_name", e.target.value)}
+              disabled={loading}
+            >
+              <option value="">Select customer issue category</option>
+              {customerCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+              <option value={CUSTOMER_OTHER_VALUE}>Other / Not in list</option>
+            </select>
+            <small>Select a customer-related category or add your own.</small>
+          </div>
+        )}
+
+        {form.issue_type === "Customer" &&
+          form.customer_category_name === CUSTOMER_OTHER_VALUE && (
+            <div className="it-form-field it-form-wide">
+              <label>
+                Required Category Not in List <span>*</span>
+              </label>
+              <input
+                value={form.custom_category_name}
+                onChange={(e) => update("custom_category_name", e.target.value)}
+                placeholder="Example: Customer mobile number update issue"
+                disabled={loading}
+              />
+              <small>This will be saved as the customer issue category.</small>
+            </div>
+          )}
 
         <div className="it-form-field">
           <label>
@@ -235,23 +409,80 @@ export default function IssueCreateForm({
           </select>
         </div>
 
-        <div className="it-form-field">
+        <div className="it-form-field it-form-wide">
           <label>
             Send To Corporate User <span>*</span>
           </label>
-          <select
-            value={form.assigned_to_user_id}
-            onChange={(e) => update("assigned_to_user_id", e.target.value)}
-            disabled={loading}
-          >
-            <option value="">Select corporate user</option>
-            {corpUsers.map((corpUser) => (
-              <option key={corpUser.id} value={corpUser.id}>
-                {corpUser.name || corpUser.email}
-                {corpUser.email ? ` (${corpUser.email})` : ""}
-              </option>
-            ))}
-          </select>
+
+          <div className="it-user-picker">
+            <div className="it-user-picker-search">
+              <span>⌕</span>
+              <input
+                value={corpUserSearch}
+                onChange={(e) => setCorpUserSearch(e.target.value)}
+                placeholder="Search corporate user by name, email, or department"
+                disabled={loading}
+              />
+            </div>
+
+            <div className="it-user-picker-table">
+              <div className="it-user-picker-head">
+                <span>User</span>
+                <span>Email</span>
+                <span>Select</span>
+              </div>
+
+              {filteredCorpUsers.length === 0 ? (
+                <div className="it-user-picker-empty">
+                  No corporate user found.
+                </div>
+              ) : (
+                filteredCorpUsers.map((corpUser) => {
+                  const active =
+                    String(corpUser.id) === String(form.assigned_to_user_id);
+
+                  return (
+                    <button
+                      type="button"
+                      className={`it-user-picker-row ${active ? "active" : ""}`}
+                      key={corpUser.id}
+                      onClick={() => update("assigned_to_user_id", corpUser.id)}
+                      disabled={loading}
+                    >
+                      <span>
+                        <strong>{corpUser.name || corpUser.email}</strong>
+                        <small>
+                          {corpUser.departmentName ||
+                            corpUser.department_name ||
+                            corpUser.role ||
+                            "Corporate User"}
+                        </small>
+                      </span>
+
+                      <span className="it-user-picker-email">
+                        {corpUser.email || "—"}
+                      </span>
+
+                      <span className="it-user-picker-select">
+                        {active ? "Selected" : "Select"}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            {selectedCorpUser && (
+              <div className="it-user-selected">
+                <span>✓</span>
+                <div>
+                  <strong>{selectedCorpUser.name || selectedCorpUser.email}</strong>
+                  <small>{selectedCorpUser.email || "Selected corporate user"}</small>
+                </div>
+              </div>
+            )}
+          </div>
+
           <small>Only users with role Corporate User are shown here.</small>
         </div>
 
@@ -279,7 +510,11 @@ export default function IssueCreateForm({
           <RichTextEditor
             value={form.description}
             disabled={loading}
-            placeholder="Describe the issue in detail. Include any relevant information, steps to reproduce, and screenshots if applicable."
+            placeholder={
+              form.issue_type === "Customer"
+                ? "Describe the customer issue. Include policy number, customer concern, service impact, and action needed where applicable."
+                : "Describe the issue in detail. Include relevant information, steps to reproduce, and screenshots if applicable."
+            }
             onChange={(content) => update("description", content)}
           />
           <small>

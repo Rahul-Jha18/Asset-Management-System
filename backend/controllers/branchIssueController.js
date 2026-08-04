@@ -135,6 +135,92 @@ const toNullableNumber = (value) => {
   return numericValue;
 };
 
+
+const VALID_ISSUE_TYPES = [
+  "Employee",
+  "Customer",
+];
+
+const CUSTOMER_ISSUE_CATEGORIES = [
+  "Policy Servicing",
+  "Claim Related",
+  "Premium Payment",
+  "Policy Loan",
+  "Maturity / Survival Benefit",
+  "Agent / Service Feedback",
+  "Branch Service Complaint",
+  "Digital Service / Mobile App",
+  "Customer KYC / Profile Update",
+  "Other Customer Issue",
+];
+
+const normalizeIssueTypeValue = (value, fallback = "Employee") => {
+  const normalized = String(value || fallback)
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+
+  if (
+    normalized === "customer" ||
+    normalized === "customerissue"
+  ) {
+    return "Customer";
+  }
+
+  return "Employee";
+};
+
+const normalizeIssueTypeFilter = (value) => {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return null;
+  }
+
+  return normalizeIssueTypeValue(value);
+};
+
+const normalizeCustomerCategoryName = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 160);
+
+const buildCustomerCategoryObject = (name) => ({
+  id: null,
+  name:
+    normalizeCustomerCategoryName(name) ||
+    "Customer Issue",
+  code: "CUSTOMER",
+});
+
+const getIssueCategoryDisplayName = (issue, category) => {
+  const issueType = normalizeIssueTypeValue(
+    issue?.issue_type
+  );
+
+  if (issueType === "Customer") {
+    return (
+      normalizeCustomerCategoryName(
+        issue?.customer_category_name
+      ) ||
+      normalizeCustomerCategoryName(
+        issue?.custom_category_name
+      ) ||
+      "Customer Issue"
+    );
+  }
+
+  return String(
+    category?.name ||
+      issue?.category?.name ||
+      "General"
+  ).trim();
+};
+
+
 const getSequelizeErrorPayload = (error) => ({
   name: error?.name,
   message: error?.message,
@@ -156,7 +242,7 @@ const getSequelizeErrorPayload = (error) => ({
 });
 
 /* ─────────────────────────────────────────────────────────────
-   EMAIL HELPERS
+   PROFESSIONAL EMAIL HELPERS
 ───────────────────────────────────────────────────────────── */
 
 const isValidEmail = (value) => {
@@ -175,16 +261,202 @@ const escapeHtml = (value) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 
+/*
+  Converts rich-text issue descriptions into safe readable text.
+
+  Example:
+  <p>Printer is <strong>not working</strong></p>
+
+  becomes:
+  Printer is not working
+*/
+const stripHtml = (value) =>
+  String(value || "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "• ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#039;/gi, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+const formatEmailDate = (value) => {
+  if (!value) {
+    return "Not available";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Not available";
+  }
+
+  return date.toLocaleString("en-NP", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 const getIssueUrl = (issueId) => {
   const baseUrl = String(
     process.env.FRONTEND_URL ||
       process.env.CLIENT_URL ||
+      process.env.CLIENT_URL_VITE ||
       process.env.APP_URL ||
       "http://localhost:3001"
   ).replace(/\/$/, "");
 
   return `${baseUrl}/branch-issues/${issueId}`;
 };
+
+const getBackendBaseUrl = () =>
+  String(
+    process.env.BACKEND_URL ||
+      process.env.API_URL ||
+      "http://192.168.0.50:5001"
+  ).replace(/\/$/, "");
+
+const buildAttachmentResponse = (attachment) => {
+  const item =
+    typeof attachment?.toJSON === "function"
+      ? attachment.toJSON()
+      : { ...attachment };
+
+  if (item?.stored_file_name) {
+    item.file_url =
+      `${getBackendBaseUrl()}/uploads/branch-issues/${encodeURIComponent(
+        item.stored_file_name
+      )}`;
+  }
+
+  return item;
+};
+
+const getPriorityTheme = (priority) => {
+  switch (
+    String(priority || "")
+      .trim()
+      .toLowerCase()
+  ) {
+    case "critical":
+      return {
+        text: "#991B1B",
+        background: "#FEE2E2",
+        border: "#FCA5A5",
+        accent: "#DC2626",
+      };
+
+    case "high":
+      return {
+        text: "#9A3412",
+        background: "#FFEDD5",
+        border: "#FDBA74",
+        accent: "#EA580C",
+      };
+
+    case "low":
+      return {
+        text: "#166534",
+        background: "#DCFCE7",
+        border: "#86EFAC",
+        accent: "#16A34A",
+      };
+
+    case "medium":
+    default:
+      return {
+        text: "#92400E",
+        background: "#FEF3C7",
+        border: "#FCD34D",
+        accent: "#D97706",
+      };
+  }
+};
+
+const getStatusTheme = (status) => {
+  switch (
+    String(status || "")
+      .trim()
+      .toLowerCase()
+  ) {
+    case "closed":
+      return {
+        text: "#334155",
+        background: "#E2E8F0",
+        border: "#CBD5E1",
+      };
+
+    case "underreview":
+    case "under review":
+      return {
+        text: "#92400E",
+        background: "#FEF3C7",
+        border: "#FCD34D",
+      };
+
+    case "open":
+    default:
+      return {
+        text: "#166534",
+        background: "#DCFCE7",
+        border: "#86EFAC",
+      };
+  }
+};
+
+const buildDetailRow = ({
+  label,
+  value,
+  valueHtml,
+  last = false,
+}) => `
+  <tr>
+    <td
+      width="145"
+      valign="top"
+      style="
+        width:145px;
+        padding:12px 14px;
+        border-bottom:${last ? "none" : "1px solid #E8EDF3"};
+        color:#64748B;
+        font-family:Arial,Helvetica,sans-serif;
+        font-size:12px;
+        font-weight:700;
+        line-height:18px;
+        text-transform:uppercase;
+        letter-spacing:.04em;
+      "
+    >
+      ${escapeHtml(label)}
+    </td>
+
+    <td
+      valign="top"
+      style="
+        padding:12px 14px;
+        border-bottom:${last ? "none" : "1px solid #E8EDF3"};
+        color:#172033;
+        font-family:Arial,Helvetica,sans-serif;
+        font-size:14px;
+        font-weight:600;
+        line-height:20px;
+        word-break:break-word;
+      "
+    >
+      ${valueHtml || escapeHtml(value || "—")}
+    </td>
+  </tr>
+`;
 
 const sendIssueAssignmentEmail = async ({
   issue,
@@ -202,387 +474,898 @@ const sendIssueAssignmentEmail = async ({
     return {
       sent: false,
       reason:
-        "Assigned Corporate User does not have a valid email address",
+        "The assigned user does not have a valid email address",
     };
   }
 
   const issueUrl = getIssueUrl(issue.id);
 
   const assignedName =
-    assignedUser?.name ||
-    "Corporate User";
+    String(assignedUser?.name || "").trim() ||
+    "Issue Handler";
 
   const reporterName =
-    reporter?.name ||
-    reporter?.email ||
-    "Branch User";
+    String(
+      reporter?.name ||
+        reporter?.email ||
+        "Branch User"
+    ).trim();
 
   const reporterEmail =
-    reporter?.email || "";
+    String(reporter?.email || "").trim();
 
-  const categoryName =
-    category?.name ||
-    "General";
+  const issueTypeLabel = normalizeIssueTypeValue(issue?.issue_type);
 
-  const expectedOutcome =
-    issue.expected_outcome || "";
+  const categoryName = getIssueCategoryDisplayName(issue, category);
 
-  await sendMail({
-    to: recipientEmail,
+  const descriptionText =
+    stripHtml(issue.description) ||
+    "No description was provided.";
 
-    subject:
-      `[${issue.ticket_no}] New Issue Assigned - ${issue.title}`,
+  const expectedOutcomeText =
+    stripHtml(issue.expected_outcome);
 
-    text: [
-      `Hello ${assignedName},`,
-      "",
-      "A new branch issue has been assigned to you.",
-      "",
-      `Ticket: ${issue.ticket_no}`,
-      `Title: ${issue.title}`,
-      `Category: ${categoryName}`,
-      `Priority: ${issue.priority}`,
-      `Status: ${issue.status}`,
-      `Reported by: ${reporterName}`,
-      reporterEmail
-        ? `Reporter email: ${reporterEmail}`
-        : null,
-      "",
-      "Description:",
-      issue.description,
-      expectedOutcome
-        ? `Expected outcome: ${expectedOutcome}`
-        : null,
-      "",
-      `Open issue: ${issueUrl}`,
-      "",
-      "Nepal Life Asset Management System",
-    ]
-      .filter(Boolean)
-      .join("\n"),
+  const priority =
+    String(issue.priority || "Medium").trim();
 
-    html: `
-      <div
-        style="
-          font-family:Arial,sans-serif;
-          background:#f4f7fb;
-          padding:24px;
-          color:#172033;
-        "
-      >
-        <div
-          style="
-            max-width:680px;
-            margin:0 auto;
-            background:#ffffff;
-            border:1px solid #dce4ee;
-            border-radius:14px;
-            overflow:hidden;
-          "
+  const status =
+    String(issue.status || "Open").trim();
+
+  const submittedAt =
+    formatEmailDate(issue.created_at);
+
+  const priorityTheme =
+    getPriorityTheme(priority);
+
+  const statusTheme =
+    getStatusTheme(status);
+
+  const emailSubject =
+    `[${issue.ticket_no}] New issue assigned: ${issue.title}`;
+
+  const plainTextMessage = [
+    "NEPAL LIFE",
+    "Asset Management System",
+    "",
+    "NEW ISSUE ASSIGNED",
+    "",
+    `Hello ${assignedName},`,
+    "",
+    "A new branch issue has been assigned to you and requires your review.",
+    "",
+    `Ticket Number: ${issue.ticket_no}`,
+    `Issue Title: ${issue.title}`,
+    `Issue Type: ${issueTypeLabel}`,
+    `Category: ${categoryName}`,
+    `Priority: ${priority}`,
+    `Status: ${status}`,
+    `Reported By: ${reporterName}`,
+    reporterEmail
+      ? `Reporter Email: ${reporterEmail}`
+      : null,
+    `Submitted On: ${submittedAt}`,
+    "",
+    "ISSUE DESCRIPTION",
+    descriptionText,
+    "",
+    expectedOutcomeText
+      ? "EXPECTED OUTCOME"
+      : null,
+    expectedOutcomeText || null,
+    "",
+    `Open assigned issue: ${issueUrl}`,
+    "",
+    "Please review the issue and update its status through the Asset Management System.",
+    "",
+    "This is an automated message. Please do not reply directly to this email.",
+    "",
+    "Nepal Life Insurance Company Limited",
+    "Asset Management System",
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
+
+  const htmlMessage = `
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1"
+    >
+
+    <title>${escapeHtml(emailSubject)}</title>
+  </head>
+
+  <body
+    style="
+      margin:0;
+      padding:0;
+      background-color:#EEF2F7;
+      color:#172033;
+      font-family:Arial,Helvetica,sans-serif;
+      -webkit-text-size-adjust:100%;
+      -ms-text-size-adjust:100%;
+    "
+  >
+    <!-- Email preview text -->
+    <div
+      style="
+        display:none;
+        max-height:0;
+        overflow:hidden;
+        opacity:0;
+        color:transparent;
+      "
+    >
+      ${escapeHtml(
+        `New issue ${issue.ticket_no} has been assigned to you.`
+      )}
+    </div>
+
+    <table
+      role="presentation"
+      width="100%"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      style="
+        width:100%;
+        border-collapse:collapse;
+        background-color:#EEF2F7;
+      "
+    >
+      <tr>
+        <td
+          align="center"
+          style="padding:28px 12px;"
         >
-          <div
+          <table
+            role="presentation"
+            width="680"
+            cellspacing="0"
+            cellpadding="0"
+            border="0"
             style="
-              background:#0B5CAB;
-              color:#ffffff;
-              padding:20px 24px;
+              width:100%;
+              max-width:680px;
+              border-collapse:separate;
+              background-color:#FFFFFF;
+              border:1px solid #DCE4ED;
+              border-radius:18px;
+              overflow:hidden;
+              box-shadow:0 12px 35px rgba(15,23,42,.10);
             "
           >
-            <div
-              style="
-                font-size:12px;
-                letter-spacing:.08em;
-                text-transform:uppercase;
-                opacity:.85;
-              "
-            >
-              Nepal Life Issue Tracker
-            </div>
-
-            <h2
-              style="
-                margin:7px 0 0;
-                font-size:22px;
-              "
-            >
-              New Issue Assigned
-            </h2>
-          </div>
-
-          <div style="padding:24px">
-            <p style="margin-top:0">
-              Hello
-              <strong>
-                ${escapeHtml(assignedName)}
-              </strong>,
-            </p>
-
-            <p>
-              A new branch issue has been assigned to you.
-              Please review the details below.
-            </p>
-
-            <table
-              style="
-                width:100%;
-                border-collapse:collapse;
-                margin:18px 0;
-                font-size:14px;
-              "
-            >
-              <tr>
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                    color:#64748b;
-                    width:160px;
-                  "
-                >
-                  Ticket
-                </td>
-
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                    font-weight:700;
-                  "
-                >
-                  ${escapeHtml(issue.ticket_no)}
-                </td>
-              </tr>
-
-              <tr>
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                    color:#64748b;
-                  "
-                >
-                  Title
-                </td>
-
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                  "
-                >
-                  ${escapeHtml(issue.title)}
-                </td>
-              </tr>
-
-              <tr>
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                    color:#64748b;
-                  "
-                >
-                  Category
-                </td>
-
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                  "
-                >
-                  ${escapeHtml(categoryName)}
-                </td>
-              </tr>
-
-              <tr>
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                    color:#64748b;
-                  "
-                >
-                  Priority
-                </td>
-
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                    font-weight:700;
-                  "
-                >
-                  ${escapeHtml(issue.priority)}
-                </td>
-              </tr>
-
-              <tr>
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                    color:#64748b;
-                  "
-                >
-                  Status
-                </td>
-
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                  "
-                >
-                  ${escapeHtml(issue.status)}
-                </td>
-              </tr>
-
-              <tr>
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                    color:#64748b;
-                  "
-                >
-                  Reported by
-                </td>
-
-                <td
-                  style="
-                    padding:9px;
-                    border-bottom:1px solid #e5e7eb;
-                  "
-                >
-                  ${escapeHtml(reporterName)}
-                </td>
-              </tr>
-
-              ${
-                reporterEmail
-                  ? `
-                    <tr>
-                      <td
-                        style="
-                          padding:9px;
-                          border-bottom:1px solid #e5e7eb;
-                          color:#64748b;
-                        "
-                      >
-                        Reporter Email
-                      </td>
-
-                      <td
-                        style="
-                          padding:9px;
-                          border-bottom:1px solid #e5e7eb;
-                        "
-                      >
-                        ${escapeHtml(reporterEmail)}
-                      </td>
-                    </tr>
-                  `
-                  : ""
-              }
-            </table>
-
-            <div
-              style="
-                background:#f8fafc;
-                border:1px solid #e2e8f0;
-                border-radius:10px;
-                padding:14px;
-                margin-bottom:18px;
-              "
-            >
-              <div
+            <!-- Brand header -->
+            <tr>
+              <td
                 style="
-                  font-size:12px;
-                  font-weight:700;
-                  color:#64748b;
-                  text-transform:uppercase;
-                  margin-bottom:6px;
+                  padding:0;
+                  background-color:#FFFFFF;
+                  border-radius:18px 18px 0 0;
                 "
               >
-                Description
-              </div>
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  style="border-collapse:collapse;"
+                >
+                  <tr>
+                    <td
+                      style="
+                        padding:20px 24px;
+                        border-bottom:1px solid #E7ECF2;
+                      "
+                    >
+                      <table
+                        role="presentation"
+                        width="100%"
+                        cellspacing="0"
+                        cellpadding="0"
+                        border="0"
+                        style="border-collapse:collapse;"
+                      >
+                        <tr>
+                          <td
+                            width="58"
+                            valign="middle"
+                            style="width:58px;"
+                          >
+                            <!-- Text-based logo mark -->
+                            <table
+                              role="presentation"
+                              width="48"
+                              height="48"
+                              cellspacing="0"
+                              cellpadding="0"
+                              border="0"
+                              style="
+                                width:48px;
+                                height:48px;
+                                border-collapse:separate;
+                                background-color:#D71920;
+                                border-radius:13px;
+                              "
+                            >
+                              <tr>
+                                <td
+                                  align="center"
+                                  valign="middle"
+                                  style="
+                                    color:#FFFFFF;
+                                    font-family:Arial,Helvetica,sans-serif;
+                                    font-size:20px;
+                                    font-weight:900;
+                                    letter-spacing:-1px;
+                                  "
+                                >
+                                  NL
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
 
-              <div
+                          <td
+                            valign="middle"
+                            style="padding-left:3px;"
+                          >
+                            <div
+                              style="
+                                color:#D71920;
+                                font-family:Arial,Helvetica,sans-serif;
+                                font-size:22px;
+                                font-weight:900;
+                                line-height:25px;
+                                letter-spacing:-.5px;
+                              "
+                            >
+                              NEPAL LIFE
+                            </div>
+
+                            <div
+                              style="
+                                margin-top:2px;
+                                color:#64748B;
+                                font-family:Arial,Helvetica,sans-serif;
+                                font-size:11px;
+                                font-weight:700;
+                                line-height:16px;
+                                letter-spacing:.08em;
+                                text-transform:uppercase;
+                              "
+                            >
+                              Asset Management System
+                            </div>
+                          </td>
+
+                          <td
+                            align="right"
+                            valign="middle"
+                            style="padding-left:12px;"
+                          >
+                            <span
+                              style="
+                                display:inline-block;
+                                padding:7px 11px;
+                                background-color:#F1F5F9;
+                                border:1px solid #DCE4ED;
+                                border-radius:999px;
+                                color:#475569;
+                                font-family:Arial,Helvetica,sans-serif;
+                                font-size:11px;
+                                font-weight:700;
+                                line-height:15px;
+                              "
+                            >
+                              Issue Notification
+                            </span>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Hero -->
+            <tr>
+              <td
                 style="
-                  white-space:pre-wrap;
-                  line-height:1.6;
+                  padding:28px 26px 26px;
+                  background-color:#152A54;
+                  border-left:6px solid #D71920;
                 "
               >
-                ${escapeHtml(issue.description)}
-              </div>
-            </div>
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  style="border-collapse:collapse;"
+                >
+                  <tr>
+                    <td valign="top">
+                      <div
+                        style="
+                          color:#FFB7BA;
+                          font-family:Arial,Helvetica,sans-serif;
+                          font-size:11px;
+                          font-weight:800;
+                          line-height:16px;
+                          letter-spacing:.10em;
+                          text-transform:uppercase;
+                        "
+                      >
+                        Action required
+                      </div>
+
+                      <div
+                        style="
+                          margin-top:7px;
+                          color:#FFFFFF;
+                          font-family:Arial,Helvetica,sans-serif;
+                          font-size:25px;
+                          font-weight:800;
+                          line-height:32px;
+                          letter-spacing:-.4px;
+                        "
+                      >
+                        New Issue Assigned
+                      </div>
+
+                      <div
+                        style="
+                          margin-top:10px;
+                          color:#D8E2F2;
+                          font-family:Arial,Helvetica,sans-serif;
+                          font-size:14px;
+                          font-weight:400;
+                          line-height:22px;
+                        "
+                      >
+                        A new issue has been assigned to your account.
+                        Please review the details and take the appropriate action.
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Main content -->
+            <tr>
+              <td style="padding:27px 26px 12px;">
+                <div
+                  style="
+                    color:#172033;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:16px;
+                    font-weight:400;
+                    line-height:25px;
+                  "
+                >
+                  Hello
+                  <strong>${escapeHtml(assignedName)}</strong>,
+                </div>
+
+                <div
+                  style="
+                    margin-top:8px;
+                    color:#526174;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:14px;
+                    font-weight:400;
+                    line-height:23px;
+                  "
+                >
+                  The following issue has been submitted and assigned
+                  to you through the Nepal Life Asset Management System.
+                </div>
+              </td>
+            </tr>
+
+            <!-- Ticket highlight -->
+            <tr>
+              <td style="padding:12px 26px 0;">
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  style="
+                    width:100%;
+                    border-collapse:separate;
+                    background-color:#F8FAFC;
+                    border:1px solid #DCE4ED;
+                    border-radius:14px;
+                  "
+                >
+                  <tr>
+                    <td style="padding:17px 18px;">
+                      <table
+                        role="presentation"
+                        width="100%"
+                        cellspacing="0"
+                        cellpadding="0"
+                        border="0"
+                        style="border-collapse:collapse;"
+                      >
+                        <tr>
+                          <td valign="middle">
+                            <div
+                              style="
+                                color:#64748B;
+                                font-family:Arial,Helvetica,sans-serif;
+                                font-size:10px;
+                                font-weight:800;
+                                line-height:15px;
+                                letter-spacing:.08em;
+                                text-transform:uppercase;
+                              "
+                            >
+                              Ticket number
+                            </div>
+
+                            <div
+                              style="
+                                margin-top:4px;
+                                color:#152A54;
+                                font-family:Arial,Helvetica,sans-serif;
+                                font-size:20px;
+                                font-weight:900;
+                                line-height:25px;
+                              "
+                            >
+                              ${escapeHtml(issue.ticket_no)}
+                            </div>
+                          </td>
+
+                          <td
+                            align="right"
+                            valign="middle"
+                          >
+                            <span
+                              style="
+                                display:inline-block;
+                                margin:2px;
+                                padding:7px 11px;
+                                background-color:${priorityTheme.background};
+                                border:1px solid ${priorityTheme.border};
+                                border-radius:999px;
+                                color:${priorityTheme.text};
+                                font-family:Arial,Helvetica,sans-serif;
+                                font-size:11px;
+                                font-weight:800;
+                                line-height:15px;
+                              "
+                            >
+                              ${escapeHtml(priority)} Priority
+                            </span>
+
+                            <span
+                              style="
+                                display:inline-block;
+                                margin:2px;
+                                padding:7px 11px;
+                                background-color:${statusTheme.background};
+                                border:1px solid ${statusTheme.border};
+                                border-radius:999px;
+                                color:${statusTheme.text};
+                                font-family:Arial,Helvetica,sans-serif;
+                                font-size:11px;
+                                font-weight:800;
+                                line-height:15px;
+                              "
+                            >
+                              ${escapeHtml(
+                                status === "UnderReview"
+                                  ? "Under Review"
+                                  : status
+                              )}
+                            </span>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Issue details -->
+            <tr>
+              <td style="padding:20px 26px 0;">
+                <div
+                  style="
+                    margin-bottom:9px;
+                    color:#152A54;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:12px;
+                    font-weight:800;
+                    line-height:18px;
+                    letter-spacing:.07em;
+                    text-transform:uppercase;
+                  "
+                >
+                  Issue information
+                </div>
+
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  style="
+                    width:100%;
+                    border-collapse:separate;
+                    border:1px solid #DCE4ED;
+                    border-radius:12px;
+                    overflow:hidden;
+                  "
+                >
+                  ${buildDetailRow({
+                    label: "Issue title",
+                    value: issue.title,
+                  })}
+
+                  ${buildDetailRow({
+                    label: "Issue type",
+                    value: issueTypeLabel,
+                  })}
+
+                  ${buildDetailRow({
+                    label: "Category",
+                    value: categoryName,
+                  })}
+
+                  ${buildDetailRow({
+                    label: "Reported by",
+                    value: reporterName,
+                  })}
+
+                  ${
+                    reporterEmail
+                      ? buildDetailRow({
+                          label: "Reporter email",
+                          valueHtml: `
+                            <a
+                              href="mailto:${escapeHtml(reporterEmail)}"
+                              style="
+                                color:#1D4ED8;
+                                text-decoration:none;
+                                font-weight:700;
+                              "
+                            >
+                              ${escapeHtml(reporterEmail)}
+                            </a>
+                          `,
+                        })
+                      : ""
+                  }
+
+                  ${buildDetailRow({
+                    label: "Submitted on",
+                    value: submittedAt,
+                    last: true,
+                  })}
+                </table>
+              </td>
+            </tr>
+
+            <!-- Description -->
+            <tr>
+              <td style="padding:20px 26px 0;">
+                <div
+                  style="
+                    margin-bottom:9px;
+                    color:#152A54;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:12px;
+                    font-weight:800;
+                    line-height:18px;
+                    letter-spacing:.07em;
+                    text-transform:uppercase;
+                  "
+                >
+                  Issue description
+                </div>
+
+                <div
+                  style="
+                    padding:17px 18px;
+                    background-color:#F8FAFC;
+                    border:1px solid #DCE4ED;
+                    border-left:4px solid ${priorityTheme.accent};
+                    border-radius:12px;
+                    color:#334155;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:14px;
+                    font-weight:400;
+                    line-height:23px;
+                    white-space:pre-line;
+                    word-break:break-word;
+                  "
+                >
+                  ${escapeHtml(descriptionText).replace(/\n/g, "<br>")}
+                </div>
+              </td>
+            </tr>
 
             ${
-              expectedOutcome
+              expectedOutcomeText
                 ? `
-                  <div
-                    style="
-                      background:#eff6ff;
-                      border:1px solid #bfdbfe;
-                      border-radius:10px;
-                      padding:14px;
-                      margin-bottom:18px;
-                    "
-                  >
-                    <div
-                      style="
-                        font-size:12px;
-                        font-weight:700;
-                        color:#1d4ed8;
-                        text-transform:uppercase;
-                        margin-bottom:6px;
-                      "
-                    >
-                      Expected Outcome
-                    </div>
+                  <!-- Expected outcome -->
+                  <tr>
+                    <td style="padding:20px 26px 0;">
+                      <div
+                        style="
+                          margin-bottom:9px;
+                          color:#152A54;
+                          font-family:Arial,Helvetica,sans-serif;
+                          font-size:12px;
+                          font-weight:800;
+                          line-height:18px;
+                          letter-spacing:.07em;
+                          text-transform:uppercase;
+                        "
+                      >
+                        Expected outcome
+                      </div>
 
-                    <div
-                      style="
-                        white-space:pre-wrap;
-                        line-height:1.6;
-                      "
-                    >
-                      ${escapeHtml(expectedOutcome)}
-                    </div>
-                  </div>
+                      <div
+                        style="
+                          padding:17px 18px;
+                          background-color:#EFF6FF;
+                          border:1px solid #BFDBFE;
+                          border-radius:12px;
+                          color:#1E3A5F;
+                          font-family:Arial,Helvetica,sans-serif;
+                          font-size:14px;
+                          font-weight:400;
+                          line-height:23px;
+                          white-space:pre-line;
+                          word-break:break-word;
+                        "
+                      >
+                        ${escapeHtml(expectedOutcomeText).replace(
+                          /\n/g,
+                          "<br>"
+                        )}
+                      </div>
+                    </td>
+                  </tr>
                 `
                 : ""
             }
 
-            <a
-              href="${escapeHtml(issueUrl)}"
-              style="
-                display:inline-block;
-                background:#0B5CAB;
-                color:#ffffff;
-                text-decoration:none;
-                padding:11px 18px;
-                border-radius:8px;
-                font-weight:700;
-              "
-            >
-              Open Assigned Issue
-            </a>
+            <!-- Call to action -->
+            <tr>
+              <td
+                align="center"
+                style="padding:28px 26px 12px;"
+              >
+                <table
+                  role="presentation"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  style="border-collapse:separate;"
+                >
+                  <tr>
+                    <td
+                      align="center"
+                      bgcolor="#D71920"
+                      style="
+                        background-color:#D71920;
+                        border-radius:10px;
+                      "
+                    >
+                      <a
+                        href="${escapeHtml(issueUrl)}"
+                        target="_blank"
+                        style="
+                          display:inline-block;
+                          padding:14px 24px;
+                          color:#FFFFFF;
+                          font-family:Arial,Helvetica,sans-serif;
+                          font-size:14px;
+                          font-weight:800;
+                          line-height:18px;
+                          text-decoration:none;
+                          border-radius:10px;
+                        "
+                      >
+                        Review Assigned Issue &nbsp;→
+                      </a>
+                    </td>
+                  </tr>
+                </table>
 
-            <p
-              style="
-                margin:22px 0 0;
-                color:#64748b;
-                font-size:12px;
-              "
-            >
-              This is an automated notification from the
-              Nepal Life Asset Management System.
-            </p>
+                <div
+                  style="
+                    margin-top:13px;
+                    color:#94A3B8;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:11px;
+                    font-weight:400;
+                    line-height:17px;
+                  "
+                >
+                  Button not working? Copy and open this address:
+                </div>
+
+                <div
+                  style="
+                    margin-top:3px;
+                    color:#1D4ED8;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:11px;
+                    font-weight:600;
+                    line-height:17px;
+                    word-break:break-all;
+                  "
+                >
+                  ${escapeHtml(issueUrl)}
+                </div>
+              </td>
+            </tr>
+
+            <!-- Notice -->
+            <tr>
+              <td style="padding:17px 26px 26px;">
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  style="
+                    width:100%;
+                    border-collapse:separate;
+                    background-color:#FFF7ED;
+                    border:1px solid #FED7AA;
+                    border-radius:11px;
+                  "
+                >
+                  <tr>
+                    <td
+                      width="40"
+                      valign="top"
+                      style="
+                        width:40px;
+                        padding:13px 0 13px 14px;
+                        color:#C2410C;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:17px;
+                        font-weight:900;
+                      "
+                    >
+                      !
+                    </td>
+
+                    <td
+                      valign="top"
+                      style="
+                        padding:13px 14px 13px 4px;
+                        color:#9A3412;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:12px;
+                        font-weight:500;
+                        line-height:19px;
+                      "
+                    >
+                      Please review the assigned issue and update its
+                      status through the system. Avoid replying directly
+                      to this automated email.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                align="center"
+                style="
+                  padding:23px 24px;
+                  background-color:#F8FAFC;
+                  border-top:1px solid #E3E9F0;
+                  border-radius:0 0 18px 18px;
+                "
+              >
+                <div
+                  style="
+                    color:#D71920;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:14px;
+                    font-weight:900;
+                    line-height:20px;
+                    letter-spacing:.02em;
+                  "
+                >
+                  NEPAL LIFE
+                </div>
+
+                <div
+                  style="
+                    margin-top:3px;
+                    color:#475569;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:11px;
+                    font-weight:700;
+                    line-height:17px;
+                  "
+                >
+                  Nepal Life Insurance Company Limited
+                </div>
+
+                <div
+                  style="
+                    margin-top:7px;
+                    color:#94A3B8;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:10px;
+                    font-weight:400;
+                    line-height:16px;
+                  "
+                >
+                  Asset Management System · Automated Issue Notification
+                </div>
+
+                <div
+                  style="
+                    margin-top:3px;
+                    color:#94A3B8;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:10px;
+                    font-weight:400;
+                    line-height:16px;
+                  "
+                >
+                  © ${new Date().getFullYear()} Nepal Life Insurance
+                  Company Limited. All rights reserved.
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <div
+            style="
+              max-width:680px;
+              padding:13px 10px 0;
+              color:#94A3B8;
+              font-family:Arial,Helvetica,sans-serif;
+              font-size:10px;
+              font-weight:400;
+              line-height:16px;
+              text-align:center;
+            "
+          >
+            This message was generated automatically because an issue
+            was assigned to your system account.
           </div>
-        </div>
-      </div>
-    `,
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+  `;
+
+  await sendMail({
+    to: recipientEmail,
+    subject: emailSubject,
+    text: plainTextMessage,
+    html: htmlMessage,
   });
 
   return {
@@ -590,11 +1373,9 @@ const sendIssueAssignmentEmail = async ({
     to: recipientEmail,
   };
 };
-
 /* ─────────────────────────────────────────────────────────────
    MULTER FILE UPLOAD
 ───────────────────────────────────────────────────────────── */
-
 const uploadDir = path.join(
   process.cwd(),
   "uploads",
@@ -606,7 +1387,6 @@ if (!fs.existsSync(uploadDir)) {
     recursive: true,
   });
 }
-
 const storage = multer.diskStorage({
   destination: (_req, _file, callback) => {
     callback(null, uploadDir);
@@ -693,7 +1473,9 @@ exports.getCorpUsers = asyncHandler(
   async (_req, res) => {
     const users = await User.findAll({
       where: {
-        role: "corp_user",
+        role: {
+          [Op.in]: ["admin", "corp_user"],
+        },
       },
 
       attributes: [
@@ -706,7 +1488,10 @@ exports.getCorpUsers = asyncHandler(
         "emp_code",
       ],
 
-      order: [["name", "ASC"]],
+      order: [
+        ["role", "ASC"],
+        ["name", "ASC"],
+      ],
     });
 
     res.json(users);
@@ -724,6 +1509,8 @@ exports.listIssues = asyncHandler(
       status,
       priority,
       category_id,
+      issue_type,
+      customer_category_name,
       search,
     } = req.query;
 
@@ -740,8 +1527,19 @@ exports.listIssues = asyncHandler(
       where.priority = priority;
     }
 
+    const cleanIssueType = normalizeIssueTypeFilter(issue_type);
+
+    if (cleanIssueType) {
+      where.issue_type = cleanIssueType;
+    }
+
     if (category_id) {
       where.category_id = category_id;
+    }
+
+    if (customer_category_name) {
+      where.customer_category_name =
+        normalizeCustomerCategoryName(customer_category_name);
     }
 
     if (search) {
@@ -765,6 +1563,16 @@ exports.listIssues = asyncHandler(
         },
         {
           reporter_email: {
+            [Op.like]: `%${cleanSearch}%`,
+          },
+        },
+        {
+          customer_category_name: {
+            [Op.like]: `%${cleanSearch}%`,
+          },
+        },
+        {
+          custom_category_name: {
             [Op.like]: `%${cleanSearch}%`,
           },
         },
@@ -838,6 +1646,7 @@ exports.getIssue = asyncHandler(
       messages,
       attachments,
       logs,
+      assignedUser,
     ] = await Promise.all([
       BranchIssueMessage.findAll({
         where: messageWhere,
@@ -857,12 +1666,49 @@ exports.getIssue = asyncHandler(
         },
         order: [["created_at", "ASC"]],
       }),
+
+      issue.assigned_to_user_id
+        ? User.findByPk(issue.assigned_to_user_id, {
+            attributes: [
+              "id",
+              "name",
+              "email",
+              "role",
+            ],
+          })
+        : Promise.resolve(null),
     ]);
 
+    const assignedUserPayload = assignedUser
+      ? {
+          id: assignedUser.id,
+          name: assignedUser.name,
+          email: assignedUser.email,
+          role: assignedUser.role,
+        }
+      : null;
+
+    const issuePayload =
+      typeof issue.toJSON === "function"
+        ? issue.toJSON()
+        : { ...issue };
+
+    issuePayload.assigned_to_name =
+      assignedUserPayload?.name ||
+      assignedUserPayload?.email ||
+      null;
+
+    issuePayload.assigned_to_email =
+      assignedUserPayload?.email ||
+      null;
+
+    issuePayload.assigned_user =
+      assignedUserPayload;
+
     res.json({
-      issue,
+      issue: issuePayload,
       messages,
-      attachments,
+      attachments: attachments.map(buildAttachmentResponse),
       logs,
     });
   }
@@ -880,6 +1726,10 @@ exports.createIssue = asyncHandler(
       description,
       expected_outcome,
       category_id,
+      issue_type,
+      customer_category_name,
+      custom_category_name,
+      issue_category_name,
       priority,
       assigned_to_user_id,
       reporter_branch_id,
@@ -917,15 +1767,21 @@ exports.createIssue = asyncHandler(
     if (!cleanAssignedToUserId) {
       return res.status(400).json({
         message:
-          "Please select a Corporate User",
+          "Please select an Admin or Corporate User",
       });
     }
 
-    const assignedCorpUser =
+    const assignedUser =
       await User.findOne({
         where: {
           id: cleanAssignedToUserId,
-          role: "corp_user",
+
+          role: {
+            [Op.in]: [
+              "admin",
+              "corp_user",
+            ],
+          },
         },
 
         attributes: [
@@ -936,47 +1792,93 @@ exports.createIssue = asyncHandler(
         ],
       });
 
-    if (!assignedCorpUser) {
+    if (!assignedUser) {
       return res.status(400).json({
         message:
-          "Invalid Corporate User selected",
+          "Invalid issue handler selected. Please select an Admin or Corporate User.",
 
         received:
           assigned_to_user_id,
       });
     }
 
+    const cleanIssueType =
+      normalizeIssueTypeValue(issue_type);
+
     const cleanCategoryId =
       toNullableNumber(category_id);
 
-    if (!cleanCategoryId) {
-      return res.status(400).json({
-        message:
-          "Please select issue category",
-      });
+    const requestedCustomerCategory =
+      normalizeCustomerCategoryName(
+        customer_category_name ||
+          issue_category_name ||
+          custom_category_name
+      );
+
+    const cleanCustomCategoryName =
+      normalizeCustomerCategoryName(custom_category_name);
+
+    let category = null;
+    let finalCategoryId = null;
+    let finalCustomerCategoryName = null;
+    let finalCustomCategoryName = null;
+
+    if (cleanIssueType === "Employee") {
+      if (!cleanCategoryId) {
+        return res.status(400).json({
+          message:
+            "Please select employee issue category",
+        });
+      }
+
+      category =
+        await BranchIssueCategory.findOne({
+          where: {
+            id: cleanCategoryId,
+            is_active: true,
+          },
+
+          attributes: [
+            "id",
+            "name",
+            "code",
+          ],
+        });
+
+      if (!category) {
+        return res.status(400).json({
+          message:
+            "Invalid issue category selected",
+
+          received: category_id,
+        });
+      }
+
+      finalCategoryId = category.id;
     }
 
-    const category =
-      await BranchIssueCategory.findOne({
-        where: {
-          id: cleanCategoryId,
-          is_active: true,
-        },
+    if (cleanIssueType === "Customer") {
+      if (!requestedCustomerCategory) {
+        return res.status(400).json({
+          message:
+            "Please select or enter customer issue category",
+        });
+      }
 
-        attributes: [
-          "id",
-          "name",
-          "code",
-        ],
-      });
+      finalCustomerCategoryName =
+        requestedCustomerCategory;
 
-    if (!category) {
-      return res.status(400).json({
-        message:
-          "Invalid issue category selected",
+      /*
+        When frontend sends custom_category_name, we keep it separately.
+        For predefined customer categories, this remains null.
+      */
+      finalCustomCategoryName =
+        cleanCustomCategoryName || null;
 
-        received: category_id,
-      });
+      category =
+        buildCustomerCategoryObject(
+          finalCustomerCategoryName
+        );
     }
 
     const cleanReporterBranchId =
@@ -1028,7 +1930,16 @@ exports.createIssue = asyncHandler(
             ).trim() || null,
 
           category_id:
-            cleanCategoryId,
+            finalCategoryId,
+
+          issue_type:
+            cleanIssueType,
+
+          customer_category_name:
+            finalCustomerCategoryName,
+
+          custom_category_name:
+            finalCustomCategoryName,
 
           priority:
             cleanPriority,
@@ -1054,7 +1965,7 @@ exports.createIssue = asyncHandler(
             null,
 
           assigned_to_user_id:
-            assignedCorpUser.id,
+            assignedUser.id,
         });
 
         break;
@@ -1127,10 +2038,13 @@ exports.createIssue = asyncHandler(
       action: "Created",
 
       remarks:
-        `Issue submitted and assigned to ${
-          assignedCorpUser.name ||
-          assignedCorpUser.email
-        }`,
+        `${cleanIssueType} issue submitted under ${getIssueCategoryDisplayName(
+          issue,
+          category
+        )} and assigned to ${
+          assignedUser.name ||
+          assignedUser.email
+        } (${assignedUser.role})`,
     });
 
     /*
@@ -1150,8 +2064,7 @@ exports.createIssue = asyncHandler(
         await sendIssueAssignmentEmail({
           issue,
 
-          assignedUser:
-            assignedCorpUser,
+          assignedUser,
 
           category,
 
@@ -1178,10 +2091,13 @@ exports.createIssue = asyncHandler(
             issue.ticket_no,
 
           assignedUserId:
-            assignedCorpUser.id,
+            assignedUser.id,
 
           assignedEmail:
-            assignedCorpUser.email,
+            assignedUser.email,
+
+          assignedRole:
+            assignedUser.role,
 
           message:
             mailError?.message,
@@ -1217,6 +2133,11 @@ exports.createIssue = asyncHandler(
 /* ─────────────────────────────────────────────────────────────
    6. CHANGE ISSUE STATUS
    PUT /api/v1/branch-issues/:id/status
+
+   Permission:
+   - Only the specifically assigned user can change status.
+   - The assigned user must have role admin or corp_user.
+   - Unassigned admins cannot change the status.
 ───────────────────────────────────────────────────────────── */
 
 exports.changeStatus = asyncHandler(
@@ -1232,23 +2153,19 @@ exports.changeStatus = asyncHandler(
       "Closed",
     ];
 
-    if (
-      !validStatuses.includes(status)
-    ) {
+    if (!validStatuses.includes(status)) {
       return res.status(400).json({
         message:
           "Invalid status. Must be Open, UnderReview or Closed",
       });
     }
 
-    const issue =
-      await BranchIssue.findOne({
-        where: {
-          id: req.params.id,
-          is_deleted: false,
-          ...branchScope(req.user),
-        },
-      });
+    const issue = await BranchIssue.findOne({
+      where: {
+        id: req.params.id,
+        is_deleted: false,
+      },
+    });
 
     if (!issue) {
       return res.status(404).json({
@@ -1256,52 +2173,67 @@ exports.changeStatus = asyncHandler(
       });
     }
 
-    const oldStatus =
-      issue.status;
+    const currentUserId = req.user?.id;
+    const assignedUserId = issue.assigned_to_user_id;
+    const currentRole = normalizeRole(req.user?.role);
 
-    const update = {
+    const isAssignedUser =
+      currentUserId !== undefined &&
+      currentUserId !== null &&
+      assignedUserId !== undefined &&
+      assignedUserId !== null &&
+      String(currentUserId) === String(assignedUserId);
+
+    const hasAllowedRole = [
+      "admin",
+      "corpuser",
+    ].includes(currentRole);
+
+    if (!isAssignedUser || !hasAllowedRole) {
+      return res.status(403).json({
+        message:
+          "Only the assigned Admin or Corporate User can change this issue status",
+      });
+    }
+
+    const oldStatus = issue.status;
+
+    if (oldStatus === status) {
+      return res.status(400).json({
+        message: `Issue status is already ${status}`,
+      });
+    }
+
+    const cleanRemarks = String(remarks || "").trim();
+
+    await issue.update({
       status,
       closed_at:
         status === "Closed"
           ? new Date()
           : null,
-    };
-
-    await issue.update(update);
+    });
 
     await BranchIssueActivityLog.create({
-      issue_id:
-        issue.id,
-
-      actor_user_id:
-        req.user?.id ?? null,
-
+      issue_id: issue.id,
+      actor_user_id: req.user?.id ?? null,
       actor_name:
-        req.user?.name ?? null,
-
+        req.user?.name ??
+        req.user?.email ??
+        null,
       action:
         status === "Closed"
           ? "Closed"
-          : oldStatus === "Closed" &&
-              status !== "Closed"
+          : oldStatus === "Closed" && status !== "Closed"
             ? "Reopened"
             : "StatusChanged",
-
-      old_status:
-        oldStatus,
-
-      new_status:
-        status,
-
-      remarks:
-        String(remarks || "").trim() ||
-        null,
+      old_status: oldStatus,
+      new_status: status,
+      remarks: cleanRemarks || null,
     });
 
-    res.json({
-      message:
-        "Status updated successfully",
-
+    return res.json({
+      message: "Status updated successfully",
       issue,
     });
   }
@@ -1491,7 +2423,10 @@ exports.uploadAttachment = asyncHandler(
       message:
         "File uploaded successfully",
 
-      attachment,
+      attachment:
+        buildAttachmentResponse(
+          attachment
+        ),
     });
   }
 );

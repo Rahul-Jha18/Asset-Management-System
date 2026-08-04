@@ -1,8 +1,8 @@
 import api from "./api";
 
 /* Categories */
-export const getIssueCategories = () =>
-  api.get("/api/v1/branch-issues/categories");
+export const getIssueCategories = (params = {}) =>
+  api.get("/api/v1/branch-issues/categories", { params });
 
 export const getIssueCorpUsers = () =>
   api.get("/api/v1/branch-issues/corp-users");
@@ -32,6 +32,7 @@ export const addBranchIssueMessage = (id, message, is_internal = false) =>
 export const uploadBranchIssueAttachment = (id, file) => {
   const fd = new FormData();
   fd.append("file", file);
+
   return api.post(`/api/v1/branch-issues/${id}/attachments`, fd, {
     headers: { "Content-Type": "multipart/form-data" },
   });
