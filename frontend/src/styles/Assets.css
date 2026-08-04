@@ -1,5 +1,7 @@
 /* CLEAN + RESPONSIVE CSS (FORMAL TABLE + BRANCH STYLE + YOUR BUTTON GLOW) */
-
+:root {
+  --it-brand-grad: linear-gradient(135deg, #7c3aed83  0%, #7c3aed8f 100%);
+}
 /* ---------------------------------
    GLOBAL RESET
 ---------------------------------- */
