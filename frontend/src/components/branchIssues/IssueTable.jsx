@@ -446,7 +446,7 @@ export default function IssueTable({
               : `${BASKETS.length} baskets`}
           </span>
           <span className="it-table-role-pill">
-            {canAct ? "Admin / Corp View" : "Branch View"}
+            {canAct ? "My Work View" : "Admin View"}
           </span>
         </div>
       </div>

@@ -42,44 +42,35 @@ const isApprover = (user) => {
 /*
   Access rules:
 
-  Admin, Approver and Head Office:
+  Admin:
   - Can view all issues.
 
-  Corporate users:
+  All other roles:
+  - Can view only issues they created.
   - Can view only issues assigned to them.
 
-  Branch users:
-  - Can view issues from their own branch.
+  Branch/station is not used for visibility here because the required
+  flow is strictly: created by me OR assigned to me.
 */
 const branchScope = (user) => {
   const role = normalizeRole(user?.role);
 
-  if (
-    ["admin", "approver", "headoffice"].includes(role)
-  ) {
+  if (role === "admin") {
     return {};
   }
 
-  if (role === "corpuser") {
-    return {
-      assigned_to_user_id: user?.id ?? -1,
-    };
-  }
-
-  const branchId =
-    user?.branch_id ??
-    user?.branchId ??
-    user?.service_station_id ??
-    null;
-
-  if (branchId) {
-    return {
-      reporter_branch_id: branchId,
-    };
-  }
+  const userId =
+    user?.id ?? -1;
 
   return {
-    reporter_user_id: user?.id ?? -1,
+    [Op.or]: [
+      {
+        reporter_user_id: userId,
+      },
+      {
+        assigned_to_user_id: userId,
+      },
+    ],
   };
 };
 
@@ -268,68 +259,34 @@ const getUserBranchId = (user) =>
 
 const getAnalysisScope = (user) => {
   const role = normalizeRole(user?.role);
-  const branchId = getUserBranchId(user);
+  const userId = user?.id ?? -1;
 
   /*
     Dashboard visibility rule:
-    - admin / corp_user / approver / head office: all issue data
-    - subadmin: station/branch scoped data using service_station_id/branch_id
-    - normal branch user: own branch data, fallback to own submitted issues
+    - admin: all issue data
+    - every other role: only created-by-me OR assigned-to-me data
   */
-  if (
-    [
-      "admin",
-      "corpuser",
-      "approver",
-      "headoffice",
-    ].includes(role)
-  ) {
+  if (role === "admin") {
     return {
       where: {},
-      label: "All branches",
+      label: "All issues",
       role,
       level: "all",
     };
   }
 
-  if (role === "subadmin") {
-    if (branchId) {
-      return {
-        where: {
-          reporter_branch_id: branchId,
-        },
-        label: "Assigned station / branch",
-        role,
-        level: "station",
-      };
-    }
-
-    return {
-      where: {
-        reporter_user_id: user?.id ?? -1,
-      },
-      label: "Your submitted issues",
-      role,
-      level: "own",
-    };
-  }
-
-  if (branchId) {
-    return {
-      where: {
-        reporter_branch_id: branchId,
-      },
-      label: "Your branch",
-      role,
-      level: "branch",
-    };
-  }
-
   return {
     where: {
-      reporter_user_id: user?.id ?? -1,
+      [Op.or]: [
+        {
+          reporter_user_id: userId,
+        },
+        {
+          assigned_to_user_id: userId,
+        },
+      ],
     },
-    label: "Your submitted issues",
+    label: "Created or assigned to you",
     role,
     level: "own",
   };
@@ -3048,8 +3005,8 @@ exports.createIssue = asyncHandler(
 
    Permission:
    - Only the specifically assigned user can change status.
-   - The assigned user must have role admin or corp_user.
-   - Unassigned admins cannot change the status.
+   - Admin can view all issues, but cannot change status unless assigned.
+   - Role is not checked here because any role can be assigned an issue.
 ───────────────────────────────────────────────────────────── */
 
 exports.changeStatus = asyncHandler(
@@ -3087,7 +3044,6 @@ exports.changeStatus = asyncHandler(
 
     const currentUserId = req.user?.id;
     const assignedUserId = issue.assigned_to_user_id;
-    const currentRole = normalizeRole(req.user?.role);
 
     const isAssignedUser =
       currentUserId !== undefined &&
@@ -3096,15 +3052,10 @@ exports.changeStatus = asyncHandler(
       assignedUserId !== null &&
       String(currentUserId) === String(assignedUserId);
 
-    const hasAllowedRole = [
-      "admin",
-      "corpuser",
-    ].includes(currentRole);
-
-    if (!isAssignedUser || !hasAllowedRole) {
+    if (!isAssignedUser) {
       return res.status(403).json({
         message:
-          "Only the assigned Admin or Corporate User can change this issue status",
+          "Only the assigned user can change this issue status",
       });
     }
 

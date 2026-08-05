@@ -1119,8 +1119,8 @@ export default function BranchIssuesPage() {
   const navigate = useNavigate();
   const role = String(user?.role?.name || user?.role || "").toLowerCase().replace(/[\s_-]/g, "");
   const isAdmin = role === "admin";
-  const isCorpUser = role === "corpuser";
-  const canAct = isAdmin || isCorpUser;
+  const isAssignedInboxUser = !isAdmin;
+  const canAct = !isAdmin;
   const canDelete = isAdmin; // delete is admin-only
 
   const [issues, setIssues] = useState([]);
@@ -1217,13 +1217,13 @@ export default function BranchIssuesPage() {
     const closed = typeFilteredIssues.filter((issue) => issue.status === "Closed").length;
     const high = typeFilteredIssues.filter((issue) => ["High", "Critical"].includes(issue.priority)).length;
 
-    // New Report = new/open issue assigned to the logged-in Corporate User.
-    // For normal branch users/admin view, it shows open reports in the current visible list.
+    // New Report = open issue assigned to the logged-in user.
+    // Admin sees all open reports as new because admin has full visibility.
     const newReports = typeFilteredIssues.filter((issue) => {
       const isOpen = issue.status === "Open";
       if (!isOpen) return false;
 
-      if (isCorpUser) {
+      if (isAssignedInboxUser) {
         return String(issue.assigned_to_user_id || "") === String(user?.id || "");
       }
 
@@ -1231,7 +1231,7 @@ export default function BranchIssuesPage() {
     }).length;
 
     return { total, newReports, open, underReview, closed, high };
-  }, [typeFilteredIssues, isCorpUser, user?.id]);
+  }, [typeFilteredIssues, isAssignedInboxUser, user?.id]);
 
   const newReportCount = stats.newReports || 0;
   const navItems = useMemo(
@@ -1247,7 +1247,7 @@ export default function BranchIssuesPage() {
         const isOpen = issue.status === "Open";
         if (!isOpen) return false;
 
-        if (isCorpUser) {
+        if (isAssignedInboxUser) {
           return String(issue.assigned_to_user_id || "") === String(user?.id || "");
         }
 
@@ -1260,7 +1260,7 @@ export default function BranchIssuesPage() {
     }
 
     return typeFilteredIssues.filter((i) => i.status === activeStat);
-  }, [typeFilteredIssues, activeStat, isCorpUser, user?.id]);
+  }, [typeFilteredIssues, activeStat, isAssignedInboxUser, user?.id]);
 
   useEffect(() => {
     setPage(1);
@@ -1304,7 +1304,7 @@ export default function BranchIssuesPage() {
       },
       new: {
         title: "New Report Basket",
-        description: isCorpUser
+        description: isAssignedInboxUser
           ? "New open reports assigned to you."
           : "New open reports available in this view.",
         tone: "red",
@@ -1332,7 +1332,7 @@ export default function BranchIssuesPage() {
     };
 
     return map[activeStat] || map.all;
-  }, [activeStat, isCorpUser]);
+  }, [activeStat, isAssignedInboxUser]);
 
   const kpis = [
     {
@@ -1351,7 +1351,7 @@ export default function BranchIssuesPage() {
       icon: "bell",
       color: "#E11D48",
       colorSoft: "#FDECEF",
-      hint: isCorpUser ? "New assigned reports" : "New open reports",
+      hint: isAssignedInboxUser ? "New assigned reports" : "New open reports",
       notify: stats.newReports,
     },
     {
@@ -1607,7 +1607,7 @@ export default function BranchIssuesPage() {
               basketTone={basketMeta.tone}
               basketCount={filteredByStat.length}
               newReportCount={newReportCount}
-              isCorpUser={isCorpUser}
+              isCorpUser={isAssignedInboxUser}
               onBasketChange={setActiveStat}
               onRowClick={(issueId) => navigate(`/branch-issues/${issueId}`)}
               onRefresh={load}

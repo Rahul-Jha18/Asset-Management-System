@@ -24,7 +24,7 @@ export const createBranchIssue = (data) =>
 export const deleteBranchIssue = (id) =>
   api.delete(`/api/v1/branch-issues/${id}`);
 
-/* Status  (approver only) */
+/* Status */
 export const changeBranchIssueStatus = (id, status, remarks = "") =>
   api.put(`/api/v1/branch-issues/${id}/status`, { status, remarks });
 
@@ -41,7 +41,6 @@ export const uploadBranchIssueAttachment = (id, file) => {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
-
 
 /* Analysis Dashboard */
 export const getBranchIssueAnalysisDashboard = (params = {}) =>

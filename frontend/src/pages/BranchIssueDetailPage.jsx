@@ -855,7 +855,6 @@ export default function BranchIssueDetailPage() {
 
   const role = String(user?.role || "").toLowerCase().replace(/[\s_-]/g, "");
   const isAdmin = role === "admin";
-  const isCorpUser = role === "corpuser";
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -915,12 +914,14 @@ export default function BranchIssueDetailPage() {
   const issue = data?.issue;
 
   // Issue-specific permission flags
-  const isAssignedCorpUser = isCorpUser && String(issue?.assigned_to_user_id) === String(user?.id);
-  const isCreator = String(issue?.reporter_user_id) === String(user?.id);
+  const isAssignedUser =
+    String(issue?.assigned_to_user_id || "") === String(user?.id || "");
+  const isCreator =
+    String(issue?.reporter_user_id || "") === String(user?.id || "");
 
-  const canChat = isAdmin || isAssignedCorpUser || isCreator;
-  const canChangeStatus = isAssignedCorpUser; // admin can chat but NOT change status
-  const canPostInternal = isAdmin || isAssignedCorpUser;
+  const canChat = isAdmin || isAssignedUser || isCreator;
+  const canChangeStatus = isAssignedUser;
+  const canPostInternal = isAdmin;
 
   const handleStatusChange = async () => {
     if (!newStatus) return;
@@ -1222,7 +1223,7 @@ export default function BranchIssueDetailPage() {
                 {canChangeStatus && (
                   <div className="it-detail-card">
                     <div className="it-detail-header">
-                      <small>Corporate User Actions</small>
+                      <small>Assigned User Actions</small>
                       <h2>Change Status</h2>
                     </div>
 
