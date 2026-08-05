@@ -6,79 +6,102 @@ import Footer from "../components/Layout/Footer";
 import { getBranchIssueAnalysisDashboard } from "../services/branchIssueApi";
 
 const FONTS = `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
 `;
 
 const CSS = `
 *,*::before,*::after{box-sizing:border-box}
 
 :root{
-  --ad-blue:#1D4ED8;
-  --ad-blue-dark:#1E3A8A;
-  --ad-red:#DC2626;
-  --ad-green:#16A34A;
-  --ad-amber:#D97706;
-  --ad-purple:#7E22CE;
-  --ad-slate:#64748B;
-  --ad-bg:#F6F8FC;
+  --ad-blue:#4F46E5;
+  --ad-blue-dark:#3730A3;
+  --ad-violet:#7C3AED;
+  --ad-brand-grad:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+  --ad-red:#E11D48;
+  --ad-green:#10B981;
+  --ad-amber:#F59E0B;
+  --ad-teal:#0891B2;
+  --ad-purple:#9333EA;
+  --ad-slate:#6B6885;
+
+  --ad-bg:#F4F5FB;
   --ad-card:#FFFFFF;
-  --ad-line:#E2E8F0;
-  --ad-line-dark:#CBD5E1;
-  --ad-text:#0F172A;
-  --ad-muted:#64748B;
-  --ad-faint:#94A3B8;
-  --ad-shadow-sm:0 1px 2px rgba(15,23,42,.05);
-  --ad-shadow:0 1px 3px rgba(15,23,42,.06),0 10px 26px rgba(15,23,42,.06);
-  --ad-shadow-lg:0 18px 50px rgba(15,23,42,.12);
+  --ad-line:#E7E7F3;
+  --ad-line-dark:#D6D5EA;
+  --ad-text:#161328;
+  --ad-muted:#6B6885;
+  --ad-faint:#9C99B4;
+
+  --ad-shadow-sm:0 1px 2px rgba(30,20,70,.05);
+  --ad-shadow:0 1px 3px rgba(30,20,70,.05),0 12px 28px rgba(45,27,105,.07);
+  --ad-shadow-lg:0 20px 50px rgba(45,27,105,.16);
   --ad-radius:18px;
   --ad-font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --ad-display:'Sora','Inter',sans-serif;
 }
+
+@keyframes ad-spin{to{transform:rotate(360deg)}}
+@keyframes ad-fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ad-pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes ad-draw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+@keyframes ad-pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes ad-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
 .ad-page{
   font-family:var(--ad-font);
   background:
-    radial-gradient(circle at top left,rgba(29,78,216,.08),transparent 32%),
-    linear-gradient(180deg,#FBFCFF 0%,#F2F6FB 100%);
+    radial-gradient(900px 480px at 94% -8%, rgba(124,58,237,.10), transparent 55%),
+    radial-gradient(760px 420px at -4% 18%, rgba(79,70,229,.08), transparent 55%),
+    var(--ad-bg);
   height:calc(100vh - 36px);
   max-height:calc(100vh - 36px);
   overflow:auto;
   color:var(--ad-text);
-  padding:18px 18px 32px;
+  padding:20px 20px 34px;
   scrollbar-width:thin;
-  scrollbar-color:#CBD5E1 transparent;
+  scrollbar-color:#C9C7E4 transparent;
 }
 
 .ad-page::-webkit-scrollbar{width:8px;height:8px}
 .ad-page::-webkit-scrollbar-track{background:transparent}
-.ad-page::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:999px}
+.ad-page::-webkit-scrollbar-thumb{background:#C9C7E4;border-radius:999px}
 
-.ad-inner{max-width:1480px;margin:0 auto}
+.ad-inner{max-width:1520px;margin:0 auto}
 
 .ad-head{
-  background:#FFFFFF;
+  background:var(--ad-card);
   border:1px solid var(--ad-line);
-  border-radius:22px;
+  border-radius:24px;
   box-shadow:var(--ad-shadow);
-  padding:18px 20px;
-  margin-bottom:14px;
+  padding:22px 26px;
+  margin-bottom:16px;
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
-  gap:16px;
+  gap:18px;
   flex-wrap:wrap;
   position:relative;
   overflow:hidden;
+  animation:ad-fade-up .35s ease both;
 }
 
 .ad-head::before{
   content:"";
   position:absolute;
-  top:0;
-  left:20px;
-  right:20px;
-  height:3px;
-  border-radius:0 0 999px 999px;
-  background:linear-gradient(90deg,var(--ad-blue),var(--ad-red));
+  inset:0 0 auto 0;
+  height:4px;
+  background:linear-gradient(90deg,#4F46E5,#7C3AED,#E11D48);
+}
+
+.ad-head::after{
+  content:"";
+  position:absolute;
+  top:-90px;
+  right:-70px;
+  width:260px;
+  height:260px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(124,58,237,.14),transparent 70%);
 }
 
 .ad-eyebrow{
@@ -88,8 +111,9 @@ const CSS = `
   color:var(--ad-blue);
   font-size:11px;
   text-transform:uppercase;
-  letter-spacing:.08em;
-  font-weight:900;
+  letter-spacing:.13em;
+  font-weight:700;
+  font-family:var(--ad-display);
 }
 
 .ad-eyebrow::before{
@@ -97,39 +121,39 @@ const CSS = `
   width:8px;
   height:8px;
   border-radius:999px;
-  background:var(--ad-red);
+  background:var(--ad-brand-grad);
+  animation:ad-pulse-dot 1.8s ease-in-out infinite;
 }
 
 .ad-title{
-  margin:7px 0 0;
-  font-size:clamp(1.45rem,3vw,2.08rem);
+  margin:8px 0 0;
+  font-family:var(--ad-display);
+  font-size:clamp(1.5rem,3vw,2.15rem);
   line-height:1.08;
-  letter-spacing:-.04em;
-  font-weight:900;
-  color:#0F172A;
+  letter-spacing:-.03em;
+  font-weight:800;
+  color:#12102A;
 }
-
+.ad-actions{
+  position:relative;
+  z-index:2;
+}
 .ad-desc{
   max-width:760px;
-  margin:8px 0 0;
+  margin:9px 0 0;
   color:var(--ad-muted);
   line-height:1.65;
   font-size:13.5px;
 }
 
-.ad-actions{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  flex-wrap:wrap;
-}
+.ad-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 
 .ad-btn{
   border:none;
   border-radius:12px;
-  padding:10px 14px;
+  padding:10px 15px;
   font-family:var(--ad-font);
-  font-weight:850;
+  font-weight:750;
   font-size:12.5px;
   display:inline-flex;
   align-items:center;
@@ -140,89 +164,86 @@ const CSS = `
   white-space:nowrap;
 }
 
-.ad-btn:hover:not(:disabled){
-  transform:translateY(-1px);
-  box-shadow:var(--ad-shadow);
-}
-
+.ad-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--ad-shadow)}
 .ad-btn:disabled{opacity:.55;cursor:not-allowed}
-.ad-btn-primary{background:var(--ad-blue);color:#FFFFFF;box-shadow:0 8px 18px rgba(29,78,216,.20)}
-.ad-btn-primary:hover{background:var(--ad-blue-dark)}
-.ad-btn-soft{background:#FFFFFF;color:#334155;border:1px solid var(--ad-line);box-shadow:var(--ad-shadow-sm)}
-.ad-btn-soft:hover{background:#F8FAFC;border-color:#CBD5E1}
+.ad-btn-primary{background:var(--ad-brand-grad);color:#FFFFFF;box-shadow:0 10px 22px rgba(79,70,229,.26)}
+.ad-btn-soft{background:#FFFFFF;color:var(--ad-text);border:1px solid var(--ad-line);box-shadow:var(--ad-shadow-sm)}
+.ad-btn-soft:hover{background:#F8F8FE;border-color:var(--ad-line-dark)}
 
 .ad-scope{
   display:flex;
   align-items:center;
   gap:8px;
-  background:#EFF6FF;
-  color:#1D4ED8;
-  border:1px solid #BFDBFE;
+  background:#EEF0FE;
+  color:var(--ad-blue);
+  border:1px solid #D7D9FB;
   border-radius:999px;
-  padding:8px 12px;
+  padding:8px 13px;
   font-size:12px;
-  font-weight:850;
+  font-weight:750;
 }
 
 .ad-filter-card{
-  background:#FFFFFF;
+  background:var(--ad-card);
   border:1px solid var(--ad-line);
   border-radius:18px;
   box-shadow:var(--ad-shadow-sm);
-  padding:12px;
+  padding:13px;
   display:grid;
   grid-template-columns:repeat(5,minmax(130px,1fr)) auto;
   gap:10px;
   align-items:end;
-  margin-bottom:14px;
+  margin-bottom:15px;
 }
 
 .ad-field{display:flex;flex-direction:column;gap:6px}
 .ad-field label{
-  color:#475569;
+  color:var(--ad-muted);
   font-size:10px;
-  font-weight:900;
+  font-weight:700;
   letter-spacing:.07em;
   text-transform:uppercase;
+  font-family:var(--ad-display);
 }
 .ad-field input,.ad-field select{
-  height:39px;
-  border:1px solid #CBD5E1;
+  height:40px;
+  border:1px solid var(--ad-line-dark);
   background:#FFFFFF;
   border-radius:11px;
   padding:0 11px;
-  color:#0F172A;
+  color:var(--ad-text);
   outline:none;
   font-family:var(--ad-font);
+  transition:.16s ease;
 }
 .ad-field input:focus,.ad-field select:focus{
   border-color:var(--ad-blue);
-  box-shadow:0 0 0 3px rgba(29,78,216,.10);
+  box-shadow:0 0 0 4px rgba(79,70,229,.10);
 }
+
+/* ── KPI cards ──────────────────────────────────────────── */
 
 .ad-kpis{
   display:grid;
   grid-template-columns:repeat(6,1fr);
-  gap:12px;
-  margin-bottom:14px;
+  gap:13px;
+  margin-bottom:15px;
 }
 
 .ad-kpi{
-  background:#FFFFFF;
+  background:var(--ad-card);
   border:1px solid var(--ad-line);
   border-radius:18px;
   box-shadow:var(--ad-shadow-sm);
-  padding:14px;
-  min-height:112px;
+  padding:15px;
+  min-height:114px;
   position:relative;
   overflow:hidden;
-  transition:.18s ease;
+  transition:.2s ease;
+  animation:ad-fade-up .4s ease both;
 }
 
-.ad-kpi:hover{
-  transform:translateY(-2px);
-  box-shadow:var(--ad-shadow);
-}
+.ad-kpi:hover{transform:translateY(-3px);box-shadow:var(--ad-shadow-lg);border-color:var(--ad-line-dark)}
 
 .ad-kpi::before{
   content:"";
@@ -232,74 +253,83 @@ const CSS = `
   bottom:16px;
   width:3px;
   border-radius:0 999px 999px 0;
-  background:var(--tone,#1D4ED8);
+  background:var(--tone,#4F46E5);
 }
 
-.ad-kpi-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
+.ad-kpi-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 
 .ad-kpi small{
   display:block;
-  color:#64748B;
+  color:var(--ad-muted);
   font-size:10px;
-  font-weight:900;
+  font-weight:700;
   text-transform:uppercase;
   letter-spacing:.07em;
+  font-family:var(--ad-display);
 }
 
 .ad-kpi-icon{
-  width:34px;
-  height:34px;
+  width:36px;
+  height:36px;
   border-radius:12px;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:#F1F5F9;
-  color:var(--tone,#1D4ED8);
-  font-size:17px;
+  background:var(--tone-soft,#EEF0FE);
+  color:var(--tone,#4F46E5);
+  position:relative;
+  flex-shrink:0;
 }
+.ad-kpi-icon-glyph{width:15px;height:15px;background:currentColor;border-radius:4px;opacity:.9}
+.ad-kpi-icon-glyph.folder{clip-path:polygon(0 15%,35% 15%,45% 28%,100% 28%,100% 88%,0 88%)}
+.ad-kpi-icon-glyph.ring{background:transparent;border:2.4px solid currentColor;border-radius:50%}
+.ad-kpi-icon-glyph.clock{background:transparent;border:2.4px solid currentColor;border-radius:50%}
+.ad-kpi-icon-glyph.check{clip-path:polygon(20% 45%,40% 65%,80% 15%,90% 25%,40% 85%,10% 55%)}
+.ad-kpi-icon-glyph.bolt{clip-path:polygon(55% 0%,10% 60%,45% 60%,35% 100%,90% 35%,50% 35%)}
+.ad-kpi-icon-glyph.user{border-radius:50% 50% 0 0;position:relative}
+.ad-kpi-icon-glyph.user::before{content:"";position:absolute;width:6px;height:6px;background:currentColor;border-radius:50%;top:-8px;left:4.5px}
 
 .ad-kpi strong{
   display:block;
-  margin-top:13px;
-  font-size:1.85rem;
+  margin-top:14px;
+  font-family:var(--ad-display);
+  font-size:1.9rem;
   line-height:1;
-  font-weight:900;
-  color:var(--tone,#0F172A);
-  letter-spacing:-.04em;
+  font-weight:800;
+  color:var(--tone,#161328);
+  letter-spacing:-.03em;
 }
 
 .ad-kpi span{
   display:block;
-  margin-top:8px;
-  color:#64748B;
+  margin-top:9px;
+  color:var(--ad-muted);
   font-size:11.5px;
-  font-weight:650;
+  font-weight:600;
 }
 
-.ad-grid{
-  display:grid;
-  grid-template-columns:1.25fr .85fr;
-  gap:14px;
-}
+/* ── Layout grid ────────────────────────────────────────── */
+
+.ad-grid{display:grid;grid-template-columns:1.4fr .8fr .8fr;gap:15px;margin-bottom:15px}
+.ad-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
+.ad-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:15px}
 
 .ad-card{
-  background:#FFFFFF;
+  background:var(--ad-card);
   border:1px solid var(--ad-line);
   border-radius:20px;
   box-shadow:var(--ad-shadow-sm);
   overflow:hidden;
   min-width:0;
+  transition:.2s ease;
+  animation:ad-fade-up .4s ease both;
 }
+.ad-card:hover{box-shadow:var(--ad-shadow);border-color:var(--ad-line-dark)}
 
 .ad-card-head{
-  padding:14px 16px;
+  padding:15px 18px;
   border-bottom:1px solid var(--ad-line);
-  background:linear-gradient(180deg,#FFFFFF 0%,#F8FAFC 100%);
+  background:linear-gradient(180deg,#FFFFFF 0%,#FAFAFE 100%);
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -308,173 +338,152 @@ const CSS = `
 
 .ad-card-head small{
   display:block;
-  color:#64748B;
+  color:var(--ad-blue);
   font-size:10px;
-  font-weight:900;
+  font-weight:700;
   text-transform:uppercase;
-  letter-spacing:.08em;
+  letter-spacing:.1em;
   margin-bottom:4px;
+  font-family:var(--ad-display);
 }
 
 .ad-card-head h3{
   margin:0;
-  font-size:16px;
-  font-weight:900;
+  font-size:15.5px;
+  font-weight:750;
   letter-spacing:-.02em;
-  color:#0F172A;
+  color:#171532;
+  font-family:var(--ad-display);
 }
 
-.ad-card-body{padding:16px}
-.ad-chart-wrap{height:280px;min-height:240px}
+.ad-card-body{padding:17px}
+.ad-chart-wrap{height:270px;min-height:230px}
 .ad-chart-wrap.tall{height:360px}
 .ad-svg{width:100%;height:100%;display:block}
-.ad-axis-text{fill:#64748B;font-size:11px;font-weight:700}
-.ad-value-text{fill:#0F172A;font-size:11px;font-weight:850}
-.ad-grid-line{stroke:#E2E8F0;stroke-width:1}
-.ad-line-created{fill:none;stroke:#1D4ED8;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.ad-line-closed{fill:none;stroke:#16A34A;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.ad-dot-created{fill:#1D4ED8}
-.ad-dot-closed{fill:#16A34A}
+.ad-axis-text{fill:var(--ad-muted);font-size:11px;font-weight:700}
+.ad-value-text{fill:var(--ad-text);font-size:11px;font-weight:800}
+.ad-grid-line{stroke:var(--ad-line);stroke-width:1}
+.ad-line-created{fill:none;stroke:#4F46E5;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:ad-draw 1.1s ease forwards .1s}
+.ad-line-closed{fill:none;stroke:#10B981;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:var(--len2);stroke-dashoffset:var(--len2);animation:ad-draw 1.1s ease forwards .3s}
+.ad-area-created{opacity:.14}
+.ad-area-closed{opacity:.10}
+.ad-dot-created{fill:#4F46E5}
+.ad-dot-closed{fill:#10B981}
 
-.ad-legend{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:12px;
-}
-
+.ad-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
 .ad-legend-item{
   display:inline-flex;
   align-items:center;
   gap:7px;
-  color:#475569;
-  background:#F8FAFC;
-  border:1px solid #E2E8F0;
+  color:var(--ad-soft-text,#3D3A57);
+  background:#F8F8FE;
+  border:1px solid var(--ad-line);
   border-radius:999px;
-  padding:5px 9px;
+  padding:6px 10px;
   font-size:11px;
-  font-weight:800;
+  font-weight:750;
 }
-
 .ad-legend-dot{width:8px;height:8px;border-radius:999px;background:var(--tone)}
 
-.ad-rank-list{display:flex;flex-direction:column;gap:9px}
-.ad-rank-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 52px;
-  gap:10px;
-  align-items:center;
-}
-.ad-rank-label{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  color:#334155;
-  font-size:12.5px;
-  font-weight:800;
-  margin-bottom:5px;
-}
-.ad-rank-track{
-  height:8px;
-  background:#F1F5F9;
-  border-radius:999px;
-  overflow:hidden;
-}
-.ad-rank-fill{
-  height:100%;
-  border-radius:999px;
-  background:linear-gradient(90deg,#1D4ED8,#3B82F6);
-}
-.ad-rank-count{
-  justify-self:end;
-  min-width:38px;
-  height:26px;
-  border-radius:999px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background:#EFF6FF;
-  color:#1D4ED8;
-  font-weight:900;
-  font-size:11.5px;
-}
+.ad-rank-list{display:flex;flex-direction:column;gap:11px}
+.ad-rank-row{display:grid;grid-template-columns:minmax(0,1fr) 54px;gap:10px;align-items:center}
+.ad-rank-label{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#3D3A57;font-size:12.5px;font-weight:750;margin-bottom:6px}
+.ad-rank-track{height:9px;background:#F1F1FA;border-radius:999px;overflow:hidden}
+.ad-rank-fill{height:100%;border-radius:999px;animation:ad-pop .5s ease both}
+.ad-rank-count{justify-self:end;min-width:40px;height:27px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:#EEF0FE;color:var(--ad-blue);font-weight:800;font-size:11.5px}
 
-.ad-donut-wrap{
-  height:280px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.ad-donut-center-title{font-size:10px;fill:#64748B;font-weight:800;text-transform:uppercase}
-.ad-donut-center-value{font-size:22px;fill:#0F172A;font-weight:900}
+.ad-donut-wrap{height:250px;display:flex;align-items:center;justify-content:center}
+.ad-donut-center-title{font-size:10px;fill:var(--ad-muted);font-weight:700;text-transform:uppercase}
+.ad-donut-center-value{font-size:22px;fill:var(--ad-text);font-weight:800}
+.ad-donut-ring{animation:ad-pop .5s ease both}
 
 .ad-recent-table{overflow:auto}
 .ad-table{width:100%;border-collapse:collapse;min-width:900px}
 .ad-table th{
-  background:#F8FAFC;
-  color:#64748B;
+  background:#F8F8FE;
+  color:var(--ad-muted);
   text-align:left;
   font-size:10px;
   letter-spacing:.08em;
   text-transform:uppercase;
-  font-weight:900;
-  padding:11px 13px;
+  font-weight:700;
+  padding:12px 14px;
   border-bottom:1px solid var(--ad-line);
+  font-family:var(--ad-display);
 }
-.ad-table td{
-  padding:12px 13px;
-  border-bottom:1px solid #EEF2F7;
-  color:#334155;
-  font-size:12.5px;
-}
-.ad-table tr:hover td{background:#F8FAFC}
-.ad-ticket{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;border-radius:8px;padding:5px 8px;font-weight:900;white-space:nowrap}
-.ad-type{border-radius:999px;padding:5px 9px;font-size:11px;font-weight:850;border:1px solid #BFDBFE;background:#EFF6FF;color:#1D4ED8}
-.ad-type.customer{border-color:#FED7AA;background:#FFF7ED;color:#C2410C}
+.ad-table td{padding:12px 14px;border-bottom:1px solid #F0F0F8;color:#3D3A57;font-size:12.5px}
+.ad-table tr:hover td{background:#F8F8FE}
+.ad-ticket{background:#EEF0FE;color:var(--ad-blue);border:1px solid #D7D9FB;border-radius:9px;padding:5px 9px;font-weight:800;white-space:nowrap}
+.ad-type{border-radius:999px;padding:5px 10px;font-size:11px;font-weight:750;border:1px solid #D7D9FB;background:#EEF0FE;color:var(--ad-blue)}
+.ad-type.customer{border-color:#FBE1AE;background:#FFF6E7;color:#B45309}
 
-.ad-empty{
-  padding:48px 16px;
-  text-align:center;
-  color:#64748B;
+.ad-empty{padding:50px 16px;text-align:center;color:var(--ad-muted);display:flex;flex-direction:column;gap:9px;align-items:center}
+.ad-empty-icon{width:52px;height:52px;border-radius:16px;background:#F8F8FE;border:1px solid var(--ad-line);position:relative}
+.ad-empty-icon::before{content:"";position:absolute;inset:15px;border:2px solid var(--ad-faint);border-radius:4px}
+.ad-empty strong{color:#3D3A57;font-family:var(--ad-display)}
+
+.ad-spinner{width:38px;height:38px;border-radius:50%;border:3px solid var(--ad-line);border-top-color:var(--ad-blue);animation:ad-spin .8s linear infinite}
+
+/* ── Gauge ──────────────────────────────────────────────── */
+.ad-gauge-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;padding:6px 0}
+.ad-gauge-value{font-family:var(--ad-display);font-size:2.1rem;font-weight:800;color:#171532;letter-spacing:-.03em;margin-top:-64px}
+.ad-gauge-label{font-size:11.5px;color:var(--ad-muted);font-weight:650;text-align:center;max-width:200px}
+.ad-gauge-stats{display:flex;gap:14px;margin-top:8px}
+.ad-gauge-stat{text-align:center}
+.ad-gauge-stat strong{display:block;font-family:var(--ad-display);font-size:15px;color:#171532}
+.ad-gauge-stat small{display:block;font-size:10px;color:var(--ad-faint);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* ── Status pipeline ────────────────────────────────────── */
+.ad-pipeline{display:flex;flex-direction:column;gap:12px}
+.ad-pipeline-bar{display:flex;height:16px;border-radius:999px;overflow:hidden;background:#F1F1FA;box-shadow:inset 0 0 0 1px var(--ad-line)}
+.ad-pipeline-seg{height:100%;transition:.4s ease}
+.ad-pipeline-legend{display:flex;flex-wrap:wrap;gap:10px}
+.ad-pipeline-item{display:flex;align-items:center;gap:8px;flex:1;min-width:120px;background:#F8F8FE;border:1px solid var(--ad-line);border-radius:13px;padding:10px 12px}
+.ad-pipeline-dot{width:10px;height:10px;border-radius:999px;flex-shrink:0}
+.ad-pipeline-item strong{display:block;font-family:var(--ad-display);font-size:15px;color:#171532}
+.ad-pipeline-item small{display:block;font-size:10.5px;color:var(--ad-muted);margin-top:1px}
+
+/* ── Leaderboard highlight ──────────────────────────────── */
+.ad-highlight-row{display:flex;flex-direction:column;gap:10px}
+.ad-highlight-card{
   display:flex;
-  flex-direction:column;
-  gap:8px;
   align-items:center;
+  gap:12px;
+  background:linear-gradient(135deg,#F5F4FF,#EEF0FE);
+  border:1px solid #D7D9FB;
+  border-radius:15px;
+  padding:12px 14px;
+  animation:ad-float 4s ease-in-out infinite;
 }
-.ad-empty-icon{font-size:42px}
-.ad-empty strong{color:#334155}
-
-.ad-spinner{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  border:3px solid #E2E8F0;
-  border-top-color:#1D4ED8;
-  animation:ad-spin .8s linear infinite;
+.ad-highlight-rank{
+  width:34px;height:34px;border-radius:11px;
+  background:var(--ad-brand-grad);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ad-display);font-weight:800;font-size:13px;flex-shrink:0;
 }
-@keyframes ad-spin{to{transform:rotate(360deg)}}
+.ad-highlight-card div strong{display:block;font-size:13px;color:#171532;font-weight:750}
+.ad-highlight-card div span{display:block;font-size:11px;color:var(--ad-muted);margin-top:1px}
 
+@media(max-width:1400px){
+  .ad-grid{grid-template-columns:1fr 1fr}
+  .ad-grid-3{grid-template-columns:1fr 1fr}
+}
 @media(max-width:1280px){
   .ad-kpis{grid-template-columns:repeat(3,1fr)}
   .ad-filter-card{grid-template-columns:repeat(3,1fr)}
 }
-
 @media(max-width:1024px){
-  .ad-grid{grid-template-columns:1fr}
+  .ad-grid,.ad-grid-2,.ad-grid-3{grid-template-columns:1fr}
 }
-
 @media(max-width:760px){
   .ad-page{height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);padding:14px 12px}
-  .ad-head{padding:16px}
+  .ad-head{padding:18px}
   .ad-actions{width:100%}
   .ad-btn{flex:1}
   .ad-filter-card{grid-template-columns:1fr}
   .ad-kpis{grid-template-columns:repeat(2,1fr)}
-  .ad-chart-wrap,.ad-chart-wrap.tall,.ad-donut-wrap{height:250px}
+  .ad-chart-wrap,.ad-chart-wrap.tall,.ad-donut-wrap{height:230px}
 }
-
 @media(max-width:480px){
   .ad-kpis{grid-template-columns:1fr}
   .ad-btn{width:100%}
@@ -514,9 +523,34 @@ const getIssueTrackerNavItems = (user) => {
   ].filter((item) => item.show !== false);
 };
 
-const COLORS = ["#1D4ED8", "#16A34A", "#D97706", "#DC2626", "#7E22CE", "#64748B", "#0891B2", "#BE123C"];
+const COLORS = ["#4F46E5", "#10B981", "#F59E0B", "#E11D48", "#7C3AED", "#0891B2", "#EC4899", "#65A30D"];
 
 const number = (value) => Number(value || 0).toLocaleString();
+
+/* Lightweight count-up used purely for a polished number reveal — display only. */
+function AnimatedNumber({ value }) {
+  const target = Number(value || 0);
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    const duration = 700;
+    const from = 0;
+
+    const tick = (now) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(from + (target - from) * eased));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => raf && cancelAnimationFrame(raf);
+  }, [target]);
+
+  return <>{number(display)}</>;
+}
 
 function CardHead({ kicker, title, right }) {
   return (
@@ -530,14 +564,16 @@ function CardHead({ kicker, title, right }) {
   );
 }
 
-function KPI({ label, value, hint, icon, color }) {
+function KPI({ label, value, hint, icon, color, colorSoft }) {
   return (
-    <div className="ad-kpi" style={{ "--tone": color }}>
+    <div className="ad-kpi" style={{ "--tone": color, "--tone-soft": colorSoft }}>
       <div className="ad-kpi-top">
         <small>{label}</small>
-        <div className="ad-kpi-icon">{icon}</div>
+        <div className="ad-kpi-icon">
+          <span className={`ad-kpi-icon-glyph ${icon}`} />
+        </div>
       </div>
-      <strong>{number(value)}</strong>
+      <strong style={{ color }}><AnimatedNumber value={value} /></strong>
       <span>{hint}</span>
     </div>
   );
@@ -549,7 +585,7 @@ function RankBarChart({ data = [], emptyText = "No data available" }) {
   if (!data.length) {
     return (
       <div className="ad-empty">
-        <div className="ad-empty-icon">📊</div>
+        <div className="ad-empty-icon" />
         <strong>{emptyText}</strong>
       </div>
     );
@@ -587,16 +623,16 @@ function RankBarChart({ data = [], emptyText = "No data available" }) {
 
 function DonutChart({ data = [], total = 0 }) {
   const safeTotal = Number(total || data.reduce((sum, item) => sum + Number(item.count || 0), 0));
-  const radius = 72;
-  const stroke = 20;
+  const radius = 70;
+  const stroke = 19;
   const circumference = 2 * Math.PI * radius;
   let offset = 0;
 
   if (!safeTotal) {
     return (
       <div className="ad-empty">
-        <div className="ad-empty-icon">◔</div>
-        <strong>No type data available</strong>
+        <div className="ad-empty-icon" />
+        <strong>No data available</strong>
       </div>
     );
   }
@@ -604,14 +640,15 @@ function DonutChart({ data = [], total = 0 }) {
   return (
     <>
       <div className="ad-donut-wrap">
-        <svg className="ad-svg" viewBox="0 0 220 220" role="img" aria-label="Issue type distribution">
-          <circle cx="110" cy="110" r={radius} fill="none" stroke="#F1F5F9" strokeWidth={stroke} />
+        <svg className="ad-svg" viewBox="0 0 220 220" role="img" aria-label="Distribution">
+          <circle cx="110" cy="110" r={radius} fill="none" stroke="#F1F1FA" strokeWidth={stroke} />
           {data.map((item, index) => {
             const value = Number(item.count || 0);
             const dash = (value / safeTotal) * circumference;
             const circle = (
               <circle
                 key={item.name}
+                className="ad-donut-ring"
                 cx="110"
                 cy="110"
                 r={radius}
@@ -666,19 +703,41 @@ function LineChart({ data = [] }) {
       .map((item, index) => `${index === 0 ? "M" : "L"} ${getX(index)} ${getY(item[key])}`)
       .join(" ");
 
+  const buildArea = (key) => {
+    if (!data.length) return "";
+    const line = buildPath(key);
+    const lastX = getX(data.length - 1);
+    const firstX = getX(0);
+    const baseY = pad.top + plotH;
+    return `${line} L ${lastX} ${baseY} L ${firstX} ${baseY} Z`;
+  };
+
   if (!data.length) {
     return (
       <div className="ad-empty">
-        <div className="ad-empty-icon">📈</div>
+        <div className="ad-empty-icon" />
         <strong>No monthly trend yet</strong>
       </div>
     );
   }
 
+  const pathLen = 1600;
+
   return (
     <>
       <div className="ad-chart-wrap">
         <svg className="ad-svg" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="ad-area-created-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#4F46E5" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="ad-area-closed-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10B981" stopOpacity="0.30" />
+              <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+
           {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
             const y = pad.top + plotH - ratio * plotH;
             return (
@@ -691,8 +750,11 @@ function LineChart({ data = [] }) {
             );
           })}
 
-          <path className="ad-line-created" d={buildPath("created")} />
-          <path className="ad-line-closed" d={buildPath("closed")} />
+          <path className="ad-area-created" d={buildArea("created")} fill="url(#ad-area-created-grad)" />
+          <path className="ad-area-closed" d={buildArea("closed")} fill="url(#ad-area-closed-grad)" />
+
+          <path className="ad-line-created" style={{ "--len": pathLen }} d={buildPath("created")} />
+          <path className="ad-line-closed" style={{ "--len2": pathLen }} d={buildPath("closed")} />
 
           {data.map((item, index) => (
             <g key={item.name}>
@@ -707,10 +769,132 @@ function LineChart({ data = [] }) {
       </div>
 
       <div className="ad-legend">
-        <span className="ad-legend-item"><span className="ad-legend-dot" style={{ "--tone": "#1D4ED8" }} />Created</span>
-        <span className="ad-legend-item"><span className="ad-legend-dot" style={{ "--tone": "#16A34A" }} />Closed</span>
+        <span className="ad-legend-item"><span className="ad-legend-dot" style={{ "--tone": "#4F46E5" }} />Created</span>
+        <span className="ad-legend-item"><span className="ad-legend-dot" style={{ "--tone": "#10B981" }} />Closed</span>
       </div>
     </>
+  );
+}
+
+/* Resolution-rate radial gauge — derived from summary.total / summary.closed, no new fetch. */
+function ResolutionGauge({ total = 0, closed = 0 }) {
+  const safeTotal = Number(total || 0);
+  const safeClosed = Number(closed || 0);
+  const pct = safeTotal > 0 ? Math.round((safeClosed / safeTotal) * 100) : 0;
+
+  const radius = 78;
+  const stroke = 16;
+  const circumference = 2 * Math.PI * radius;
+  const dash = (pct / 100) * circumference;
+
+  return (
+    <div className="ad-gauge-wrap">
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r={radius} fill="none" stroke="#F1F1FA" strokeWidth={stroke} />
+        <circle
+          cx="100"
+          cy="100"
+          r={radius}
+          fill="none"
+          stroke="url(#ad-gauge-grad)"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${circumference - dash}`}
+          transform="rotate(-90 100 100)"
+          className="ad-donut-ring"
+        />
+        <defs>
+          <linearGradient id="ad-gauge-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#4F46E5" />
+            <stop offset="100%" stopColor="#10B981" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div className="ad-gauge-value">{pct}%</div>
+      <div className="ad-gauge-label">of reports have been resolved and closed</div>
+      <div className="ad-gauge-stats">
+        <div className="ad-gauge-stat">
+          <strong>{number(safeClosed)}</strong>
+          <small>Closed</small>
+        </div>
+        <div className="ad-gauge-stat">
+          <strong>{number(safeTotal - safeClosed)}</strong>
+          <small>Remaining</small>
+        </div>
+        <div className="ad-gauge-stat">
+          <strong>{number(safeTotal)}</strong>
+          <small>Total</small>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Status pipeline — single segmented bar built from the same summary counts already fetched. */
+function StatusPipeline({ open = 0, underReview = 0, closed = 0 }) {
+  const total = Math.max(1, Number(open || 0) + Number(underReview || 0) + Number(closed || 0));
+
+  const segments = [
+    { label: "Open", value: Number(open || 0), color: "#10B981" },
+    { label: "Under Review", value: Number(underReview || 0), color: "#F59E0B" },
+    { label: "Closed", value: Number(closed || 0), color: "#6B6885" },
+  ];
+
+  return (
+    <div className="ad-pipeline">
+      <div className="ad-pipeline-bar">
+        {segments.map((seg) => (
+          <div
+            key={seg.label}
+            className="ad-pipeline-seg"
+            style={{ width: `${(seg.value / total) * 100}%`, background: seg.color }}
+            title={`${seg.label}: ${seg.value}`}
+          />
+        ))}
+      </div>
+
+      <div className="ad-pipeline-legend">
+        {segments.map((seg) => (
+          <div className="ad-pipeline-item" key={seg.label}>
+            <span className="ad-pipeline-dot" style={{ background: seg.color }} />
+            <div>
+              <strong>{number(seg.value)}</strong>
+              <small>{seg.label} &middot; {total ? Math.round((seg.value / total) * 100) : 0}%</small>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* Top-N highlight strip — derived client-side from already-fetched rank data. */
+function Leaderboard({ data = [], emptyText = "No data available" }) {
+  const top = [...data]
+    .sort((a, b) => Number(b.count || 0) - Number(a.count || 0))
+    .slice(0, 3);
+
+  if (!top.length) {
+    return (
+      <div className="ad-empty">
+        <div className="ad-empty-icon" />
+        <strong>{emptyText}</strong>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ad-highlight-row">
+      {top.map((item, index) => (
+        <div className="ad-highlight-card" key={item.name} style={{ animationDelay: `${index * 0.3}s` }}>
+          <div className="ad-highlight-rank">{index + 1}</div>
+          <div>
+            <strong>{item.name}</strong>
+            <span>{number(item.count)} reports</span>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -718,7 +902,7 @@ function RecentTable({ rows = [], onOpen }) {
   if (!rows.length) {
     return (
       <div className="ad-empty">
-        <div className="ad-empty-icon">📭</div>
+        <div className="ad-empty-icon" />
         <strong>No recent reports found</strong>
       </div>
     );
@@ -926,14 +1110,15 @@ export default function BranchIssueAnalysisDashboard() {
             ) : (
               <>
                 <div className="ad-kpis">
-                  <KPI label="Total Reports" value={summary.total} icon="📋" color="#1D4ED8" hint="Visible based on role" />
-                  <KPI label="Open" value={summary.open} icon="📂" color="#16A34A" hint="Waiting for action" />
-                  <KPI label="Under Review" value={summary.underReview} icon="⏱" color="#D97706" hint="Currently processing" />
-                  <KPI label="Closed" value={summary.closed} icon="✓" color="#64748B" hint="Resolved reports" />
-                  <KPI label="High / Critical" value={summary.highCritical} icon="!" color="#DC2626" hint="Priority attention" />
-                  <KPI label="Customer Issues" value={summary.customer} icon="👤" color="#7E22CE" hint="Customer-related reports" />
+                  <KPI label="Total Reports" value={summary.total} icon="folder" color="#4F46E5" colorSoft="#EEF0FE" hint="Visible based on role" />
+                  <KPI label="Open" value={summary.open} icon="ring" color="#10B981" colorSoft="#E7FBF3" hint="Waiting for action" />
+                  <KPI label="Under Review" value={summary.underReview} icon="clock" color="#F59E0B" colorSoft="#FFF6E7" hint="Currently processing" />
+                  <KPI label="Closed" value={summary.closed} icon="check" color="#6B6885" colorSoft="#F2F2F9" hint="Resolved reports" />
+                  <KPI label="High / Critical" value={summary.highCritical} icon="bolt" color="#E11D48" colorSoft="#FDECEF" hint="Priority attention" />
+                  <KPI label="Customer Issues" value={summary.customer} icon="user" color="#7C3AED" colorSoft="#F4EEFE" hint="Customer-related reports" />
                 </div>
 
+                {/* Row 1 — trend (with area fill), resolution gauge, status pipeline */}
                 <div className="ad-grid">
                   <div className="ad-card">
                     <CardHead kicker="Trend" title="Monthly created vs closed reports" />
@@ -943,12 +1128,50 @@ export default function BranchIssueAnalysisDashboard() {
                   </div>
 
                   <div className="ad-card">
+                    <CardHead kicker="Resolution" title="Overall resolution rate" />
+                    <div className="ad-card-body">
+                      <ResolutionGauge total={summary.total} closed={summary.closed} />
+                    </div>
+                  </div>
+
+                  <div className="ad-card">
+                    <CardHead kicker="Pipeline" title="Status breakdown" />
+                    <div className="ad-card-body">
+                      <StatusPipeline
+                        open={summary.open}
+                        underReview={summary.underReview}
+                        closed={summary.closed}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 2 — type & priority donuts, top branches leaderboard */}
+                <div className="ad-grid-3">
+                  <div className="ad-card">
                     <CardHead kicker="Pie Chart" title="Issue type distribution" />
                     <div className="ad-card-body">
                       <DonutChart data={charts.byType || []} total={summary.total} />
                     </div>
                   </div>
 
+                  <div className="ad-card">
+                    <CardHead kicker="Pie Chart" title="Priority distribution" />
+                    <div className="ad-card-body">
+                      <DonutChart data={charts.byPriority || []} />
+                    </div>
+                  </div>
+
+                  <div className="ad-card">
+                    <CardHead kicker="Leaderboard" title="Top branches by volume" />
+                    <div className="ad-card-body">
+                      <Leaderboard data={charts.byBranch || []} emptyText="No branch data available" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 3 — category, status, branch rank bars */}
+                <div className="ad-grid-3">
                   <div className="ad-card">
                     <CardHead kicker="Category" title="Reports by category" />
                     <div className="ad-card-body">
@@ -969,16 +1192,25 @@ export default function BranchIssueAnalysisDashboard() {
                       <RankBarChart data={charts.byBranch || []} />
                     </div>
                   </div>
+                </div>
 
+                <div className="ad-grid-2">
                   <div className="ad-card">
                     <CardHead kicker="Priority" title="Reports by priority" />
                     <div className="ad-card-body">
                       <RankBarChart data={charts.byPriority || []} />
                     </div>
                   </div>
+
+                  <div className="ad-card">
+                    <CardHead kicker="Leaderboard" title="Top categories by volume" />
+                    <div className="ad-card-body">
+                      <Leaderboard data={charts.byCategory || []} emptyText="No category data available" />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="ad-card" style={{ marginTop: 14 }}>
+                <div className="ad-card">
                   <CardHead kicker="Recent" title="Latest visible reports" />
                   <RecentTable
                     rows={data?.recentIssues || []}

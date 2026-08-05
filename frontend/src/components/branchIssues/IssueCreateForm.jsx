@@ -7,16 +7,10 @@ import {
 import { getBranchByCode } from "../../services/branchService";
 
 export const CUSTOMER_ISSUE_CATEGORIES = [
-  "Policy Servicing",
-  "Claim Related",
-  "Premium Payment",
-  "Policy Loan",
-  "Maturity / Survival Benefit",
-  "Agent / Service Feedback",
-  "Branch Service Complaint",
-  "Digital Service / Mobile App",
-  "Customer KYC / Profile Update",
-  "Other Customer Issue",
+  "Issue",
+  "Service Request",
+  "Complaint",
+  "Grievance",
 ];
 
 const CUSTOMER_OTHER_VALUE = "__OTHER_CUSTOMER_CATEGORY__";
@@ -319,7 +313,7 @@ export default function IssueCreateForm({
             <span className="it-type-radio-icon customer">👤</span>
             <span>
               <strong>Customer Issue</strong>
-              <small>Customer service, claim, premium, KYC, policy, or complaint.</small>
+              <small>Customer issue, service request, complaint, or grievance.</small>
             </span>
           </button>
         </div>
@@ -368,15 +362,14 @@ export default function IssueCreateForm({
               onChange={(e) => update("customer_category_name", e.target.value)}
               disabled={loading}
             >
-              <option value="">Select customer issue category</option>
+              <option value="">Select customer category</option>
               {customerCategories.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
               ))}
-              <option value={CUSTOMER_OTHER_VALUE}>Other / Not in list</option>
             </select>
-            <small>Select a customer-related category or add your own.</small>
+            <small>Select Issue, Service Request, Complaint, or Grievance.</small>
           </div>
         )}
 
@@ -437,7 +430,7 @@ export default function IssueCreateForm({
 
               {filteredCorpUsers.length === 0 ? (
                 <div className="it-user-picker-empty">
-                  No corporate user found.
+                  No user found.
                 </div>
               ) : (
                 filteredCorpUsers.map((corpUser) => {

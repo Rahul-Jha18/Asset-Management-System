@@ -142,16 +142,10 @@ const VALID_ISSUE_TYPES = [
 ];
 
 const CUSTOMER_ISSUE_CATEGORIES = [
-  "Policy Servicing",
-  "Claim Related",
-  "Premium Payment",
-  "Policy Loan",
-  "Maturity / Survival Benefit",
-  "Agent / Service Feedback",
-  "Branch Service Complaint",
-  "Digital Service / Mobile App",
-  "Customer KYC / Profile Update",
-  "Other Customer Issue",
+  "Issue",
+  "Service Request",
+  "Complaint",
+  "Grievance",
 ];
 
 const normalizeIssueTypeValue = (value, fallback = "Employee") => {
@@ -187,6 +181,30 @@ const normalizeCustomerCategoryName = (value) =>
     .trim()
     .replace(/\s+/g, " ")
     .slice(0, 160);
+
+
+const normalizeCustomerCategoryKey = (value) =>
+  normalizeCustomerCategoryName(value)
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+
+const resolveCustomerCategoryName = (value) => {
+  const key = normalizeCustomerCategoryKey(value);
+
+  const categoryMap = {
+    issue: "Issue",
+    customerissue: "Issue",
+    servicerequest: "Service Request",
+    service: "Service Request",
+    request: "Service Request",
+    complaint: "Complaint",
+    complaints: "Complaint",
+    grievance: "Grievance",
+    grievances: "Grievance",
+  };
+
+  return categoryMap[key] || null;
+};
 
 const buildCustomerCategoryObject = (name) => ({
   id: null,
@@ -1761,6 +1779,256 @@ const sendIssueAssignmentEmail = async ({
     to: recipientEmail,
   };
 };
+
+const getResolutionLabel = (issue, category) => {
+  const issueType =
+    normalizeIssueTypeValue(issue?.issue_type);
+
+  const categoryName =
+    getIssueCategoryDisplayName(issue, category);
+
+  const normalizedCategory =
+    normalizeCustomerCategoryKey(categoryName);
+
+  if (issueType === "Customer") {
+    if (normalizedCategory === "complaint") {
+      return {
+        subjectLabel: "Complaint resolved",
+        heading: "Your complaint has been resolved",
+        bodyLabel: "complaint",
+      };
+    }
+
+    if (normalizedCategory === "grievance") {
+      return {
+        subjectLabel: "Grievance resolved",
+        heading: "Your grievance has been resolved",
+        bodyLabel: "grievance",
+      };
+    }
+
+    if (normalizedCategory === "servicerequest") {
+      return {
+        subjectLabel: "Service request completed",
+        heading: "Your service request has been completed",
+        bodyLabel: "service request",
+      };
+    }
+
+    return {
+      subjectLabel: "Customer issue resolved",
+      heading: "Your customer issue has been resolved",
+      bodyLabel: "customer issue",
+    };
+  }
+
+  return {
+    subjectLabel: "Issue resolved",
+    heading: "Your reported issue has been resolved",
+    bodyLabel: "issue",
+  };
+};
+
+const sendIssueClosedEmail = async ({
+  issue,
+  category,
+  closedBy,
+  remarks,
+}) => {
+  const recipientEmail = String(
+    issue?.reporter_email || ""
+  )
+    .trim()
+    .toLowerCase();
+
+  if (!isValidEmail(recipientEmail)) {
+    return {
+      sent: false,
+      reason:
+        "Reporter does not have a valid email address",
+    };
+  }
+
+  const issueUrl =
+    getIssueUrl(issue.id);
+
+  const reporterName =
+    String(
+      issue?.reporter_name ||
+        issue?.reporter_email ||
+        "User"
+    ).trim();
+
+  const categoryName =
+    getIssueCategoryDisplayName(issue, category);
+
+  const issueTypeLabel =
+    normalizeIssueTypeValue(issue?.issue_type);
+
+  const resolution =
+    getResolutionLabel(issue, category);
+
+  const closedByName =
+    String(
+      closedBy?.name ||
+        closedBy?.email ||
+        "Issue Handler"
+    ).trim();
+
+  const closedOn =
+    formatEmailDate(issue.closed_at || new Date());
+
+  const cleanRemarks =
+    stripHtml(remarks || "");
+
+  const emailSubject =
+    `[${issue.ticket_no}] ${resolution.subjectLabel}: ${issue.title}`;
+
+  const plainTextMessage = [
+    "NEPAL LIFE",
+    "Asset Management System",
+    "",
+    resolution.heading.toUpperCase(),
+    "",
+    `Dear ${reporterName},`,
+    "",
+    `Your reported ${resolution.bodyLabel} has been marked as resolved/closed.`,
+    "",
+    `Ticket Number: ${issue.ticket_no}`,
+    `Issue Title: ${issue.title}`,
+    `Issue Type: ${issueTypeLabel}`,
+    `Category: ${categoryName}`,
+    "Status: Closed",
+    `Closed By: ${closedByName}`,
+    `Closed On: ${closedOn}`,
+    cleanRemarks ? "" : null,
+    cleanRemarks ? "RESOLUTION REMARKS" : null,
+    cleanRemarks || null,
+    "",
+    `View issue details: ${issueUrl}`,
+    "",
+    "If this concern is not fully resolved, please contact the assigned handler or your branch/department support team.",
+    "",
+    "This is an automated message. Please do not reply directly to this email.",
+    "",
+    "Nepal Life Insurance Company Limited",
+    "Asset Management System",
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
+
+  const htmlMessage = `
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>${escapeHtml(emailSubject)}</title>
+  </head>
+
+  <body style="margin:0;padding:0;background:#EEF2F7;color:#172033;font-family:Arial,Helvetica,sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;background:#EEF2F7;">
+      <tr>
+        <td align="center" style="padding:28px 12px;">
+          <table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;background:#FFFFFF;border:1px solid #DCE4ED;border-radius:18px;overflow:hidden;box-shadow:0 12px 35px rgba(15,23,42,.10);">
+            <tr>
+              <td style="padding:20px 24px;border-bottom:1px solid #E7ECF2;">
+                <div style="color:#D71920;font-size:22px;font-weight:900;line-height:25px;">NEPAL LIFE</div>
+                <div style="margin-top:2px;color:#64748B;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Asset Management System</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:28px 26px;background:#152A54;border-left:6px solid #16A34A;">
+                <div style="color:#BBF7D0;font-size:11px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;">Closed / Resolved</div>
+                <div style="margin-top:7px;color:#FFFFFF;font-size:25px;font-weight:800;line-height:32px;">${escapeHtml(resolution.heading)}</div>
+                <div style="margin-top:10px;color:#D8E2F2;font-size:14px;line-height:22px;">Ticket ${escapeHtml(issue.ticket_no)} has been closed by ${escapeHtml(closedByName)}.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:24px 26px 10px;">
+                <div style="font-size:16px;line-height:25px;">Dear <strong>${escapeHtml(reporterName)}</strong>,</div>
+                <div style="margin-top:8px;color:#526174;font-size:14px;line-height:23px;">
+                  Your reported ${escapeHtml(resolution.bodyLabel)} has been marked as resolved/closed in the Nepal Life Asset Management System.
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:14px 26px 0;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:separate;border:1px solid #DCE4ED;border-radius:12px;overflow:hidden;">
+                  ${buildDetailRow({ label: "Ticket number", value: issue.ticket_no })}
+                  ${buildDetailRow({ label: "Issue title", value: issue.title })}
+                  ${buildDetailRow({ label: "Issue type", value: issueTypeLabel })}
+                  ${buildDetailRow({ label: "Category", value: categoryName })}
+                  ${buildDetailRow({ label: "Status", value: "Closed" })}
+                  ${buildDetailRow({ label: "Closed by", value: closedByName })}
+                  ${buildDetailRow({ label: "Closed on", value: closedOn, last: !cleanRemarks })}
+                  ${
+                    cleanRemarks
+                      ? buildDetailRow({
+                          label: "Resolution remarks",
+                          value: cleanRemarks,
+                          last: true,
+                        })
+                      : ""
+                  }
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding:28px 26px 12px;">
+                <a href="${escapeHtml(issueUrl)}" target="_blank" style="display:inline-block;padding:14px 24px;background:#16A34A;color:#FFFFFF;font-size:14px;font-weight:800;text-decoration:none;border-radius:10px;">
+                  View Closed Issue
+                </a>
+
+                <div style="margin-top:13px;color:#94A3B8;font-size:11px;line-height:17px;">
+                  Button not working? Copy and open this address:
+                </div>
+
+                <div style="margin-top:3px;color:#1D4ED8;font-size:11px;font-weight:600;line-height:17px;word-break:break-all;">
+                  ${escapeHtml(issueUrl)}
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:18px 26px 26px;">
+                <div style="padding:14px 16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;color:#166534;font-size:12px;line-height:19px;">
+                  If this concern is not fully resolved, please contact the assigned handler or your branch/department support team.
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding:22px 24px;background:#F8FAFC;border-top:1px solid #E3E9F0;">
+                <div style="color:#D71920;font-size:14px;font-weight:900;">NEPAL LIFE</div>
+                <div style="margin-top:4px;color:#475569;font-size:11px;font-weight:700;">Nepal Life Insurance Company Limited</div>
+                <div style="margin-top:7px;color:#94A3B8;font-size:10px;">Automated Issue Resolution Notification</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+  `;
+
+  await sendMail({
+    to: recipientEmail,
+    subject: emailSubject,
+    text: plainTextMessage,
+    html: htmlMessage,
+  });
+
+  return {
+    sent: true,
+    to: recipientEmail,
+  };
+};
+
 /* ─────────────────────────────────────────────────────────────
    MULTER FILE UPLOAD
 ───────────────────────────────────────────────────────────── */
@@ -1924,7 +2192,11 @@ exports.listIssues = asyncHandler(
     }
 
     if (customer_category_name) {
+      const resolvedCustomerCategory =
+        resolveCustomerCategoryName(customer_category_name);
+
       where.customer_category_name =
+        resolvedCustomerCategory ||
         normalizeCustomerCategoryName(customer_category_name);
     }
 
@@ -2439,11 +2711,14 @@ exports.createIssue = asyncHandler(
     const cleanCategoryId =
       toNullableNumber(category_id);
 
+    const requestedCustomerCategoryRaw =
+      customer_category_name ||
+      issue_category_name ||
+      custom_category_name;
+
     const requestedCustomerCategory =
-      normalizeCustomerCategoryName(
-        customer_category_name ||
-          issue_category_name ||
-          custom_category_name
+      resolveCustomerCategoryName(
+        requestedCustomerCategoryRaw
       );
 
     const cleanCustomCategoryName =
@@ -2492,7 +2767,13 @@ exports.createIssue = asyncHandler(
       if (!requestedCustomerCategory) {
         return res.status(400).json({
           message:
-            "Please select or enter customer issue category",
+            "Please select customer category: Issue, Service Request, Complaint, or Grievance",
+
+          allowed_categories:
+            CUSTOMER_ISSUE_CATEGORIES,
+
+          received:
+            requestedCustomerCategoryRaw || null,
         });
       }
 
@@ -2500,11 +2781,11 @@ exports.createIssue = asyncHandler(
         requestedCustomerCategory;
 
       /*
-        When frontend sends custom_category_name, we keep it separately.
-        For predefined customer categories, this remains null.
+        Customer category is now restricted to:
+        Issue, Service Request, Complaint, Grievance.
+        custom_category_name is kept null for this flow.
       */
-      finalCustomCategoryName =
-        cleanCustomCategoryName || null;
+      finalCustomCategoryName = null;
 
       category =
         buildCustomerCategoryObject(
@@ -2863,9 +3144,72 @@ exports.changeStatus = asyncHandler(
       remarks: cleanRemarks || null,
     });
 
+    let closureEmailNotification = {
+      sent: false,
+      reason:
+        status === "Closed"
+          ? "Email notification was not attempted"
+          : "Issue was not closed",
+    };
+
+    if (status === "Closed") {
+      try {
+        const category = issue.category_id
+          ? await BranchIssueCategory.findByPk(issue.category_id, {
+              attributes: [
+                "id",
+                "name",
+                "code",
+              ],
+            })
+          : null;
+
+        closureEmailNotification =
+          await sendIssueClosedEmail({
+            issue,
+            category,
+            closedBy: req.user,
+            remarks: cleanRemarks,
+          });
+      } catch (mailError) {
+        console.error(
+          "ISSUE CLOSURE EMAIL ERROR:",
+          {
+            issueId:
+              issue.id,
+
+            ticketNo:
+              issue.ticket_no,
+
+            reporterEmail:
+              issue.reporter_email,
+
+            message:
+              mailError?.message,
+
+            stack:
+              mailError?.stack,
+          }
+        );
+
+        closureEmailNotification = {
+          sent: false,
+
+          reason:
+            mailError?.message ||
+            "Issue closed email delivery failed",
+        };
+      }
+    }
+
     return res.json({
-      message: "Status updated successfully",
+      message:
+        status === "Closed" && closureEmailNotification.sent
+          ? "Status updated successfully and reporter email sent"
+          : "Status updated successfully",
       issue,
+      closure_email_notification:
+        closureEmailNotification,
     });
   }
 );

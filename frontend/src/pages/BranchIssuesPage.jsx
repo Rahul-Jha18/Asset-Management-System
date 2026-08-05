@@ -205,6 +205,19 @@ const CSS = `
 
 .it-btn-soft:hover{background:var(--it-soft2);border-color:var(--it-line-dark)}
 
+.it-btn-analysis{
+  background:#FFFFFF;
+  color:var(--it-blue);
+  border:1px solid #D7D9FB;
+  box-shadow:var(--it-shadow-sm);
+}
+
+.it-btn-analysis:hover{
+  background:#EEF0FE;
+  border-color:#C7CBFA;
+}
+
+
 /* ── KPI cards ──────────────────────────────────────────── */
 
 .it-kpis{
@@ -1028,16 +1041,10 @@ const CSS = `
 `;
 
 const CUSTOMER_ISSUE_CATEGORIES = [
-  "Policy Servicing",
-  "Claim Related",
-  "Premium Payment",
-  "Policy Loan",
-  "Maturity / Survival Benefit",
-  "Agent / Service Feedback",
-  "Branch Service Complaint",
-  "Digital Service / Mobile App",
-  "Customer KYC / Profile Update",
-  "Other Customer Issue",
+  "Issue",
+  "Service Request",
+  "Complaint",
+  "Grievance",
 ];
 
 const ISSUE_TYPE_FILTERS = [
@@ -1405,6 +1412,14 @@ export default function BranchIssuesPage() {
                 <button type="button" className="it-btn it-btn-soft" onClick={load} disabled={loading}>
                   Refresh
                 </button>
+                <button
+                  type="button"
+                  className="it-btn it-btn-analysis"
+                  onClick={() => navigate("/branch-issues/analysis")}
+                >
+                  📊 Analysis Dashboard
+                </button>
+
                 <button
                   type="button"
                   className={`it-btn ${showCreate ? "it-btn-amber" : "it-btn-primary"}`}

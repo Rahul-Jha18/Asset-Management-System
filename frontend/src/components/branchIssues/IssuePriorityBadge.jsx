@@ -10,5 +10,10 @@ export default function IssuePriorityBadge({ priority = "Medium" }) {
     Critical: "it-priority it-priority-critical",
   };
 
-  return <span className={map[normalized] || map.Medium}>{normalized}</span>;
+  return (
+    <span className={map[normalized] || map.Medium}>
+      <span className="it-priority-dot" />
+      {normalized}
+    </span>
+  );
 }

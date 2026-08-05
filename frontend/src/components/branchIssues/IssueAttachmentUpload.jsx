@@ -439,15 +439,17 @@ export default function IssueAttachmentUpload({
             }
           />
 
+          <span className="it-attach-drop-icon" aria-hidden="true" />
+
           <strong>
             {loading
               ? "Uploading..."
-              : "Upload Attachment"}
+              : "Upload attachment"}
           </strong>
 
           <small>
             Images and PDFs open inside the
-            preview viewer. Maximum size: 10 MB.
+            preview viewer &middot; Max 10&nbsp;MB
           </small>
         </div>
       )}
