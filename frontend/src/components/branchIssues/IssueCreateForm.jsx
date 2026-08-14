@@ -279,8 +279,8 @@ export default function IssueCreateForm({
   return (
     <form className="it-create-form" onSubmit={submit}>
       <div className="it-form-section-title">
-        <span className="it-section-icon">▦</span>
-        Issue Details
+        <span className="it-section-icon">1</span>
+        1. Issue Details
       </div>
 
       <div className="it-type-radio-panel">
@@ -406,6 +406,11 @@ export default function IssueCreateForm({
         </div>
 
         <div className="it-form-field it-form-wide">
+          <div className="it-form-section-title it-form-step">
+            <span className="it-section-icon">2</span>
+            2. Assign To User
+          </div>
+
           <label>
             Assign To User <span>*</span>
           </label>
@@ -500,6 +505,11 @@ export default function IssueCreateForm({
         </div>
 
         <div className="it-form-field it-form-wide">
+          <div className="it-form-section-title it-form-step">
+            <span className="it-section-icon">3</span>
+            3. Description
+          </div>
+
           <label>
             Description <span>*</span>
           </label>
@@ -612,7 +622,7 @@ export default function IssueCreateForm({
               ? "Submitting..."
               : branchLoading
               ? "Loading Branch..."
-              : "Submit Issue"}
+              : "Create Issue"}
           </button>
         </div>
       </div>

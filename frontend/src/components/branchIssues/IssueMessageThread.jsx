@@ -35,7 +35,8 @@ export default function IssueMessageThread({ messages = [], currentUser }) {
       {messages.map((message) => {
         const mine =
           String(message.sender_user_id || "") === String(currentUser?.id || "") ||
-          String(message.sender_name || "").toLowerCase() === String(currentUser?.name || "").toLowerCase();
+          String(message.sender_name || "").toLowerCase() ===
+            String(currentUser?.name || "").toLowerCase();
 
         return (
           <div
@@ -45,7 +46,11 @@ export default function IssueMessageThread({ messages = [], currentUser }) {
               mine ? "it-message-row-mine" : "",
             ].join(" ")}
           >
-            {!mine && <span className="it-message-avatar">{initials(message.sender_name)}</span>}
+            {!mine && (
+              <span className="it-message-avatar">
+                {initials(message.sender_name)}
+              </span>
+            )}
 
             <div
               className={[

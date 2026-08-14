@@ -1,26 +1,33 @@
 import React from "react";
 
 const ACTION_META = {
-  Created:          { label: "Issue created",    tone: "green" },
-  StatusChanged:    { label: null,                tone: "amber" },
-  MessageAdded:     { label: "Message added",     tone: "blue" },
-  AttachmentAdded:  { label: "Attachment added",  tone: "violet" },
-  Assigned:         { label: "Assigned",          tone: "blue" },
-  Closed:           { label: "Closed",            tone: "slate" },
-  Reopened:         { label: "Reopened",          tone: "green" },
+  Created: { label: "Issue created", tone: "green", icon: "✓" },
+  StatusChanged: { label: null, tone: "amber", icon: "↻" },
+  MessageAdded: { label: "Message added", tone: "blue", icon: "✉" },
+  AttachmentAdded: { label: "Attachment added", tone: "violet", icon: "⎋" },
+  Assigned: { label: "Assigned", tone: "blue", icon: "👤" },
+  Closed: { label: "Closed", tone: "slate", icon: "✓" },
+  Reopened: { label: "Reopened", tone: "green", icon: "↺" },
 };
 
-const metaFor = (log) => ACTION_META[log.action] || { label: log.action || "Activity", tone: "slate" };
+const metaFor = (log) =>
+  ACTION_META[log.action] || {
+    label: log.action || "Activity",
+    tone: "slate",
+    icon: "•",
+  };
 
 const labelFor = (log) => {
   if (log.action === "StatusChanged") {
     return `${log.old_status || "Status"} → ${log.new_status || "Updated"}`;
   }
+
   return metaFor(log).label || log.action || "Activity";
 };
 
 const timeFor = (date) => {
   if (!date) return "";
+
   return new Date(date).toLocaleString("en-NP", {
     month: "short",
     day: "2-digit",
@@ -46,7 +53,9 @@ export default function IssueActivityLog({ logs = [] }) {
 
         return (
           <div className={`it-activity-mini it-activity-${meta.tone}`} key={log.id}>
-            <span className="it-activity-dot" />
+            <span className="it-activity-dot" aria-hidden="true">
+              <span className="it-activity-dot-icon">{meta.icon}</span>
+            </span>
 
             <div className="it-activity-mini-body">
               <div className="it-activity-mini-line">

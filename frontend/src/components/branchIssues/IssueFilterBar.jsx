@@ -1,8 +1,14 @@
 import React from "react";
 
 const SearchIcon = () => (
-  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+  <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+  </svg>
+);
+
+const FilterIcon = () => (
+  <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4.5h18M6.75 12h10.5M10 19.5h4" />
   </svg>
 );
 
@@ -29,6 +35,7 @@ export default function IssueFilterBar({
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search title, ticket no, reporter or branch..."
         />
+        <kbd>⌘ K</kbd>
       </div>
 
       <select className="it-filter-select" value={statusF} onChange={(e) => onStatus(e.target.value)}>
@@ -57,9 +64,15 @@ export default function IssueFilterBar({
 
       {activeFilters > 0 && (
         <button type="button" className="it-clear-btn" onClick={onClear}>
-          Clear Filters
+          Clear
         </button>
       )}
+
+      <button type="button" className="it-filter-action" aria-label="Filters">
+        <FilterIcon />
+        Filters
+        <span>{activeFilters}</span>
+      </button>
 
       <span className="it-count-pill">{total} issue{total === 1 ? "" : "s"}</span>
     </div>
